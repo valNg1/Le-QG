@@ -365,9 +365,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
   <p class="sec" style="margin-top:8px;">Mes widgets</p>
   <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Choisis ce que tu veux voir sur ton accueil</p>
   <div class="widget-list" id="widget-list"></div>
+  <p class="sec">Tâches ménagères</p>
+  <div id="taches-config"></div>
   <p class="sec">Fils d'actualités</p>
   <div id="teams-picker"></div>
   <div id="podcasts-picker" style="display:none;"></div>
+  <div id="taches-config" style="margin-bottom:10px;"></div>
   <button id="save-perso-btn" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:13px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;margin-top:16px;">💾 Enregistrer</button>
 </div>
 
@@ -535,6 +538,7 @@ const WIDGET_DEFS = [
   { id:"actu",     name:"Actualités",          desc:"Fils d'infos à la carte",             emoji:"📰" },
   { id:"tdf",      name:"Tour de France 2026", desc:"App complète",                        emoji:"🚴" },
   { id:"cdm",      name:"Coupe du Monde 2026", desc:"App complète USA/Canada/Mexique",     emoji:"🏆" },
+  { id:"taches",   name:"Tâches ménagères",   desc:"Répartition aléatoire entre membres",  emoji:"🧹" },
 ];
 
 // ════════════════════════════════════════════
@@ -649,8 +653,10 @@ function finishOnboarding() {
 // ════════════════════════════════════════════
 function startApp() {
   updateHeader();
-  fetchMeteo("paris");
-  fetchMeteo("quiberon");
+  // Villes météo depuis state
+  const meteoVilles = state.meteoVilles || ["paris","quiberon"];
+  renderMeteoCards(meteoVilles);
+  meteoVilles.forEach(v => fetchMeteo(v));
   renderDiner();
   renderEvents();
   renderAnnivStrips();
@@ -707,17 +713,48 @@ function showView(id) {
 // ════════════════════════════════════════════
 // MÉTÉO
 // ════════════════════════════════════════════
-const CITIES = {
-  paris:    { lat:48.8566, lon:2.3522,   label:"Paris" },
-  quiberon: { lat:47.4833, lon:-3.1167,  label:"Quiberon" },
-};
+
+// Villes météo disponibles
+const CITIES_LIST = [
+  { id:"paris",     label:"Paris",          lat:48.8566,  lon:2.3522,   url:"https://meteofrance.com/previsions-meteo-france/paris/75000" },
+  { id:"quiberon",  label:"Quiberon",       lat:47.4833,  lon:-3.1167,  url:"https://meteofrance.com/previsions-meteo-france/quiberon/56170" },
+  { id:"lyon",      label:"Lyon",           lat:45.7640,  lon:4.8357,   url:"https://meteofrance.com/previsions-meteo-france/lyon/69000" },
+  { id:"marseille", label:"Marseille",      lat:43.2965,  lon:5.3698,   url:"https://meteofrance.com/previsions-meteo-france/marseille/13000" },
+  { id:"bordeaux",  label:"Bordeaux",       lat:44.8378,  lon:-0.5792,  url:"https://meteofrance.com/previsions-meteo-france/bordeaux/33000" },
+  { id:"nice",      label:"Nice",           lat:43.7102,  lon:7.2620,   url:"https://meteofrance.com/previsions-meteo-france/nice/06000" },
+  { id:"biarritz",  label:"Biarritz",       lat:43.4832,  lon:-1.5586,  url:"https://meteofrance.com/previsions-meteo-france/biarritz/64200" },
+  { id:"nantes",    label:"Nantes",         lat:47.2184,  lon:-1.5536,  url:"https://meteofrance.com/previsions-meteo-france/nantes/44000" },
+  { id:"strasbourg",label:"Strasbourg",     lat:48.5734,  lon:7.7521,   url:"https://meteofrance.com/previsions-meteo-france/strasbourg/67000" },
+  { id:"london",    label:"Londres",        lat:51.5074,  lon:-0.1278,  url:"https://www.bbc.co.uk/weather/london" },
+  { id:"barcelona", label:"Barcelone",      lat:41.3851,  lon:2.1734,   url:"https://www.aemet.es" },
+  { id:"newyork",   label:"New York",       lat:40.7128,  lon:-74.0060, url:"https://weather.com" },
+];
+
+// Villes actives (depuis state)
+const CITIES = {}; // dynamique, rempli au démarrage
 const WMO_ICONS = {0:"☀️",1:"🌤",2:"⛅",3:"☁️",45:"🌫",48:"🌫",51:"🌦",53:"🌦",55:"🌧",61:"🌧",63:"🌧",65:"🌧",71:"🌨",73:"🌨",75:"❄️",80:"🌦",81:"🌧",82:"⛈",95:"⛈",96:"⛈",99:"⛈"};
 const WMO_DESC = {0:"Ciel dégagé",1:"Peu nuageux",2:"Partiellement nuageux",3:"Couvert",45:"Brouillard",51:"Bruine légère",61:"Pluie légère",63:"Pluie",71:"Neige légère",80:"Averses",95:"Orage"};
+
+
+function renderMeteoCards(villes) {
+  const row = document.querySelector(".meteo-row");
+  if (!row) return;
+  row.innerHTML = villes.map(v => {
+    const c = CITIES_LIST.find(x=>x.id===v)||{label:v,url:"#"};
+    return `<a class="meteo-card" id="meteo-${v}" href="${c.url}" target="_blank">
+      <div class="meteo-city">${c.label}</div>
+      <div class="skel" style="width:36px;height:36px;border-radius:8px;"></div>
+      <div class="skel" style="width:60px;height:26px;margin-top:4px;"></div>
+      <div class="skel" style="width:80px;height:10px;margin-top:4px;"></div>
+    </a>`;
+  }).join("");
+}
 
 async function fetchMeteo(cityKey) {
   const c = CITIES[cityKey];
   try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,weathercode,windspeed_10m,relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=Europe/Paris&forecast_days=2`;
+    const cityDef = CITIES_LIST.find(x=>x.id===cityKey) || CITIES_LIST[0];
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${cityDef.lat}&longitude=${cityDef.lon}&current=temperature_2m,weathercode,windspeed_10m,relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto&forecast_days=2`;
     const res = await fetch(url);
     const data = await res.json();
     const cur = data.current, daily = data.daily;
@@ -729,8 +766,9 @@ async function fetchMeteo(cityKey) {
     const code1 = daily.weathercode[1];
     const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
     const tmrLabel = tomorrow.toLocaleDateString("fr-FR",{weekday:"short"});
+    const cityInfo = CITIES_LIST.find(x=>x.id===cityKey)||{label:cityKey,url:"#"};
     document.getElementById("meteo-"+cityKey).innerHTML = `
-      <div class="meteo-city">${c.label}</div>
+      <div class="meteo-city">${cityInfo.label}</div>
       <div style="display:flex;gap:10px;align-items:flex-start;margin-top:4px;">
         <div style="flex:1;">
           <div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;">Aujourd'hui</div>
@@ -752,7 +790,8 @@ async function fetchMeteo(cityKey) {
         </div>
       </div>`;
   } catch(e) {
-    document.getElementById("meteo-"+cityKey).innerHTML = `<div class="meteo-city">${CITIES[cityKey].label}</div><div class="meteo-icon">❓</div><div class="meteo-desc" style="color:var(--muted)">Indisponible</div>`;
+    const ci2 = CITIES_LIST.find(x=>x.id===cityKey)||{label:cityKey};
+    document.getElementById("meteo-"+cityKey).innerHTML = `<div class="meteo-city">${ci2.label}</div><div class="meteo-icon">❓</div><div class="meteo-desc" style="color:var(--muted)">Indisponible</div>`;
   }
 }
 
@@ -1016,8 +1055,10 @@ function renderWidgetsZone() {
     html += `<div style="display:flex;align-items:center;justify-content:space-between;margin:20px 0 10px;"><p class="sec" style="margin:0;">Actualités</p><div id="actu-fil-btns" style="display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;"></div></div><div id="actu-zone"><div class="loading">Chargement...</div></div>`;
   }
   if(state.widgets.tdf) html += `<p class="sec" style="margin-top:16px;">Tour de France 2026</p><div class="tdf-card"><div class="tdf-hdr"><div class="tdf-logo"><div class="tdf-bands"><div class="tdf-band" style="background:#002395"></div><div class="tdf-band" style="background:#FFF"></div><div class="tdf-band" style="background:#ED2939"></div></div><div class="tdf-label">Tour de France <span>2026</span></div></div><div class="tdf-badge">4–26 JUIL</div></div><a href="https://legeneral.org/tdf2026.html" target="_blank" class="tdf-open">🚴 Ouvrir l'app Tour de France</a></div>`;
+  if(state.widgets.taches) html += `<p class="sec" style="margin-top:16px;">Tâches ménagères</p><div id="taches-zone"></div>`;
   if(state.widgets.cdm) html += `<p class="sec" style="margin-top:16px;">Coupe du Monde 2026</p><div class="tdf-card" style="border-color:rgba(34,199,123,.2);"><div class="tdf-hdr"><div class="tdf-logo"><div class="tdf-bands"><div class="tdf-band" style="background:#002395"></div><div class="tdf-band" style="background:#fff"></div><div class="tdf-band" style="background:#ED2939"></div></div><div class="tdf-label">Coupe du Monde <span>2026</span></div></div><div class="tdf-badge" style="background:var(--green);">14 JUI–19 JUL</div></div><a href="https://legeneral.org/cdm2026.html" target="_blank" class="tdf-open" style="color:var(--green);border-color:rgba(52,199,123,.3);background:rgba(52,199,123,.1);">🏆 Ouvrir l'app Coupe du Monde</a></div>`;
   zone.innerHTML = html;
+  if(state.widgets.taches) renderTaches();
   if(state.widgets.env) fetchAirQuality();
   if(state.widgets.transport) renderTransport();
   if(state.widgets.actu) initActu();
@@ -1252,6 +1293,34 @@ function renderPerso() {
     });
   });
 
+  renderTachesConfig();
+  // Météo picker
+  const mp = document.getElementById("meteo-picker");
+  if (mp) {
+    mp.innerHTML = CITIES_LIST.map(c => {
+      const sel = (state.meteoVilles||["paris","quiberon"]).includes(c.id);
+      return `<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--surface);border-radius:var(--r-sm);border:1px solid ${sel?"var(--yellow)":"var(--border)"};margin-bottom:6px;cursor:pointer;" data-meteo-city="${c.id}">
+        <div style="font-size:16px;">🌤</div>
+        <div style="flex:1;font-size:13px;font-weight:600;color:var(--text)">${c.label}</div>
+        <div style="width:20px;height:20px;border-radius:50%;border:2px solid ${sel?"var(--yellow)":"var(--border2)"};background:${sel?"var(--yellow)":"none"};display:flex;align-items:center;justify-content:center;font-size:11px;color:#1A1916">${sel?"✓":""}</div>
+      </div>`;
+    }).join("");
+    mp.querySelectorAll("[data-meteo-city]").forEach(row => {
+      row.addEventListener("click", function() {
+        const id = this.dataset.meteoCity;
+        if (!state.meteoVilles) state.meteoVilles = ["paris","quiberon"];
+        if (state.meteoVilles.includes(id)) {
+          if (state.meteoVilles.length > 1) state.meteoVilles = state.meteoVilles.filter(x=>x!==id);
+          else { showToast("Garde au moins 1 ville !"); return; }
+        } else {
+          if (state.meteoVilles.length >= 2) state.meteoVilles.shift();
+          state.meteoVilles.push(id);
+        }
+        renderPerso();
+      });
+    });
+  }
+
   // Fils d'actualités
   const ap=document.getElementById("teams-picker");
   if(ap) {
@@ -1283,9 +1352,120 @@ document.getElementById("save-perso-btn").addEventListener("click",()=>{
   saveState();
   sportsCache=null; podcastsCache=null;
   renderWidgetsZone();
+  const mv=state.meteoVilles||['paris','quiberon']; renderMeteoCards(mv); mv.forEach(v=>fetchMeteo(v));
   showToast("Préférences enregistrées ✓");
 });
 
+
+
+// ════════════════════════════════════════════
+// TÂCHES MÉNAGÈRES
+// ════════════════════════════════════════════
+function getWeekKey() {
+  const d = new Date(), y = d.getFullYear();
+  const start = new Date(y, 0, 1);
+  const week = Math.ceil(((d - start) / 86400000 + start.getDay() + 1) / 7);
+  return y + "-W" + week;
+}
+
+function renderTaches() {
+  const el = document.getElementById("taches-zone");
+  if (!el) return;
+  const members = getGroupMembers();
+  if (members.length < 1) { el.innerHTML=`<div class="loading">Rejoins un groupe d'abord !</div>`; return; }
+  const taches = state.tachesDef || ["Vaisselle","Poubelles","Repas","Ménage"];
+  const wk = getWeekKey();
+  // Génère attribution si nouvelle semaine ou manquante
+  if (!state.tachesAttrib || state.tachesAttrib.week !== wk) {
+    state.tachesAttrib = { week: wk, attrib: shuffleTaches(taches, members), done: {} };
+    saveState();
+  }
+  const { attrib, done } = state.tachesAttrib;
+  const total = Object.values(attrib).flat().length;
+  const doneCount = Object.values(done).filter(Boolean).length;
+  const pct = total ? Math.round(doneCount/total*100) : 0;
+
+  el.innerHTML = `
+    <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="font-size:12px;font-weight:700;color:var(--text);">Semaine ${wk.split("-W")[1]}</div>
+        <button id="taches-shuffle-btn" style="background:none;border:1px solid var(--border2);color:var(--muted);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font);">🔀 Redistribuer</button>
+      </div>
+      ${members.map(m => {
+        const mTaches = attrib[m.name] || [];
+        return `<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);">
+          <span style="font-size:20px;flex-shrink:0;">${m.avatar}</span>
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:5px;">${m.name}</div>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;">
+              ${mTaches.map(t => `<span style="font-size:11px;font-weight:600;padding:4px 9px;border-radius:20px;cursor:pointer;border:1px solid ${done[m.name+"_"+t]?"var(--green)":"var(--border2)"};background:${done[m.name+"_"+t]?"rgba(52,199,123,.15)":"none"};color:${done[m.name+"_"+t]?"var(--green)":"var(--muted)"};text-decoration:${done[m.name+"_"+t]?"line-through":"none"};" data-tache="${m.name}_${t}">${t}</span>`).join("")}
+            </div>
+          </div>
+        </div>`;
+      }).join("")}
+      <div style="margin-top:12px;display:flex;align-items:center;gap:10px;">
+        <div style="flex:1;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;">
+          <div style="height:100%;width:${pct}%;background:var(--green);border-radius:2px;transition:width .4s;"></div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);white-space:nowrap;">${doneCount}/${total} faites</div>
+      </div>
+    </div>`;
+
+  el.querySelectorAll("[data-tache]").forEach(btn => {
+    btn.addEventListener("click", function() {
+      const key = this.dataset.tache;
+      if (!state.tachesAttrib.done) state.tachesAttrib.done = {};
+      state.tachesAttrib.done[key] = !state.tachesAttrib.done[key];
+      saveState(); renderTaches();
+    });
+  });
+  document.getElementById("taches-shuffle-btn")?.addEventListener("click", () => {
+    state.tachesAttrib = { week: wk, attrib: shuffleTaches(taches, members), done: {} };
+    saveState(); renderTaches(); showToast("🔀 Nouvelles tâches redistribuées !");
+  });
+}
+
+function shuffleTaches(taches, members) {
+  const shuffled = [...taches].sort(() => Math.random()-0.5);
+  const result = {};
+  members.forEach(m => result[m.name] = []);
+  shuffled.forEach((t,i) => result[members[i%members.length].name].push(t));
+  return result;
+}
+
+// Config tâches dans Mon QG
+function renderTachesConfig() {
+  const el = document.getElementById("taches-config");
+  if (!el) return;
+  const taches = state.tachesDef || ["Vaisselle","Poubelles","Repas","Ménage"];
+  el.innerHTML = `
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Définis les tâches à distribuer entre les membres</p>
+    ${taches.map((t,i) => `<div style="display:flex;gap:8px;margin-bottom:6px;">
+      <input value="${t}" data-tache-idx="${i}" style="flex:1;padding:8px 12px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-sm);font-family:var(--font);font-size:13px;color:var(--text);">
+      <button data-del-idx="${i}" style="background:rgba(232,56,79,.1);border:1px solid rgba(232,56,79,.2);color:var(--red);border-radius:var(--r-sm);padding:8px 12px;cursor:pointer;font-size:14px;">✕</button>
+    </div>`).join("")}
+    <button id="add-tache-btn" style="width:100%;background:none;border:1px dashed var(--border2);color:var(--muted);border-radius:var(--r-sm);padding:9px;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;margin-top:4px;">+ Ajouter une tâche</button>
+  `;
+  el.querySelectorAll("[data-tache-idx]").forEach(inp => {
+    inp.addEventListener("change", function() {
+      if (!state.tachesDef) state.tachesDef = ["Vaisselle","Poubelles","Repas","Ménage"];
+      state.tachesDef[+this.dataset.tacheIdx] = this.value.trim();
+      saveState();
+    });
+  });
+  el.querySelectorAll("[data-del-idx]").forEach(btn => {
+    btn.addEventListener("click", function() {
+      if (!state.tachesDef) state.tachesDef = ["Vaisselle","Poubelles","Repas","Ménage"];
+      state.tachesDef.splice(+this.dataset.delIdx, 1);
+      saveState(); renderTachesConfig();
+    });
+  });
+  document.getElementById("add-tache-btn")?.addEventListener("click", () => {
+    if (!state.tachesDef) state.tachesDef = ["Vaisselle","Poubelles","Repas","Ménage"];
+    state.tachesDef.push("Nouvelle tâche");
+    saveState(); renderTachesConfig();
+  });
+}
 
 // ════════════════════════════════════════════
 // ACTUALITÉS — NewsData.io
