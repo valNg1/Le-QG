@@ -365,10 +365,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
   <p class="sec" style="margin-top:8px;">Mes widgets</p>
   <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Choisis ce que tu veux voir sur ton accueil</p>
   <div class="widget-list" id="widget-list"></div>
-  <p class="sec">Mes équipes sportives</p>
+  <p class="sec">Fils d'actualités</p>
   <div id="teams-picker"></div>
-  <p class="sec">Mes podcasts</p>
-  <div id="podcasts-picker"></div>
+  <div id="podcasts-picker" style="display:none;"></div>
   <button id="save-perso-btn" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:13px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;margin-top:16px;">💾 Enregistrer</button>
 </div>
 
@@ -531,11 +530,11 @@ const ALL_PODCASTS = [
 ];
 
 const WIDGET_DEFS = [
-  { id:"env",      name:"Qualité de l'air",    desc:"Indice AQI Paris",              emoji:"🌿" },
-  { id:"transport",name:"Transports IDF",      desc:"RER A, Ligne L, Métro 1, 4",   emoji:"🚇" },
-  { id:"sports",   name:"Résultats sportifs",  desc:"Tes équipes en direct",         emoji:"⚽" },
-  { id:"podcasts", name:"Derniers podcasts",   desc:"Tes shows favoris",             emoji:"🎙" },
-  { id:"tdf",      name:"Tour de France 2026", desc:"App complète",                  emoji:"🚴" },
+  { id:"env",      name:"Qualité de l'air",    desc:"Indice AQI Paris",                    emoji:"🌿" },
+  { id:"transport",name:"Transports IDF",      desc:"RER A, Ligne L, Métro 1, 4",         emoji:"🚇" },
+  { id:"actu",     name:"Actualités",          desc:"Fils d'infos à la carte",             emoji:"📰" },
+  { id:"tdf",      name:"Tour de France 2026", desc:"App complète",                        emoji:"🚴" },
+  { id:"cdm",      name:"Coupe du Monde 2026", desc:"App complète USA/Canada/Mexique",     emoji:"🏆" },
 ];
 
 // ════════════════════════════════════════════
@@ -718,22 +717,39 @@ const WMO_DESC = {0:"Ciel dégagé",1:"Peu nuageux",2:"Partiellement nuageux",3:
 async function fetchMeteo(cityKey) {
   const c = CITIES[cityKey];
   try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,weathercode,windspeed_10m,relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min&timezone=Europe/Paris&forecast_days=1`;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,weathercode,windspeed_10m,relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=Europe/Paris&forecast_days=2`;
     const res = await fetch(url);
     const data = await res.json();
     const cur = data.current, daily = data.daily;
     const code = cur.weathercode;
-    const tmax = Math.round(daily.temperature_2m_max[0]);
-    const tmin = Math.round(daily.temperature_2m_min[0]);
+    const tmax0 = Math.round(daily.temperature_2m_max[0]);
+    const tmin0 = Math.round(daily.temperature_2m_min[0]);
+    const tmax1 = Math.round(daily.temperature_2m_max[1]);
+    const tmin1 = Math.round(daily.temperature_2m_min[1]);
+    const code1 = daily.weathercode[1];
+    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+    const tmrLabel = tomorrow.toLocaleDateString("fr-FR",{weekday:"short"});
     document.getElementById("meteo-"+cityKey).innerHTML = `
       <div class="meteo-city">${c.label}</div>
-      <div class="meteo-icon">${WMO_ICONS[code]||"🌡"}</div>
-      <div class="meteo-temp">${Math.round(cur.temperature_2m)}<sup>°C</sup></div>
-      <div class="meteo-desc">${WMO_DESC[code]||""}</div>
-      <div class="meteo-mm">↑${tmax}° ↓${tmin}°</div>
-      <div class="meteo-extra">
-        <span class="meteo-ei">💨${Math.round(cur.windspeed_10m)}</span>
-        <span class="meteo-ei">💧${cur.relative_humidity_2m}%</span>
+      <div style="display:flex;gap:10px;align-items:flex-start;margin-top:4px;">
+        <div style="flex:1;">
+          <div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;">Aujourd'hui</div>
+          <div class="meteo-icon">${WMO_ICONS[code]||"🌡"}</div>
+          <div class="meteo-temp">${Math.round(cur.temperature_2m)}<sup>°C</sup></div>
+          <div class="meteo-mm">↑${tmax0}° ↓${tmin0}°</div>
+          <div class="meteo-extra" style="margin-top:4px;">
+            <span class="meteo-ei">💨${Math.round(cur.windspeed_10m)}</span>
+            <span class="meteo-ei">💧${cur.relative_humidity_2m}%</span>
+          </div>
+        </div>
+        <div style="width:1px;background:var(--border);align-self:stretch;flex-shrink:0;margin-top:4px;"></div>
+        <div style="flex:1;">
+          <div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;">${tmrLabel.charAt(0).toUpperCase()+tmrLabel.slice(1)}</div>
+          <div style="font-size:22px;line-height:1;margin-bottom:4px;">${WMO_ICONS[code1]||"🌡"}</div>
+          <div style="font-size:18px;font-weight:800;color:var(--muted);">↑${tmax1}°</div>
+          <div class="meteo-mm">↓${tmin1}°</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px;">${WMO_DESC[code1]||""}</div>
+        </div>
       </div>`;
   } catch(e) {
     document.getElementById("meteo-"+cityKey).innerHTML = `<div class="meteo-city">${CITIES[cityKey].label}</div><div class="meteo-icon">❓</div><div class="meteo-desc" style="color:var(--muted)">Indisponible</div>`;
@@ -827,7 +843,11 @@ let editingEvId = null;
 
 function renderEvents() {
   const now = new Date(); now.setHours(0,0,0,0);
-  const upcoming = (state.events||[]).filter(e=>new Date(e.date+"T00:00:00")>=now).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const in7 = new Date(now); in7.setDate(in7.getDate()+7);
+  const all = (state.events||[]).filter(e=>new Date(e.date+"T00:00:00")>=now).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const thisWeek = all.filter(e=>new Date(e.date+"T00:00:00")<=in7);
+  const later = all.filter(e=>new Date(e.date+"T00:00:00")>in7);
+
   const renderCard = ev => {
     const d = new Date(ev.date+"T00:00:00");
     const color = COLORS[ev.color]||COLORS.blue;
@@ -851,12 +871,24 @@ function renderEvents() {
       <div class="ev-dot" style="background:${color}"></div>
     </div>`;
   };
+
+  const emptyWeek = `<div style="padding:12px 0;text-align:center;color:var(--muted);font-size:13px;">Rien cette semaine — clique + Ajouter !</div>`;
+
+  // Accueil : cette semaine seulement
   const homeEl = document.getElementById("events-list");
+  if (homeEl) homeEl.innerHTML = thisWeek.length ? thisWeek.map(renderCard).join("") : emptyWeek;
+
+  // Page agenda : cette semaine + à venir
   const fullEl = document.getElementById("events-full");
-  const html = upcoming.length ? upcoming.map(renderCard).join("") : `<div class="loading">Aucun événement à venir.<br>Clique + Ajouter !</div>`;
-  if (homeEl) homeEl.innerHTML = upcoming.slice(0,3).map(renderCard).join("") || `<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px;">Aucun événement — clique + Ajouter !</div>`;
-  if (fullEl) fullEl.innerHTML = html;
-  // Bind clicks
+  if (fullEl) {
+    let html = thisWeek.length ? thisWeek.map(renderCard).join("") : emptyWeek;
+    if (later.length) {
+      html += `<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin:20px 0 10px;">Événements à venir</div>`;
+      html += later.map(renderCard).join("");
+    }
+    fullEl.innerHTML = html;
+  }
+
   document.querySelectorAll(".event-card").forEach(card => {
     card.addEventListener("click", () => showEvDetail(card.dataset.id));
   });
@@ -978,14 +1010,17 @@ function renderWidgetsZone() {
     if(state.widgets.transport) html += `<div class="info-card" id="transport-card"><div class="info-label">Transports IDF</div><div class="transport-lines" id="transport-lines"><div class="skel" style="height:18px;border-radius:4px;margin-bottom:6px;"></div><div class="skel" style="height:18px;border-radius:4px;"></div></div></div>`;
     html += `</div>`;
   }
-  if(state.widgets.sports) html += `<p class="sec">Résultats sportifs</p><div id="sports-zone"><div class="loading">Chargement...</div></div>`;
-  if(state.widgets.podcasts) html += `<p class="sec">Derniers podcasts</p><div id="podcasts-zone"><div class="loading">Chargement...</div></div>`;
-  if(state.widgets.tdf) html += `<p class="sec">Tour de France 2026</p><div class="tdf-card"><div class="tdf-hdr"><div class="tdf-logo"><div class="tdf-bands"><div class="tdf-band" style="background:#002395"></div><div class="tdf-band" style="background:#FFF"></div><div class="tdf-band" style="background:#ED2939"></div></div><div class="tdf-label">Tour de France <span>2026</span></div></div><div class="tdf-badge">4–26 JUIL</div></div><a href="https://legeneral.org/tdf2026.html" target="_blank" class="tdf-open">🚴 Ouvrir l'app Tour de France</a></div>`;
+  if(state.widgets.actu) {
+    const fils = (state.actuFils||["fr"]);
+    const filLabels = {fr:"🇫🇷 France",world:"🌍 Monde",sport:"⚽ Sport",tech:"💻 Tech",science:"🔬 Science"};
+    html += `<div style="display:flex;align-items:center;justify-content:space-between;margin:20px 0 10px;"><p class="sec" style="margin:0;">Actualités</p><div id="actu-fil-btns" style="display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;"></div></div><div id="actu-zone"><div class="loading">Chargement...</div></div>`;
+  }
+  if(state.widgets.tdf) html += `<p class="sec" style="margin-top:16px;">Tour de France 2026</p><div class="tdf-card"><div class="tdf-hdr"><div class="tdf-logo"><div class="tdf-bands"><div class="tdf-band" style="background:#002395"></div><div class="tdf-band" style="background:#FFF"></div><div class="tdf-band" style="background:#ED2939"></div></div><div class="tdf-label">Tour de France <span>2026</span></div></div><div class="tdf-badge">4–26 JUIL</div></div><a href="https://legeneral.org/tdf2026.html" target="_blank" class="tdf-open">🚴 Ouvrir l'app Tour de France</a></div>`;
+  if(state.widgets.cdm) html += `<p class="sec" style="margin-top:16px;">Coupe du Monde 2026</p><div class="tdf-card" style="border-color:rgba(34,199,123,.2);"><div class="tdf-hdr"><div class="tdf-logo"><div class="tdf-bands"><div class="tdf-band" style="background:#002395"></div><div class="tdf-band" style="background:#fff"></div><div class="tdf-band" style="background:#ED2939"></div></div><div class="tdf-label">Coupe du Monde <span>2026</span></div></div><div class="tdf-badge" style="background:var(--green);">14 JUI–19 JUL</div></div><a href="https://legeneral.org/cdm2026.html" target="_blank" class="tdf-open" style="color:var(--green);border-color:rgba(52,199,123,.3);background:rgba(52,199,123,.1);">🏆 Ouvrir l'app Coupe du Monde</a></div>`;
   zone.innerHTML = html;
   if(state.widgets.env) fetchAirQuality();
   if(state.widgets.transport) renderTransport();
-  if(state.widgets.sports) fetchSports();
-  if(state.widgets.podcasts) fetchPodcasts();
+  if(state.widgets.actu) initActu();
 }
 
 // ── Air ──
@@ -1217,45 +1252,31 @@ function renderPerso() {
     });
   });
 
-  // Teams picker
-  const tp=document.getElementById("teams-picker");
-  if(tp) tp.innerHTML=ALL_TEAMS.map(t=>{
-    const sel=(state.teamIds||[]).includes(t.id);
-    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--surface);border-radius:var(--r-sm);border:1px solid ${sel?"var(--yellow)":"var(--border)"};margin-bottom:6px;cursor:pointer;" data-team="${t.id}">
-      <span style="font-size:22px">${t.emoji}</span>
-      <div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--text)">${t.short}</div><div style="font-size:11px;color:var(--muted)">${t.league}</div></div>
-      <div style="width:20px;height:20px;border-radius:50%;border:2px solid ${sel?"var(--yellow)":"var(--border2)"};background:${sel?"var(--yellow)":"none"};display:flex;align-items:center;justify-content:center;font-size:11px;color:#1A1916">${sel?"✓":""}</div>
-    </div>`;
-  }).join("");
-  document.querySelectorAll("[data-team]").forEach(row=>{
-    row.addEventListener("click",function(){
-      const id=this.dataset.team;
-      if(!state.teamIds) state.teamIds=[];
-      if(state.teamIds.includes(id)) state.teamIds=state.teamIds.filter(x=>x!==id);
-      else state.teamIds.push(id);
-      renderPerso();
+  // Fils d'actualités
+  const ap=document.getElementById("teams-picker");
+  if(ap) {
+    ap.innerHTML = `<p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Choisis tes fils d'actualités (si le widget Actualités est activé)</p>` +
+    NEWS_FILS.map(f=>{
+      const sel=(state.actuFils||["fr"]).includes(f.id);
+      return `<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--surface);border-radius:var(--r-sm);border:1px solid ${sel?"var(--yellow)":"var(--border)"};margin-bottom:6px;cursor:pointer;" data-fil-pick="${f.id}">
+        <div style="font-size:20px">${f.label.split(" ")[0]}</div>
+        <div style="flex:1;font-size:13px;font-weight:600;color:var(--text)">${f.label}</div>
+        <div style="width:20px;height:20px;border-radius:50%;border:2px solid ${sel?"var(--yellow)":"var(--border2)"};background:${sel?"var(--yellow)":"none"};display:flex;align-items:center;justify-content:center;font-size:11px;color:#1A1916">${sel?"✓":""}</div>
+      </div>`;
+    }).join("");
+    ap.querySelectorAll("[data-fil-pick]").forEach(row=>{
+      row.addEventListener("click",function(){
+        const id=this.dataset.filPick;
+        if(!state.actuFils) state.actuFils=["fr"];
+        if(state.actuFils.includes(id)) { if(state.actuFils.length>1) state.actuFils=state.actuFils.filter(x=>x!==id); }
+        else state.actuFils.push(id);
+        renderPerso();
+      });
     });
-  });
-
-  // Podcasts picker
+  }
+  // Podcasts picker — caché (widget supprimé)
   const pp=document.getElementById("podcasts-picker");
-  if(pp) pp.innerHTML=ALL_PODCASTS.map(p=>{
-    const sel=(state.podcastIds||[]).includes(p.id);
-    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--surface);border-radius:var(--r-sm);border:1px solid ${sel?"var(--yellow)":"var(--border)"};margin-bottom:6px;cursor:pointer;" data-pod="${p.id}">
-      <div style="width:10px;height:10px;border-radius:50%;background:${p.color};flex-shrink:0"></div>
-      <div style="flex:1;font-size:13px;font-weight:600;color:var(--text)">${p.name}</div>
-      <div style="width:20px;height:20px;border-radius:50%;border:2px solid ${sel?"var(--yellow)":"var(--border2)"};background:${sel?"var(--yellow)":"none"};display:flex;align-items:center;justify-content:center;font-size:11px;color:#1A1916">${sel?"✓":""}</div>
-    </div>`;
-  }).join("");
-  document.querySelectorAll("[data-pod]").forEach(row=>{
-    row.addEventListener("click",function(){
-      const id=this.dataset.pod;
-      if(!state.podcastIds) state.podcastIds=[];
-      if(state.podcastIds.includes(id)) state.podcastIds=state.podcastIds.filter(x=>x!==id);
-      else state.podcastIds.push(id);
-      renderPerso();
-    });
-  });
+  if(pp) pp.innerHTML="";
 }
 
 document.getElementById("save-perso-btn").addEventListener("click",()=>{
@@ -1264,6 +1285,88 @@ document.getElementById("save-perso-btn").addEventListener("click",()=>{
   renderWidgetsZone();
   showToast("Préférences enregistrées ✓");
 });
+
+
+// ════════════════════════════════════════════
+// ACTUALITÉS — NewsData.io
+// ════════════════════════════════════════════
+const NEWS_KEY = "pub_162cf52f9dba475c941badc4bbc4e5ef";
+const NEWS_FILS = [
+  { id:"fr",      label:"🇫🇷 France",   country:"fr", language:"fr", q:"" },
+  { id:"world",   label:"🌍 Monde",     country:"",  language:"fr", q:"world" },
+  { id:"sport",   label:"⚽ Sport",     country:"",  language:"fr", q:"sport" },
+  { id:"tech",    label:"💻 Tech",      country:"",  language:"fr", q:"technology" },
+  { id:"science", label:"🔬 Science",   country:"",  language:"fr", q:"science" },
+];
+let actuCache = {}, currentFil = null;
+
+function initActu() {
+  if (!state.actuFils) state.actuFils = ["fr"];
+  currentFil = state.actuFils[0] || "fr";
+  renderActuFils();
+  fetchActu(currentFil);
+}
+
+function renderActuFils() {
+  const el = document.getElementById("actu-fil-btns");
+  if (!el) return;
+  const enabled = state.actuFils || ["fr"];
+  el.innerHTML = NEWS_FILS.filter(f => enabled.includes(f.id)).map(f =>
+    `<button style="background:${f.id===currentFil?"var(--yellow)":"var(--surface2)"};color:${f.id===currentFil?"#1A1916":"var(--muted)"};border:1px solid ${f.id===currentFil?"var(--yellow)":"var(--border2)"};border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--font);" data-fil="${f.id}">${f.label}</button>`
+  ).join("");
+  el.querySelectorAll("[data-fil]").forEach(b => {
+    b.addEventListener("click", () => { currentFil = b.dataset.fil; renderActuFils(); fetchActu(currentFil); });
+  });
+}
+
+async function fetchActu(filId, force=false) {
+  const now = Date.now();
+  if (!force && actuCache[filId] && (now - actuCache[filId].ts) < 30*60*1000) {
+    renderActu(actuCache[filId].articles); return;
+  }
+  const el = document.getElementById("actu-zone");
+  if (el) el.innerHTML = `<div class="loading">Chargement...</div>`;
+  const fil = NEWS_FILS.find(f => f.id===filId);
+  if (!fil) return;
+  try {
+    let url = `https://newsdata.io/api/1/latest?apikey=${NEWS_KEY}&size=8`;
+    if (fil.country) url += `&country=${fil.country}`;
+    if (fil.language) url += `&language=${fil.language}`;
+    if (fil.q) url += `&q=${encodeURIComponent(fil.q)}`;
+    url += "&category=top";
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.status !== "success") throw new Error("API error");
+    const articles = (data.results||[]).map(a => ({
+      title: a.title||"",
+      desc: a.description ? a.description.substring(0,120)+"…" : "",
+      source: a.source_name||a.source_id||"—",
+      url: a.link||"#",
+      image: a.image_url||null,
+      date: a.pubDate ? new Date(a.pubDate).toLocaleDateString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}) : "",
+    }));
+    actuCache[filId] = { ts: now, articles };
+    renderActu(articles);
+  } catch(e) {
+    const el2 = document.getElementById("actu-zone");
+    if (el2) el2.innerHTML = `<div class="loading">Actualités indisponibles</div>`;
+  }
+}
+
+function renderActu(articles) {
+  const el = document.getElementById("actu-zone");
+  if (!el) return;
+  el.innerHTML = articles.map(a => `
+    <div onclick="window.open('${a.url}','_blank')" style="display:flex;gap:12px;background:var(--surface);border-radius:var(--r-sm);border:1px solid var(--border);padding:12px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;">
+      ${a.image ? `<img src="${a.image}" style="width:72px;height:72px;border-radius:var(--r-sm);object-fit:cover;flex-shrink:0;" onerror="this.style.display='none'">` : `<div style="width:72px;height:72px;border-radius:var(--r-sm);background:var(--surface2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:28px;">📰</div>`}
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:10px;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">${a.source}</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${a.title}</div>
+        ${a.desc ? `<div style="font-size:11px;color:var(--muted);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${a.desc}</div>` : ""}
+        <div style="font-size:10px;color:var(--muted2);margin-top:4px;">${a.date}</div>
+      </div>
+    </div>`).join("");
+}
 
 // ════════════════════════════════════════════
 // FIREBASE SYNC
