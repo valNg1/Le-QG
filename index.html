@@ -10,6 +10,8 @@
 <meta name="theme-color" content="#0F0F12">
 <link rel="manifest" href="manifest.json">
 <title>Le QG</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap');
 
@@ -1367,11 +1369,11 @@ async function fetchPodcasts(force = false) {
         const feedUrl = podcast.feedUrl;
         if (!feedUrl) return { show: p, episodes: [], podcastUrl: podcast.collectionViewUrl };
 
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`;
+        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(feedUrl)}`;
         const feedRes = await fetch(proxyUrl);
-        const feedData = await feedRes.json();
+        const feedText = await feedRes.text();
         const parser = new DOMParser();
-        const xml = parser.parseFromString(feedData.contents, 'text/xml');
+        const xml = parser.parseFromString(feedText, 'text/xml');
         const items = [...xml.querySelectorAll('item')].slice(0, 2);
 
         const episodes = items.map(item => ({
@@ -2007,18 +2009,8 @@ const IDF_LINES = [
 ];
 
 async function fetchTransport() {
-  // API IDFM nécessite une clé — on utilise leur endpoint public de perturbations
-  // sans clé on fait un fetch RSS des alertes RATP
-  try {
-    const url = 'https://api.navitia.io/v1/coverage/fr-idf/disruptions?count=50';
-    const res = await fetch(url, { headers: { 'Authorization': 'demo' }, signal: AbortSignal.timeout(4000) });
-    if (!res.ok) throw new Error('no auth');
-    const data = await res.json();
-    renderTransportFromNavitia(data.disruptions || []);
-  } catch(e) {
-    // Fallback : statut par défaut OK avec heure de dernière vérif
-    renderTransportFallback();
-  }
+  // Statut intelligent basé sur heure + jour
+  renderTransportFallback();
 }
 
 function renderTransportFromNavitia(disruptions) {
