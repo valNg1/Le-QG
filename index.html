@@ -941,19 +941,27 @@ body {
 <!-- ═══════════════════════════════════════ -->
 <div class="modal-overlay hidden" id="event-modal">
   <div class="modal">
-    <div class="modal-title">Nouvel événement</div>
-    <div style="display:flex;gap:8px;margin-bottom:12px;">
-      <button class="tache-tag tache-tag-vaisselle" data-adder="Diego" style="flex:1;justify-content:center;">D Diego</button>
-      <button class="tache-tag tache-tag-poubelles" data-adder="Luca" style="flex:1;justify-content:center;">L Luca</button>
-      <button class="tache-tag tache-tag-menage" data-adder="Romain" style="flex:1;justify-content:center;">R Romain</button>
-      <button class="tache-tag" data-adder="Cora" style="flex:1;justify-content:center;background:rgba(245,135,74,0.15);color:#F5874A;border:1px solid rgba(245,135,74,0.2);">C Cora</button>
-      <button class="tache-tag" data-adder="Valery" style="flex:1;justify-content:center;background:rgba(232,56,79,0.15);color:#E8384F;border:1px solid rgba(232,56,79,0.2);">V Val.</button>
+    <div class="modal-title" id="ev-modal-title">Nouvel événement</div>
+    <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
+      <button class="tache-tag tache-tag-vaisselle" data-adder="Diego" style="flex:1;justify-content:center;min-width:fit-content;">D Diego</button>
+      <button class="tache-tag tache-tag-poubelles" data-adder="Luca" style="flex:1;justify-content:center;min-width:fit-content;">L Luca</button>
+      <button class="tache-tag tache-tag-menage" data-adder="Romain" style="flex:1;justify-content:center;min-width:fit-content;">R Romain</button>
+      <button class="tache-tag" data-adder="Cora" style="flex:1;justify-content:center;min-width:fit-content;background:rgba(245,135,74,0.15);color:#F5874A;border:1px solid rgba(245,135,74,0.2);">C Cora</button>
+      <button class="tache-tag" data-adder="Valery" style="flex:1;justify-content:center;min-width:fit-content;background:rgba(232,56,79,0.15);color:#E8384F;border:1px solid rgba(232,56,79,0.2);">V Val.</button>
     </div>
     <input class="modal-input" id="ev-title" placeholder="Titre de l'événement" type="text">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:600;">DATES</div>
     <div class="modal-row">
-      <input class="modal-input" id="ev-date" type="date">
-      <input class="modal-input" id="ev-time" type="time" placeholder="Heure">
+      <div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Du</div>
+        <input class="modal-input" id="ev-date" type="date" style="margin-bottom:0;">
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Au (optionnel)</div>
+        <input class="modal-input" id="ev-date-end" type="date" style="margin-bottom:0;">
+      </div>
     </div>
+    <input class="modal-input" id="ev-time" type="time" placeholder="Heure (optionnel)" style="margin-top:8px;">
     <input class="modal-input" id="ev-who" placeholder="Qui est concerné ? (optionnel)" type="text">
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px;">
       <button class="tache-tag tache-tag-vaisselle" data-color="blue">💙 Famille</button>
@@ -964,6 +972,18 @@ body {
     <div class="modal-actions">
       <button class="modal-btn secondary" id="ev-cancel-btn">Annuler</button>
       <button class="modal-btn primary" id="ev-submit-btn">Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal détail/suppression événement -->
+<div class="modal-overlay hidden" id="event-detail-modal">
+  <div class="modal">
+    <div class="modal-title" id="ev-detail-title">—</div>
+    <div id="ev-detail-body" style="font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:16px;"></div>
+    <div class="modal-actions">
+      <button class="modal-btn secondary" id="ev-detail-close">Fermer</button>
+      <button class="modal-btn" id="ev-detail-delete" style="background:rgba(232,56,79,0.15);color:#E8384F;border:1px solid rgba(232,56,79,0.3);">🗑 Supprimer</button>
     </div>
   </div>
 </div>
@@ -1226,7 +1246,7 @@ function renderEvents() {
     .sort((a,b) => new Date(a.date) - new Date(b.date));
 
   const renderCard = (e) => {
-    const d = new Date(e.date);
+    const d = new Date(e.date + 'T00:00:00');
     const day = d.getDate();
     const month = d.toLocaleDateString('fr-FR', { month: 'short' });
     const color = COLOR_MAP[e.color] || COLOR_MAP.blue;
@@ -1234,10 +1254,16 @@ function renderEvents() {
     const adderBadge = adderM
       ? `<div style="font-size:10px;color:${adderM.color};margin-top:2px;font-weight:600;">ajouté par ${adderM.name}</div>`
       : '';
-    return `<div class="event-card">
+    // Plage de dates
+    let dateLabel = '';
+    if (e.dateEnd && e.dateEnd !== e.date) {
+      const dEnd = new Date(e.dateEnd + 'T00:00:00');
+      dateLabel = `au ${dEnd.getDate()} ${dEnd.toLocaleDateString('fr-FR', {month:'short'})}`;
+    }
+    return `<div class="event-card" onclick="showEventDetail('${e.id}')">
       <div class="event-date-block">
         <div class="event-day">${day}</div>
-        <div class="event-month">${month}</div>
+        <div class="event-month">${month}${dateLabel ? '<br><span style="font-size:8px;color:var(--muted);">' + dateLabel + '</span>' : ''}</div>
       </div>
       <div class="event-divider"></div>
       <div class="event-info">
@@ -1271,6 +1297,7 @@ function showAddEvent() {
   modal.classList.remove('hidden');
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('ev-date').value = today;
+  document.getElementById('ev-date-end').value = '';
   selectedAdder = '';
   selectedEvColor = 'blue';
 
@@ -1294,6 +1321,42 @@ function showAddEvent() {
   modal.onclick = function(e) { if (e.target === this) closeEventModal(); };
 }
 
+
+function showEventDetail(id) {
+  const e = eventsState.find(ev => String(ev.id) === String(id));
+  if (!e) return;
+  const modal = document.getElementById('event-detail-modal');
+  const color = COLOR_MAP[e.color] || COLOR_MAP.blue;
+  document.getElementById('ev-detail-title').textContent = e.title;
+  const d = new Date(e.date + 'T00:00:00');
+  let dateStr = d.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'});
+  if (e.dateEnd && e.dateEnd !== e.date) {
+    const dEnd = new Date(e.dateEnd + 'T00:00:00');
+    dateStr += ' → ' + dEnd.toLocaleDateString('fr-FR', {day:'numeric', month:'long'});
+  }
+  document.getElementById('ev-detail-body').innerHTML = `
+    <div style="margin-bottom:6px;">📅 ${dateStr}</div>
+    ${e.time ? '<div style="margin-bottom:6px;">🕐 ' + e.time + '</div>' : ''}
+    ${e.who ? '<div style="margin-bottom:6px;">👥 ' + e.who + '</div>' : ''}
+    ${e.adder ? '<div style="margin-bottom:6px;">✍️ Ajouté par ' + e.adder + '</div>' : ''}
+  `;
+  modal.classList.remove('hidden');
+  modal.onclick = function(ev) { if (ev.target === this) closeEventDetail(); };
+  document.getElementById('ev-detail-close').onclick = closeEventDetail;
+  document.getElementById('ev-detail-delete').onclick = function() { deleteEvent(id); closeEventDetail(); };
+}
+
+function closeEventDetail() {
+  document.getElementById('event-detail-modal').classList.add('hidden');
+}
+
+function deleteEvent(id) {
+  eventsState = eventsState.filter(e => String(e.id) !== String(id));
+  saveEvents();
+  renderEvents();
+  showToast('Événement supprimé');
+}
+
 function closeEventModal() {
   document.getElementById('event-modal').classList.add('hidden');
 }
@@ -1311,13 +1374,14 @@ function selectEvColor(color) {
 }
 
 function addEvent() {
-  const title = document.getElementById('ev-title').value.trim();
-  const date  = document.getElementById('ev-date').value;
-  const time  = document.getElementById('ev-time').value;
-  const who   = document.getElementById('ev-who').value.trim();
+  const title   = document.getElementById('ev-title').value.trim();
+  const date    = document.getElementById('ev-date').value;
+  const dateEnd = document.getElementById('ev-date-end').value;
+  const time    = document.getElementById('ev-time').value;
+  const who     = document.getElementById('ev-who').value.trim();
   if (!title || !date) { showToast('Titre et date requis !'); return; }
   const adder = selectedAdder || currentMember || 'Moi';
-  const newEvent = { title, date, time, who, color: selectedEvColor, adder, id: Date.now() };
+  const newEvent = { title, date, dateEnd, time, who, color: selectedEvColor, adder, id: Date.now() };
   eventsState.push(newEvent);
   saveEvents();
   renderEvents();
@@ -1325,6 +1389,7 @@ function addEvent() {
   closeEventModal();
   document.getElementById('ev-title').value = '';
   document.getElementById('ev-who').value = '';
+  document.getElementById('ev-date-end').value = '';
   showToast('Événement ajouté ✓');
 }
 
@@ -2709,18 +2774,7 @@ document.addEventListener('DOMContentLoaded', function() {
   initTaches();
   renderEvents();
 
-  // Ajout événements de démo si vide
-  if (eventsState.length === 0) {
-    const today = new Date();
-    const addDays = (n) => { const d = new Date(today); d.setDate(d.getDate()+n); return d.toISOString().split('T')[0]; };
-    eventsState = [
-      { title: 'Tour de France — Départ Barcelone', date: '2026-07-04', time: '10:45', who: 'Toute la famille', color: 'orange', adder: 'Diego',  id: 1 },
-      { title: 'Vacances Quiberon (rappel)',         date: addDays(4),   time: '',      who: 'Toute la famille',   color: 'blue', adder: 'Luca',   id: 2 },
-      { title: 'Vacances Quiberon',                 date: addDays(10),  time: '',      who: 'Toute la famille',   color: 'green', adder: 'Romain', id: 3 },
-    ];
-    saveEvents();
-    renderEvents();
-  }
+  // Pas d'événements de démo — liste vide au démarrage
 
   initDiner();
   initMenu();
