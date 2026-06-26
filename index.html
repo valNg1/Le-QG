@@ -869,6 +869,25 @@ body {
   <button class="courses-clear-btn" onclick="clearDoneCourses()">🗑 Supprimer les articles cochés</button>
 </div>
 
+<!-- ═══════════════════════════════════════ -->
+<!--  VIEW : MON GROUPE                     -->
+<!-- ═══════════════════════════════════════ -->
+<div id="view-groupe" class="view">
+  <p class="sec" style="margin-top:8px;">Mon groupe</p>
+  <div id="group-panel">
+    <div style="text-align:center;padding:32px;color:var(--muted);font-size:13px;">Chargement...</div>
+  </div>
+  <p class="sec" style="margin-top:20px;">Comment ça marche ?</p>
+  <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:16px;">
+    <div style="font-size:13px;color:var(--text);line-height:1.8;">
+      1️⃣ <strong>Crée un groupe</strong> — donne-lui un nom<br>
+      2️⃣ <strong>Partage le code</strong> à tes proches<br>
+      3️⃣ Ils <strong>rejoignent</strong> avec le code<br>
+      4️⃣ L'agenda, le mur et le dîner sont <strong>partagés en temps réel</strong>
+    </div>
+  </div>
+</div>
+
 <nav class="bottom-nav">
   <button class="nav-btn active" id="nav-0" onclick="showView('accueil',0)">
     <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -889,6 +908,10 @@ body {
   <button class="nav-btn" id="nav-4" onclick="showView('medias',4)">
     <svg viewBox="0 0 24 24"><path d="M4 22h16a2 2 0 002-2V4a2 2 0 00-2-2H8L2 8v12a2 2 0 002 2z"/><line x1="9" y1="1" x2="9" y2="7"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
     <span>Médias</span>
+  </button>
+  <button class="nav-btn" id="nav-groupe" onclick="showView('groupe','groupe')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+    <span>Groupe</span>
   </button>
   <button class="nav-btn" id="nav-perso" onclick="showView('perso','perso')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
@@ -1297,9 +1320,11 @@ function addEvent() {
   const who   = document.getElementById('ev-who').value.trim();
   if (!title || !date) { showToast('Titre et date requis !'); return; }
   if (!selectedAdder) { showToast('Qui ajoute cet événement ?'); return; }
-  eventsState.push({ title, date, time, who, color: selectedEvColor, adder: selectedAdder, id: Date.now() });
+  const newEvent = { title, date, time, who, color: selectedEvColor, adder: selectedAdder, id: Date.now() };
+  eventsState.push(newEvent);
   saveEvents();
   renderEvents();
+  saveEventToFirebase(newEvent);
   closeEventModal();
   document.getElementById('ev-title').value = '';
   document.getElementById('ev-who').value = '';
@@ -1453,7 +1478,7 @@ function initDiner() {
   renderDiner();
 }
 
-function saveDiner() { localStorage.setItem('fam_diner', JSON.stringify(dinerState)); }
+function saveDiner() { localStorage.setItem('fam_diner', JSON.stringify(dinerState)); saveDinerToFirebase(); }
 
 // CONFIG couleurs par choix
 const CHOICE_COLORS = {
@@ -2292,10 +2317,15 @@ function sendMsg() {
   const now = new Date();
   const time = now.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
   const date = now.toLocaleDateString('fr-FR', { day:'numeric', month:'short' });
-  murState.unshift({ id: Date.now(), who: msgWho, text, time, date, reactions: {} });
-  if (murState.length > 50) murState = murState.slice(0, 50);
-  saveMur();
-  renderMur();
+  const newMsg = { id: Date.now(), who: msgWho, text, time, date, reactions: {} };
+  if (!currentGroupCode) {
+    murState.unshift(newMsg);
+    if (murState.length > 50) murState = murState.slice(0, 50);
+    saveMur();
+    renderMur();
+  } else {
+    saveMsgToFirebase(newMsg); // Firebase snapshot met à jour le mur
+  }
   input.value = '';
   showToast(msgWho + ' a posté un message !');
 }
@@ -2478,6 +2508,7 @@ function showView(id, idx) {
   });
   if (id === 'perso') renderPerso();
   if (id === 'medias') fetchNews();
+  if (id === 'groupe') renderGroupPanel();
 }
 
 // ============================================================
@@ -2510,6 +2541,7 @@ function showToast(msg) {
 document.addEventListener('DOMContentLoaded', function() {
   initProfile();
   updateHeader();
+  if (currentGroupCode) { renderGroupPanel(); }
   fetchMeteo('paris');
   fetchMeteo('quiberon');
   initTaches();
