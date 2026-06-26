@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="TDF 2026">
+<title>Tour de France 2026</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<style>
+:root {
+  --yellow:#F7C104; --yellow-dark:#C49A00; --yellow-light:#FFF8DC;
+  --green:#1B8A3B; --polka:#E8384F; --white:#FFFFFF;
+  --gray-50:#F8F8F6; --gray-100:#EEEDE9; --gray-200:#D6D4CC;
+  --gray-400:#9C9A91; --gray-600:#5A5850; --gray-900:#1A1916;
+  --font:'Helvetica Neue',Arial,sans-serif; --radius:12px; --radius-sm:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--gray-50);color:var(--gray-900);max-width:430px;margin:0 auto;min-height:100vh;padding-bottom:72px}
+
+/* ONBOARDING */
+.onboard-overlay{position:fixed;inset:0;background:var(--gray-900);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px}
+.onboard-overlay.hidden{display:none}
+.onboard-logo{display:flex;gap:4px;margin-bottom:24px}
+.onboard-band{width:6px;height:36px;border-radius:3px}
+.onboard-title{font-size:28px;font-weight:800;color:white;text-align:center;line-height:1.2;margin-bottom:6px}
+.onboard-title span{color:var(--yellow)}
+.onboard-sub{font-size:14px;color:var(--gray-400);text-align:center;margin-bottom:36px;line-height:1.5}
+.onboard-card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius);padding:24px;width:100%;max-width:340px}
+.onboard-label{font-size:12px;font-weight:600;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;display:block}
+.onboard-input{width:100%;padding:12px 14px;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.15);border-radius:var(--radius-sm);font-family:var(--font);font-size:16px;color:white;margin-bottom:16px;transition:border-color 0.15s}
+.onboard-input::placeholder{color:var(--gray-600)}
+.onboard-input:focus{outline:none;border-color:var(--yellow)}
+.avatar-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px}
+.avatar-opt{width:100%;aspect-ratio:1;border-radius:50%;border:2px solid transparent;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;background:rgba(255,255,255,0.05)}
+.avatar-opt.selected{border-color:var(--yellow);background:rgba(247,193,4,0.15)}
+.onboard-btn{width:100%;background:var(--yellow);color:var(--gray-900);border:none;border-radius:var(--radius-sm);padding:14px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;transition:opacity 0.15s}
+.onboard-btn:hover{opacity:0.85}
+.onboard-error{font-size:13px;color:var(--polka);text-align:center;margin-top:8px;min-height:20px}
+
+/* HEADER */
+.header{background:var(--gray-900);padding:16px 16px 0;position:sticky;top:0;z-index:100}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:8px}
+.logo-bands{display:flex;gap:2px}
+.logo-band{width:5px;height:20px;border-radius:2px}
+.logo-title{font-size:15px;font-weight:700;color:var(--white);letter-spacing:0.02em}
+.logo-title span{color:var(--yellow)}
+.player-chip{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:4px 10px 4px 6px;cursor:pointer}
+.player-chip-avatar{font-size:16px;line-height:1}
+.player-chip-name{font-size:12px;font-weight:600;color:white;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nav-tabs{display:flex;gap:0;overflow-x:auto;scrollbar-width:none}
+.nav-tabs::-webkit-scrollbar{display:none}
+.tab-btn{background:none;border:none;color:var(--gray-400);font-size:13px;font-weight:500;padding:10px 14px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.15s;font-family:var(--font)}
+.tab-btn.active{color:var(--yellow);border-bottom-color:var(--yellow)}
+
+/* VIEWS */
+.view{display:none;padding:16px}
+.view.active{display:block}
+
+/* HERO ETAPE */
+.etape-hero{background:var(--gray-900);border-radius:var(--radius);padding:16px;margin-bottom:12px;color:white}
+.etape-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(247,193,4,0.15);border:1px solid rgba(247,193,4,0.3);border-radius:20px;padding:4px 10px;margin-bottom:10px}
+.etape-badge span{font-size:11px;font-weight:600;color:var(--yellow);letter-spacing:0.05em}
+.etape-dot{width:6px;height:6px;border-radius:50%;background:var(--yellow);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
+.etape-route{font-size:18px;font-weight:700;margin-bottom:4px;line-height:1.2}
+.etape-info-row{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap}
+.etape-stat{display:flex;flex-direction:column}
+.etape-stat-label{font-size:10px;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px}
+.etape-stat-value{font-size:14px;font-weight:600;color:white}
+.terrain-bar{margin-top:12px;height:4px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden}
+.terrain-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--yellow) 0%,var(--polka) 100%)}
+.terrain-label{font-size:11px;color:var(--gray-400);margin-top:4px}
+
+/* CARDS */
+.maillots-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.maillot-card{background:var(--white);border-radius:var(--radius-sm);padding:12px;border:1px solid var(--gray-100)}
+.maillot-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.maillot-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px}
+.maillot-name{font-size:11px;color:var(--gray-400);font-weight:500}
+.maillot-coureur{font-size:13px;font-weight:700;color:var(--gray-900);line-height:1.2}
+.maillot-equipe{font-size:11px;color:var(--gray-400);margin-top:1px}
+.section-title{font-size:13px;font-weight:700;color:var(--gray-600);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;margin-top:16px}
+
+/* ÉTAPES LIST */
+.etape-row{display:flex;align-items:center;background:var(--white);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;border:1px solid var(--gray-100);gap:10px;cursor:pointer}
+.etape-row.current{border-color:var(--yellow);background:var(--yellow-light)}
+.etape-num{width:32px;height:32px;border-radius:50%;background:var(--gray-100);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--gray-600);flex-shrink:0}
+.etape-num.current-num{background:var(--yellow);color:var(--gray-900)}
+.etape-content{flex:1;min-width:0}
+.etape-trajet{font-size:13px;font-weight:600;color:var(--gray-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.etape-meta{font-size:11px;color:var(--gray-400);margin-top:1px}
+.type-pill{font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;flex-shrink:0;letter-spacing:0.03em}
+.type-plat{background:#E8F4FD;color:#1565C0}
+.type-montagne{background:#FCE4EC;color:#880E4F}
+.type-haute-montagne{background:#EDE7F6;color:#4527A0}
+.type-clm{background:#FFF3E0;color:#BF360C}
+.type-clm-eq{background:#FFF3E0;color:#BF360C}
+.type-semi{background:#E8F5E9;color:#1B5E20}
+
+/* COUREURS */
+.favori-card{background:var(--white);border-radius:var(--radius);padding:16px;margin-bottom:10px;border:1px solid var(--gray-100)}
+.favori-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.favori-avatar{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;flex-shrink:0}
+.favori-meta{flex:1}
+.favori-nom{font-size:16px;font-weight:800;color:var(--gray-900);line-height:1.2}
+.favori-infos{font-size:12px;color:var(--gray-400);margin-top:3px}
+.cote-badge{background:var(--gray-900);color:var(--yellow);font-size:14px;font-weight:800;padding:6px 12px;border-radius:var(--radius-sm)}
+.favori-forces{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.force-tag{font-size:11px;background:var(--gray-100);color:var(--gray-600);padding:4px 8px;border-radius:20px;font-weight:500}
+.force-tag.top{background:var(--yellow-light);color:var(--yellow-dark)}
+.favori-desc{font-size:13px;color:var(--gray-600);line-height:1.5}
+.stars{display:flex;gap:3px}
+.star{font-size:14px}
+
+/* PRONOS */
+.prono-section{background:var(--white);border-radius:var(--radius);padding:16px;margin-bottom:12px;border:1px solid var(--gray-100)}
+.prono-title{font-size:15px;font-weight:700;color:var(--gray-900);margin-bottom:4px}
+.prono-subtitle{font-size:12px;color:var(--gray-400);margin-bottom:14px}
+.prono-select-label{font-size:12px;font-weight:600;color:var(--gray-600);margin-bottom:6px;display:block}
+.prono-select{width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-family:var(--font);font-size:14px;color:var(--gray-900);background:var(--white);appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239C9A91' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;margin-bottom:12px;cursor:pointer}
+.prono-select:focus{outline:none;border-color:var(--yellow)}
+.prono-btn{width:100%;background:var(--yellow);color:var(--gray-900);border:none;border-radius:var(--radius-sm);padding:12px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:opacity 0.15s}
+.prono-btn:hover{opacity:0.85}
+.prono-result{background:var(--gray-50);border-radius:var(--radius-sm);padding:12px;margin-top:12px;border:1px solid var(--gray-100)}
+.prono-result-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--gray-100);font-size:13px}
+.prono-result-row:last-child{border-bottom:none}
+.prono-category{color:var(--gray-400);font-size:12px}
+.prono-choice{font-weight:700;color:var(--gray-900)}
+.prono-status{font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600}
+.status-pending{background:var(--gray-100);color:var(--gray-600)}
+.status-correct{background:#E8F5E9;color:#2E7D32}
+.status-wrong{background:#FFEBEE;color:#C62828}
+.firebase-note{background:#FFF8DC;border:1px solid #F7C104;border-radius:var(--radius-sm);padding:12px;margin-bottom:16px;font-size:12px;color:#8B6914;line-height:1.5}
+.firebase-note strong{display:block;margin-bottom:4px;font-size:13px}
+
+/* LIGUE */
+.joueur-row{display:flex;align-items:center;background:var(--white);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;border:1px solid var(--gray-100);gap:12px}
+.joueur-row.me{border-color:var(--yellow);background:var(--yellow-light)}
+.joueur-rank{font-size:18px;font-weight:800;color:var(--gray-400);min-width:28px;text-align:center}
+.joueur-avatar-big{font-size:28px;line-height:1}
+.joueur-info{flex:1}
+.joueur-name{font-size:15px;font-weight:700;color:var(--gray-900)}
+.joueur-sub{font-size:12px;color:var(--gray-400);margin-top:2px}
+.joueur-score{font-size:20px;font-weight:800;color:var(--gray-900)}
+.joueur-score-label{font-size:10px;color:var(--gray-400);text-align:right}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--white);border-top:1px solid var(--gray-100);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom,0)}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;background:none;border:none;cursor:pointer;font-family:var(--font)}
+.nav-btn svg{width:22px;height:22px;stroke:var(--gray-400);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.nav-btn span{font-size:10px;color:var(--gray-400);font-weight:500}
+.nav-btn.active svg{stroke:var(--yellow-dark)}
+.nav-btn.active span{color:var(--yellow-dark);font-weight:700}
+
+/* UTILS */
+.empty-state{text-align:center;padding:32px 16px;color:var(--gray-400)}
+.empty-state-icon{font-size:36px;margin-bottom:8px}
+.empty-state p{font-size:14px;line-height:1.5}
+.toast{position:fixed;bottom:85px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--gray-900);color:white;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;opacity:0;transition:all 0.3s;z-index:200;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* NEWS TICKER */
+.news-ticker-wrap{background:var(--yellow);overflow:hidden;height:32px;display:flex;align-items:center;border-radius:var(--radius-sm);margin-bottom:12px;flex-shrink:0}
+.news-ticker-label{background:var(--gray-900);color:var(--yellow);font-size:10px;font-weight:800;padding:0 10px;height:100%;display:flex;align-items:center;white-space:nowrap;letter-spacing:0.08em;flex-shrink:0}
+.news-ticker-track{overflow:hidden;flex:1;height:100%;display:flex;align-items:center}
+.news-ticker-inner{display:flex;gap:0;white-space:nowrap;animation:ticker-scroll 40s linear infinite}
+.news-ticker-inner:hover{animation-play-state:paused}
+@keyframes ticker-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.news-ticker-item{font-size:12px;font-weight:600;color:var(--gray-900);padding:0 24px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;height:32px}
+.news-ticker-item:hover{text-decoration:underline}
+.news-ticker-sep{color:rgba(0,0,0,0.25);padding:0 4px;font-size:10px}
+.news-loading{font-size:11px;color:rgba(0,0,0,0.5);padding:0 12px;font-style:italic}
+
+/* NEWS CARDS (onglet Actus) */
+.news-card{background:var(--white);border-radius:var(--radius-sm);padding:14px;margin-bottom:8px;border:1px solid var(--gray-100);cursor:pointer;transition:transform 0.1s}
+.news-card:active{transform:scale(0.98)}
+.news-card-source{font-size:10px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px}
+.news-card-title{font-size:14px;font-weight:600;color:var(--gray-900);line-height:1.4;margin-bottom:6px}
+.news-card-date{font-size:11px;color:var(--gray-400)}
+</style>
+</head>
+<body>
+
+<!-- ONBOARDING -->
+<div class="onboard-overlay" id="onboard">
+  <div class="onboard-logo">
+    <div class="onboard-band" style="background:#002395"></div>
+    <div class="onboard-band" style="background:#FFFFFF"></div>
+    <div class="onboard-band" style="background:#ED2939"></div>
+  </div>
+  <div class="onboard-title">Tour de France<br><span>2026</span></div>
+  <div class="onboard-sub">Suis la course, fais tes pronos<br>et affronte tes amis !</div>
+  <div class="onboard-card">
+    <label class="onboard-label">Ton pseudo</label>
+    <input class="onboard-input" id="pseudo-input" type="text" placeholder="Ex: LoloVélo42" maxlength="18" autocomplete="off">
+    <label class="onboard-label" style="margin-bottom:10px;">Choisis ton avatar</label>
+    <div class="avatar-grid" id="avatar-grid">
+      <button class="avatar-opt selected" data-av="🚴">🚴</button>
+      <button class="avatar-opt" data-av="🦁">🦁</button>
+      <button class="avatar-opt" data-av="🐺">🐺</button>
+      <button class="avatar-opt" data-av="🦅">🦅</button>
+      <button class="avatar-opt" data-av="🐯">🐯</button>
+      <button class="avatar-opt" data-av="⚡">⚡</button>
+      <button class="avatar-opt" data-av="🔥">🔥</button>
+      <button class="avatar-opt" data-av="🏔">🏔</button>
+      <button class="avatar-opt" data-av="🌟">🌟</button>
+      <button class="avatar-opt" data-av="💛">💛</button>
+    </div>
+    <button class="onboard-btn" onclick="createPlayer()">C'est parti !</button>
+    <div class="onboard-error" id="onboard-error"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<header class="header">
+  <div class="header-top">
+    <div class="logo">
+      <div class="logo-bands">
+        <div class="logo-band" style="background:#002395"></div>
+        <div class="logo-band" style="background:#FFFFFF"></div>
+        <div class="logo-band" style="background:#ED2939"></div>
+      </div>
+      <div class="logo-title">Tour de France <span>2026</span></div>
+    </div>
+    <div class="player-chip" id="player-chip" onclick="resetPlayer()">
+      <span class="player-chip-avatar" id="chip-avatar">🚴</span>
+      <span class="player-chip-name" id="chip-name">—</span>
+    </div>
+  </div>
+  <nav class="nav-tabs">
+    <button class="tab-btn active" onclick="showView('accueil',0)">Accueil</button>
+    <button class="tab-btn" onclick="showView('etapes',1)">Étapes</button>
+    <button class="tab-btn" onclick="showView('classement',2)">Class.</button>
+    <button class="tab-btn" onclick="showView('coureurs',3)">Coureurs</button>
+    <button class="tab-btn" onclick="showView('pronos',4)">Pronos</button>
+    <button class="tab-btn" onclick="showView('ligue',5)">Ligue</button>
+    <button class="tab-btn" onclick="showView('actus',6)">Actus</button>
+  </nav>
+</header>
+
+<!-- ACCUEIL -->
+<div id="view-accueil" class="view active">
+  <!-- BANDEAU ACTUS -->
+  <div class="news-ticker-wrap" id="ticker-wrap">
+    <div class="news-ticker-label">ACTU</div>
+    <div class="news-ticker-track">
+      <div class="news-ticker-inner" id="ticker-inner">
+        <span class="news-loading">Chargement des actus…</span>
+      </div>
+    </div>
+  </div>
+  <div class="etape-hero">
+    <div class="etape-badge"><div class="etape-dot"></div><span>ÉTAPE 1 · SAM 4 JUILLET</span></div>
+    <div class="etape-route">Barcelone → Barcelone</div>
+    <div class="etape-meta" style="color:var(--gray-400);font-size:12px;margin-top:2px;">Contre-la-montre par équipes</div>
+    <div class="etape-info-row">
+      <div class="etape-stat"><span class="etape-stat-label">Distance</span><span class="etape-stat-value">19,7 km</span></div>
+      <div class="etape-stat"><span class="etape-stat-label">Dénivelé</span><span class="etape-stat-value">420 m</span></div>
+      <div class="etape-stat"><span class="etape-stat-label">Type</span><span class="etape-stat-value">CLM éq.</span></div>
+      <div class="etape-stat"><span class="etape-stat-label">Grand départ</span><span class="etape-stat-value">Barcelone</span></div>
+    </div>
+    <div class="terrain-bar" style="margin-top:14px;"><div class="terrain-fill" style="width:25%"></div></div>
+    <div class="terrain-label">Profil : plat avec final montagneux (Montjuïc)</div>
+  </div>
+  <p class="section-title">Maillots distinctifs</p>
+  <div class="maillots-grid">
+    <div class="maillot-card"><div class="maillot-header"><div class="maillot-icon" style="background:#FFF8DC">🟡</div><div class="maillot-name">Général</div></div><div class="maillot-coureur">—</div><div class="maillot-equipe">Non démarré</div></div>
+    <div class="maillot-card"><div class="maillot-header"><div class="maillot-icon" style="background:#E8F4FD">🟢</div><div class="maillot-name">Points</div></div><div class="maillot-coureur">—</div><div class="maillot-equipe">Non démarré</div></div>
+    <div class="maillot-card"><div class="maillot-header"><div class="maillot-icon" style="background:#FCE4EC">🔴</div><div class="maillot-name">Montagne</div></div><div class="maillot-coureur">—</div><div class="maillot-equipe">Non démarré</div></div>
+    <div class="maillot-card"><div class="maillot-header"><div class="maillot-icon" style="background:#E8F5E9">⬜</div><div class="maillot-name">Meilleur jeune</div></div><div class="maillot-coureur">—</div><div class="maillot-equipe">Non démarré</div></div>
+  </div>
+  <p class="section-title">La course en chiffres</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+    <div style="background:var(--white);border-radius:var(--radius-sm);padding:14px;border:1px solid var(--gray-100);text-align:center;"><div style="font-size:26px;font-weight:800">21</div><div style="font-size:11px;color:var(--gray-400);margin-top:2px;text-transform:uppercase;letter-spacing:0.05em">Étapes</div></div>
+    <div style="background:var(--white);border-radius:var(--radius-sm);padding:14px;border:1px solid var(--gray-100);text-align:center;"><div style="font-size:26px;font-weight:800">3 333</div><div style="font-size:11px;color:var(--gray-400);margin-top:2px;text-transform:uppercase;letter-spacing:0.05em">km totaux</div></div>
+    <div style="background:var(--white);border-radius:var(--radius-sm);padding:14px;border:1px solid var(--gray-100);text-align:center;"><div style="font-size:26px;font-weight:800">54 450</div><div style="font-size:11px;color:var(--gray-400);margin-top:2px;text-transform:uppercase;letter-spacing:0.05em">m dénivelé</div></div>
+    <div style="background:var(--white);border-radius:var(--radius-sm);padding:14px;border:1px solid var(--gray-100);text-align:center;"><div style="font-size:26px;font-weight:800">176</div><div style="font-size:11px;color:var(--gray-400);margin-top:2px;text-transform:uppercase;letter-spacing:0.05em">Coureurs</div></div>
+  </div>
+  <div style="background:var(--white);border-radius:var(--radius);padding:16px;border:1px solid var(--gray-100);margin-bottom:16px;">
+    <div style="font-size:14px;font-weight:700;margin-bottom:8px;">🗺 Le grand tour 2026</div>
+    <div style="font-size:13px;color:var(--gray-600);line-height:1.6;">Départ de <strong>Barcelone</strong> · Pyrénées · Massif Central · Vosges · Jura · <strong>Alpes</strong> (double Alpe d'Huez) · Arrivée à <strong>Paris</strong> via Montmartre.</div>
+    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--gray-100);">
+      <div style="font-size:12px;color:var(--gray-400);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Temps forts</div>
+      <div style="font-size:13px;color:var(--gray-600);line-height:1.8;">⛰ Double Alpe d'Huez (étape reine)<br>🏔 Galibier (2 642 m, toit du Tour)<br>⏱ CLM Évian–Thonon (26 km, Léman)<br>🌆 Final Montmartre × 3 passages</div>
+    </div>
+  </div>
+</div>
+
+<!-- ÉTAPES -->
+<div id="view-etapes" class="view"><div id="etapes-list"></div></div>
+
+<!-- CLASSEMENT -->
+<div id="view-classement" class="view">
+  <div style="display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;">
+    <button class="type-pill type-plat" style="padding:7px 14px;font-size:12px;cursor:pointer;border:1.5px solid #1565C0;" onclick="showToast('Classement disponible dès le 4 juillet !')">🟡 Général</button>
+    <button class="type-pill" style="padding:7px 14px;font-size:12px;cursor:pointer;border:1.5px solid transparent;background:#E8F5E9;color:#1B5E20;" onclick="showToast('Classement disponible dès le 4 juillet !')">🟢 Points</button>
+    <button class="type-pill" style="padding:7px 14px;font-size:12px;cursor:pointer;border:1.5px solid transparent;background:#FCE4EC;color:#880E4F;" onclick="showToast('Classement disponible dès le 4 juillet !')">🔴 Montagne</button>
+    <button class="type-pill" style="padding:7px 14px;font-size:12px;cursor:pointer;border:1.5px solid transparent;background:#F3E5F5;color:#4A148C;" onclick="showToast('Classement disponible dès le 4 juillet !')">⬜ Jeunes</button>
+  </div>
+  <div class="empty-state"><div class="empty-state-icon">🏁</div><p>Le Tour n'a pas encore commencé.<br>Les classements seront disponibles<br>dès le 4 juillet !</p></div>
+</div>
+
+<!-- COUREURS -->
+<div id="view-coureurs" class="view">
+  <div style="margin-bottom:12px;">
+    <input type="text" id="search-coureur" placeholder="Rechercher un coureur…" oninput="filterCoureurs(this.value)"
+      style="width:100%;padding:11px 14px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-family:var(--font);font-size:14px;background:var(--white);color:var(--gray-900);">
+  </div>
+  <div id="coureurs-list"></div>
+</div>
+
+<!-- PRONOS -->
+<div id="view-pronos" class="view">
+  <div class="firebase-note" id="firebase-note" style="display:none;">
+    <strong>⚙️ Firebase non configuré</strong>
+    Tes pronos sont sauvegardés localement pour l'instant. Suis le guide de déploiement pour activer le partage entre amis.
+  </div>
+  <div class="prono-section">
+    <div class="prono-title">🏆 Vainqueur du Tour</div>
+    <div class="prono-subtitle">Qui remportera le maillot jaune à Paris ?</div>
+    <label class="prono-select-label">Ton choix</label>
+    <select class="prono-select" id="prono-vainqueur">
+      <option value="">— Choisir un coureur —</option>
+      <option>Tadej Pogačar (UAE)</option>
+      <option>Jonas Vingegaard (Visma)</option>
+      <option>Florian Lipowitz (Red Bull)</option>
+      <option>Remco Evenepoel (Soudal)</option>
+      <option>Paul Seixas (Groupama)</option>
+      <option>Autre coureur</option>
+    </select>
+    <button class="prono-btn" onclick="saveProno('vainqueur')">Valider mon pronostic →</button>
+  </div>
+  <div class="prono-section">
+    <div class="prono-title">🔴 Roi de la montagne</div>
+    <div class="prono-subtitle">Qui portera le maillot à pois à Paris ?</div>
+    <label class="prono-select-label">Ton choix</label>
+    <select class="prono-select" id="prono-montagne">
+      <option value="">— Choisir un coureur —</option>
+      <option>Tadej Pogačar</option>
+      <option>Jonas Vingegaard</option>
+      <option>Florian Lipowitz</option>
+      <option>Paul Seixas</option>
+      <option>David Gaudu</option>
+      <option>Romain Bardet</option>
+    </select>
+    <button class="prono-btn" onclick="saveProno('montagne')">Valider mon pronostic →</button>
+  </div>
+  <div class="prono-section">
+    <div class="prono-title">🟢 Meilleur sprinteur</div>
+    <div class="prono-subtitle">Maillot vert — plus de points au sprint</div>
+    <label class="prono-select-label">Ton choix</label>
+    <select class="prono-select" id="prono-sprint">
+      <option value="">— Choisir un coureur —</option>
+      <option>Jasper Philipsen (Alpecin)</option>
+      <option>Tim Merlier (Soudal)</option>
+      <option>Olav Kooij (Decathlon)</option>
+      <option>Tadej Pogačar</option>
+    </select>
+    <button class="prono-btn" onclick="saveProno('sprint')">Valider mon pronostic →</button>
+  </div>
+  <div class="prono-section">
+    <div class="prono-title">⬜ Meilleur jeune</div>
+    <div class="prono-subtitle">Maillot blanc — moins de 26 ans</div>
+    <label class="prono-select-label">Ton choix</label>
+    <select class="prono-select" id="prono-jeune">
+      <option value="">— Choisir un coureur —</option>
+      <option>Paul Seixas (19 ans, Groupama)</option>
+      <option>Florian Lipowitz (Red Bull)</option>
+      <option>Tadej Pogačar</option>
+      <option>Remco Evenepoel</option>
+    </select>
+    <button class="prono-btn" onclick="saveProno('jeune')">Valider mon pronostic →</button>
+  </div>
+  <div id="mes-pronos-section" style="display:none;">
+    <p class="section-title">Mes pronostics</p>
+    <div class="prono-result" id="mes-pronos-content"></div>
+  </div>
+</div>
+
+<!-- LIGUE -->
+<div id="view-ligue" class="view">
+  <div style="background:var(--gray-900);border-radius:var(--radius);padding:16px;margin-bottom:16px;color:white;">
+    <div style="font-size:11px;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Ta ligue privée</div>
+    <div style="font-size:22px;font-weight:800;margin-bottom:4px;" id="ligue-pseudo-display">—</div>
+    <div style="font-size:13px;color:var(--gray-400);">Partage l'URL de l'app à tes amis pour jouer ensemble.</div>
+    <button onclick="copyLink()" style="margin-top:12px;background:rgba(247,193,4,0.15);border:1px solid rgba(247,193,4,0.3);color:var(--yellow);border-radius:var(--radius-sm);padding:8px 16px;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;">📋 Copier le lien</button>
+  </div>
+  <p class="section-title">Classement de la ligue</p>
+  <div id="ligue-classement">
+    <div class="empty-state"><div class="empty-state-icon">👥</div><p>Invite tes amis pour voir<br>le classement de la ligue !</p></div>
+  </div>
+  <p class="section-title" style="margin-top:20px;">Barème des points</p>
+  <div style="background:var(--white);border-radius:var(--radius);padding:16px;border:1px solid var(--gray-100);">
+    <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--gray-100);font-size:13px;"><span style="color:var(--gray-600);">🏆 Vainqueur correct</span><span style="font-weight:700;color:var(--green);">+50 pts</span></div>
+    <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--gray-100);font-size:13px;"><span style="color:var(--gray-600);">🔴 Montagne correct</span><span style="font-weight:700;color:var(--green);">+20 pts</span></div>
+    <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--gray-100);font-size:13px;"><span style="color:var(--gray-600);">🟢 Sprint correct</span><span style="font-weight:700;color:var(--green);">+20 pts</span></div>
+    <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:13px;"><span style="color:var(--gray-600);">⬜ Meilleur jeune correct</span><span style="font-weight:700;color:var(--green);">+15 pts</span></div>
+  </div>
+</div>
+
+<!-- ACTUS -->
+<div id="view-actus" class="view">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+    <p class="section-title" style="margin:0;">Dernières actus</p>
+    <button onclick="fetchNews(true)" style="background:none;border:1px solid var(--gray-200);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--gray-600);cursor:pointer;font-family:var(--font);">↻ Actualiser</button>
+  </div>
+  <div id="actus-list">
+    <div class="empty-state"><div class="empty-state-icon">📰</div><p>Chargement des actus…</p></div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-0" onclick="showView('accueil',0)">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>Accueil</span>
+  </button>
+  <button class="nav-btn" id="nav-1" onclick="showView('etapes',1)">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    <span>Étapes</span>
+  </button>
+  <button class="nav-btn" id="nav-2" onclick="showView('classement',2)">
+    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <span>Class.</span>
+  </button>
+  <button class="nav-btn" id="nav-3" onclick="showView('coureurs',3)">
+    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+    <span>Coureurs</span>
+  </button>
+  <button class="nav-btn" id="nav-4" onclick="showView('pronos',4)">
+    <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    <span>Pronos</span>
+  </button>
+  <button class="nav-btn" id="nav-5" onclick="showView('ligue',5)">
+    <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <span>Ligue</span>
+  </button>
+  <button class="nav-btn" id="nav-6" onclick="showView('actus',6)">
+    <svg viewBox="0 0 24 24"><path d="M4 22h16a2 2 0 002-2V4a2 2 0 00-2-2H8L2 8v12a2 2 0 002 2z"/><line x1="9" y1="1" x2="9" y2="7"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+    <span>Actus</span>
+  </button>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// FIREBASE CONFIG — remplace les valeurs après création du projet
+// Voir guide de déploiement ci-joint
+// ============================================================
+const FIREBASE_CONFIG = {
+  apiKey: "REMPLACE_MOI",
+  authDomain: "REMPLACE_MOI",
+  projectId: "REMPLACE_MOI",
+  storageBucket: "REMPLACE_MOI",
+  messagingSenderId: "REMPLACE_MOI",
+  appId: "REMPLACE_MOI"
+};
+
+let db = null;
+let firebaseReady = false;
+
+function initFirebase() {
+  try {
+    if (FIREBASE_CONFIG.apiKey === 'REMPLACE_MOI') {
+      document.getElementById('firebase-note').style.display = 'block';
+      return;
+    }
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.firestore();
+    firebaseReady = true;
+    loadLigueClassement();
+  } catch(e) {
+    document.getElementById('firebase-note').style.display = 'block';
+  }
+}
+
+// ============================================================
+// PLAYER
+// ============================================================
+let currentPlayer = JSON.parse(localStorage.getItem('tdf26_player') || 'null');
+let selectedAvatar = '🚴';
+
+document.querySelectorAll('.avatar-opt').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.avatar-opt').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedAvatar = btn.dataset.av;
+  });
+});
+
+function createPlayer() {
+  const pseudo = document.getElementById('pseudo-input').value.trim();
+  const err = document.getElementById('onboard-error');
+  if (!pseudo || pseudo.length < 2) { err.textContent = 'Pseudo trop court (2 caractères min)'; return; }
+  if (pseudo.length > 18) { err.textContent = 'Pseudo trop long (18 max)'; return; }
+  err.textContent = '';
+  currentPlayer = { pseudo, avatar: selectedAvatar, createdAt: Date.now() };
+  localStorage.setItem('tdf26_player', JSON.stringify(currentPlayer));
+  document.getElementById('onboard').classList.add('hidden');
+  updatePlayerChip();
+  if (firebaseReady) savePlayerToFirebase();
+  showToast('Bienvenue ' + pseudo + ' !\u00a0\uD83D\uDC4B');
+}
+
+function updatePlayerChip() {
+  if (!currentPlayer) return;
+  document.getElementById('chip-avatar').textContent = currentPlayer.avatar;
+  document.getElementById('chip-name').textContent = currentPlayer.pseudo;
+  document.getElementById('ligue-pseudo-display').textContent = currentPlayer.avatar + ' ' + currentPlayer.pseudo;
+}
+
+function resetPlayer() {
+  if (!confirm('Changer de joueur ? Tes pronos locaux seront conservés.')) return;
+  localStorage.removeItem('tdf26_player');
+  currentPlayer = null;
+  document.getElementById('pseudo-input').value = '';
+  document.getElementById('onboard').classList.remove('hidden');
+}
+
+async function savePlayerToFirebase() {
+  if (!firebaseReady || !currentPlayer) return;
+  try {
+    const pronos = JSON.parse(localStorage.getItem('tdf26_pronos') || '{}');
+    await db.collection('joueurs').doc(currentPlayer.pseudo).set({
+      pseudo: currentPlayer.pseudo,
+      avatar: currentPlayer.avatar,
+      pronos,
+      score: 0,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+    loadLigueClassement();
+  } catch(e) { console.log('Firebase error', e); }
+}
+
+async function loadLigueClassement() {
+  if (!firebaseReady) return;
+  try {
+    const snap = await db.collection('joueurs').orderBy('score', 'desc').limit(20).get();
+    const joueurs = [];
+    snap.forEach(doc => joueurs.push(doc.data()));
+    renderLigue(joueurs);
+  } catch(e) { console.log('Ligue error', e); }
+}
+
+function renderLigue(joueurs) {
+  const el = document.getElementById('ligue-classement');
+  if (!joueurs.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👥</div><p>Invite tes amis pour voir<br>le classement !</p></div>';
+    return;
+  }
+  const medals = ['🥇','🥈','🥉'];
+  el.innerHTML = joueurs.map((j,i) => {
+    const isMe = currentPlayer && j.pseudo === currentPlayer.pseudo;
+    return `<div class="joueur-row${isMe?' me':''}">
+      <div class="joueur-rank">${i < 3 ? medals[i] : (i+1)}</div>
+      <div class="joueur-avatar-big">${j.avatar||'🚴'}</div>
+      <div class="joueur-info">
+        <div class="joueur-name">${j.pseudo}${isMe?' (toi)':''}</div>
+        <div class="joueur-sub">${Object.keys(j.pronos||{}).length} prono(s)</div>
+      </div>
+      <div><div class="joueur-score">${j.score||0}</div><div class="joueur-score-label">pts</div></div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showView(id, idx) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
+  document.querySelectorAll('.nav-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
+}
+
+// ============================================================
+// ÉTAPES
+// ============================================================
+const ETAPES = [
+  {n:1,date:'Sam 4 juil',dep:'Barcelone',arr:'Barcelone',km:19.7,type:'clm-eq',label:'CLM éq.',deniv:420,col:'',current:true},
+  {n:2,date:'Dim 5 juil',dep:'Tarragone',arr:'Barcelone',km:178,type:'semi',label:'Semi-mont.',deniv:2800,col:'Montjuïc ×2'},
+  {n:3,date:'Lun 6 juil',dep:'Granollers',arr:'Les Angles',km:185,type:'montagne',label:'Montagne',deniv:4100,col:'Font-Romeu'},
+  {n:4,date:'Mar 7 juil',dep:'Font-Romeu',arr:'Tarbes',km:201,type:'montagne',label:'Montagne',deniv:3200,col:'Pyrénées'},
+  {n:5,date:'Mer 8 juil',dep:'Tarbes',arr:'Hautacam',km:168,type:'haute-montagne',label:'Haute mont.',deniv:4600,col:'Hautacam (HC)'},
+  {n:6,date:'Jeu 9 juil',dep:'Lourdes',arr:'Toulouse',km:193,type:'plat',label:'Plat',deniv:1100,col:''},
+  {n:7,date:'Ven 10 juil',dep:'Toulouse',arr:'Millau',km:176,type:'semi',label:'Semi-mont.',deniv:2400,col:'Massif Central'},
+  {n:8,date:'Sam 11 juil',dep:'Millau',arr:'Super-Lioran',km:155,type:'haute-montagne',label:'Haute mont.',deniv:4800,col:'Super-Lioran (HC)'},
+  {n:9,date:'Dim 12 juil',dep:'Aurillac',arr:'Mende',km:167,type:'montagne',label:'Montagne',deniv:3300,col:'La Croix-Neuve'},
+  {n:10,date:'Lun 13 juil',dep:'',arr:'',km:0,type:'repos',label:'Repos',deniv:0,col:''},
+  {n:11,date:'Mar 14 juil',dep:'Mende',arr:'Béziers',km:198,type:'plat',label:'Plat',deniv:900,col:''},
+  {n:12,date:'Mer 15 juil',dep:'Béziers',arr:'Montpellier',km:148,type:'plat',label:'Plat',deniv:700,col:''},
+  {n:13,date:'Jeu 16 juil',dep:'Montpellier',arr:'Alès',km:183,type:'semi',label:'Semi-mont.',deniv:2600,col:'Cévennes'},
+  {n:14,date:'Ven 17 juil',dep:'Alès',arr:'Valence',km:212,type:'plat',label:'Plat',deniv:1200,col:''},
+  {n:15,date:'Sam 18 juil',dep:'Valence',arr:'Grenoble',km:176,type:'montagne',label:'Montagne',deniv:3800,col:'Vercors'},
+  {n:16,date:'Dim 19 juil',dep:'Grenoble',arr:"Alpe d'Huez",km:168,type:'haute-montagne',label:'Haute mont.',deniv:5800,col:"Croix de Fer · Galibier · Alpe d'Huez (HC)"},
+  {n:17,date:'Lun 20 juil',dep:'',arr:'',km:0,type:'repos',label:'Repos',deniv:0,col:''},
+  {n:18,date:'Mar 21 juil',dep:'Champagnole',arr:'Plateau de Solaison',km:154,type:'haute-montagne',label:'Haute mont.',deniv:4700,col:'Salève · Solaison (HC)'},
+  {n:19,date:'Mer 22 juil',dep:'Évian',arr:'Thonon-les-Bains',km:26,type:'clm',label:'CLM',deniv:300,col:'Lac Léman'},
+  {n:20,date:'Jeu 23 juil',dep:'Cluses',arr:"Alpe d'Huez",km:147,type:'haute-montagne',label:'Haute mont.',deniv:5200,col:"Aravis · Alpe d'Huez (HC)"},
+  {n:21,date:'Dim 26 juil',dep:'Thoiry',arr:'Paris Champs-Élysées',km:112,type:'plat',label:'Plat',deniv:800,col:'Montmartre ×3'},
+];
+
+function renderEtapes() {
+  document.getElementById('etapes-list').innerHTML = ETAPES.map(e => {
+    if (e.type==='repos') return `<div style="text-align:center;padding:10px;font-size:12px;color:var(--gray-400);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">— Journée de repos —</div>`;
+    return `<div class="etape-row${e.current?' current':''}">
+      <div class="etape-num${e.current?' current-num':''}">${e.n}</div>
+      <div class="etape-content">
+        <div class="etape-trajet">${e.dep} → ${e.arr}</div>
+        <div class="etape-meta">${e.date} · ${e.km} km · ↑${e.deniv.toLocaleString('fr')} m</div>
+        ${e.col?`<div class="etape-meta" style="color:var(--polka);font-weight:500;">${e.col}</div>`:''}
+      </div>
+      <span class="type-pill type-${e.type}">${e.label}</span>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// COUREURS
+// ============================================================
+const COUREURS = [
+  {nom:'Tadej Pogačar',pays:'🇸🇮',equipe:'UAE Team Emirates-XRG',nat:'SLO',age:27,cote:'2/5',desc:'Triple vainqueur (2020, 2021, 2024). Favori absolu. Complet sur toutes les typologies.',tags:['Tout-terrain','Grimpeur','CLM','Attaquant'],stars:5,avatar:'TP',color:'#FFF8DC',colorText:'#C49A00'},
+  {nom:'Jonas Vingegaard',pays:'🇩🇰',equipe:'Visma–Lease a Bike',nat:'DAN',age:27,cote:'5/2',desc:'Double vainqueur 2022–23. Retour en force après blessure. Redoutable en haute montagne.',tags:['Grimpeur','CLM','Régulier'],stars:4,avatar:'JV',color:'#E8F4FD',colorText:'#1565C0'},
+  {nom:'Florian Lipowitz',pays:'🇩🇪',equipe:'Red Bull–BORA–Hansgrohe',nat:'ALL',age:25,cote:'12/1',desc:'Révélation de la Vuelta 2024. Leader chez Red Bull. Potentiel podium surprise.',tags:['Grimpeur','Jeune','En forme'],stars:3,avatar:'FL',color:'#FCE4EC',colorText:'#880E4F'},
+  {nom:'Paul Seixas',pays:'🇫🇷',equipe:'Groupama–FDJ',nat:'FRA',age:19,cote:'20/1',desc:"Prodige français de 19 ans. L'espoir tricolore n°1. Maillot blanc en ligne de mire.",tags:['Jeune','Français','Grimpeur','Révélation'],stars:3,avatar:'PS',color:'#E8F5E9',colorText:'#1B5E20'},
+  {nom:'Remco Evenepoel',pays:'🇧🇪',equipe:'Soudal Quick-Step',nat:'BEL',age:24,cote:'15/1',desc:'Champion olympique et du monde. CLM-man de génie.',tags:['CLM','Polyvalent','Ex-champion monde'],stars:3,avatar:'RE',color:'#EDE7F6',colorText:'#4527A0'},
+  {nom:'Jasper Philipsen',pays:'🇧🇪',equipe:'Alpecin–Deceuninck',nat:'BEL',age:26,cote:'—',desc:'Sprinteur n°1. Visera le maillot vert.',tags:['Sprinteur','Étapes','Maillot vert'],stars:4,avatar:'JP',color:'#FFF3E0',colorText:'#BF360C'},
+  {nom:'Tim Merlier',pays:'🇧🇪',equipe:'Soudal Quick-Step',nat:'BEL',age:31,cote:'—',desc:'Sprinteur redoutable. Visera les étapes de plat.',tags:['Sprinteur','Étapes'],stars:3,avatar:'TM',color:'#FFF3E0',colorText:'#BF360C'},
+  {nom:'David Gaudu',pays:'🇫🇷',equipe:'Groupama–FDJ',nat:'FRA',age:28,cote:'40/1',desc:'Grimpeur français. Objectif top 10.',tags:['Grimpeur','Français'],stars:2,avatar:'DG',color:'#E8F5E9',colorText:'#1B5E20'},
+  {nom:'Olav Kooij',pays:'🇳🇱',equipe:'Decathlon AG2R CMA CGM',nat:'PBS',age:23,cote:'—',desc:'Jeune sprinteur néerlandais. Peut battre Philipsen.',tags:['Sprinteur','Jeune'],stars:3,avatar:'OK',color:'#E8F4FD',colorText:'#1565C0'},
+];
+
+function renderCoureurs(filter='') {
+  const filtered = COUREURS.filter(c =>
+    c.nom.toLowerCase().includes(filter.toLowerCase()) ||
+    c.equipe.toLowerCase().includes(filter.toLowerCase())
+  );
+  document.getElementById('coureurs-list').innerHTML = filtered.map(c => {
+    const s = [...('★'.repeat(c.stars)+'☆'.repeat(5-c.stars))].map(ch =>
+      `<span class="star" style="color:${ch==='★'?'#F7C104':'var(--gray-200)'}">${ch}</span>`).join('');
+    const t = c.tags.map(tag =>
+      `<span class="force-tag${['Révélation','Jeune','Français','Attaquant'].includes(tag)?' top':''}">${tag}</span>`).join('');
+    return `<div class="favori-card">
+      <div class="favori-header">
+        <div class="favori-avatar" style="background:${c.color};color:${c.colorText}">${c.avatar}</div>
+        <div class="favori-meta">
+          <div class="favori-nom">${c.pays} ${c.nom}</div>
+          <div class="favori-infos">${c.equipe} · ${c.nat} · ${c.age} ans</div>
+          <div class="stars" style="margin-top:4px;">${s}</div>
+        </div>
+        ${c.cote!=='—'?`<div class="cote-badge">${c.cote}</div>`:''}
+      </div>
+      <div class="favori-forces">${t}</div>
+      <div class="favori-desc">${c.desc}</div>
+    </div>`;
+  }).join('') || '<div class="empty-state"><div class="empty-state-icon">🔍</div><p>Aucun coureur trouvé.</p></div>';
+}
+
+function filterCoureurs(v) { renderCoureurs(v); }
+
+// ============================================================
+// PRONOS
+// ============================================================
+let pronos = JSON.parse(localStorage.getItem('tdf26_pronos') || '{}');
+const pronoLabels = {vainqueur:'🏆 Vainqueur',montagne:'🔴 Roi montagne',sprint:'🟢 Sprinteur',jeune:'⬜ Meilleur jeune'};
+
+function saveProno(type) {
+  const sel = document.getElementById('prono-'+type);
+  if (!sel.value) { showToast('Choisis un coureur !'); return; }
+  pronos[type] = sel.value;
+  localStorage.setItem('tdf26_pronos', JSON.stringify(pronos));
+  if (firebaseReady) savePlayerToFirebase();
+  showToast('Pronostic enregistré ✓');
+  renderMesPronos();
+}
+
+function renderMesPronos() {
+  const keys = Object.keys(pronos);
+  const sec = document.getElementById('mes-pronos-section');
+  if (!keys.length) { sec.style.display='none'; return; }
+  sec.style.display='block';
+  document.getElementById('mes-pronos-content').innerHTML = keys.map(k =>
+    `<div class="prono-result-row">
+      <div><div class="prono-category">${pronoLabels[k]||k}</div><div class="prono-choice">${pronos[k]}</div></div>
+      <span class="prono-status status-pending">En attente</span>
+    </div>`).join('');
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function copyLink() {
+  navigator.clipboard.writeText(window.location.href)
+    .then(() => showToast('Lien copié ! Envoie-le à tes amis 🚴'))
+    .catch(() => showToast('Copie manuelle : ' + window.location.href));
+}
+
+// ============================================================
+// ACTUS — newsdata.io
+// ============================================================
+const NEWS_API_KEY = 'pub_162cf52f9dba475c941badc4bbc4e5ef';
+const NEWS_QUERY = 'Tour de France 2026';
+const NEWS_REFRESH_MS = 30 * 60 * 1000; // 30 min
+let newsCache = JSON.parse(localStorage.getItem('tdf26_news') || 'null');
+let newsTimer = null;
+
+async function fetchNews(force = false) {
+  const now = Date.now();
+  const cacheAge = newsCache ? now - (newsCache.ts || 0) : Infinity;
+  if (!force && newsCache && cacheAge < NEWS_REFRESH_MS) {
+    renderTicker(newsCache.articles);
+    renderActus(newsCache.articles);
+    return;
+  }
+  try {
+    const url = `https://newsdata.io/api/1/latest?apikey=${NEWS_API_KEY}&q=${encodeURIComponent(NEWS_QUERY)}&language=fr&size=15`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.status === 'success' && data.results && data.results.length) {
+      const articles = data.results.map(a => ({
+        title: a.title,
+        source: a.source_id || a.source_name || 'Presse',
+        url: a.link,
+        date: a.pubDate ? new Date(a.pubDate).toLocaleDateString('fr-FR', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '',
+      }));
+      newsCache = { articles, ts: now };
+      localStorage.setItem('tdf26_news', JSON.stringify(newsCache));
+      renderTicker(articles);
+      renderActus(articles);
+    } else {
+      if (newsCache) { renderTicker(newsCache.articles); renderActus(newsCache.articles); }
+      else fallbackNews();
+    }
+  } catch(e) {
+    if (newsCache) { renderTicker(newsCache.articles); renderActus(newsCache.articles); }
+    else fallbackNews();
+  }
+  clearTimeout(newsTimer);
+  newsTimer = setTimeout(() => fetchNews(true), NEWS_REFRESH_MS);
+}
+
+function fallbackNews() {
+  const articles = [
+    {title:'Van Aert forfait — blessure au coude et infection bactérienne', source:'Visma', url:'#', date:'17 juin'},
+    {title:'Pogačar remporte le Tour de Suisse, plus fort que jamais avant le Tour', source:'Eurosport', url:'#', date:'22 juin'},
+    {title:'Alaphilippe renonce aux championnat de France pour préparer le Tour', source:'RMC Sport', url:'#', date:'24 juin'},
+    {title:"Paul Seixas confirmé au départ — l'espoir tricolore de 19 ans", source:'L\'Équipe', url:'#', date:'23 juin'},
+    {title:'Départ le 4 juillet à Barcelone — J-10 avant la Grande Boucle', source:'letour.fr', url:'#', date:'24 juin'},
+  ];
+  renderTicker(articles);
+  renderActus(articles);
+}
+
+function renderTicker(articles) {
+  if (!articles || !articles.length) return;
+  const inner = document.getElementById('ticker-inner');
+  // On duplique pour la boucle infinie
+  const html = [...articles, ...articles].map((a, i) =>
+    `<span class="news-ticker-item" onclick="openArticle('${encodeURIComponent(a.url)}')">${a.title}</span><span class="news-ticker-sep">●</span>`
+  ).join('');
+  inner.innerHTML = html;
+  // Ajuste la vitesse selon la longueur totale du contenu
+  const totalLen = articles.reduce((s, a) => s + a.title.length, 0);
+  const duration = Math.max(30, totalLen * 0.25);
+  inner.style.animationDuration = duration + 's';
+}
+
+function renderActus(articles) {
+  const el = document.getElementById('actus-list');
+  if (!articles || !articles.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📰</div><p>Aucune actu disponible.</p></div>';
+    return;
+  }
+  el.innerHTML = articles.map(a =>
+    `<div class="news-card" onclick="openArticle('${encodeURIComponent(a.url)}')">
+      <div class="news-card-source">${a.source}</div>
+      <div class="news-card-title">${a.title}</div>
+      <div class="news-card-date">${a.date}</div>
+    </div>`
+  ).join('');
+}
+
+function openArticle(encodedUrl) {
+  const url = decodeURIComponent(encodedUrl);
+  if (url && url !== '#') window.open(url, '_blank');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+renderEtapes();
+renderCoureurs();
+renderMesPronos();
+initFirebase();
+fetchNews();
+
+if (currentPlayer) {
+  document.getElementById('onboard').classList.add('hidden');
+  updatePlayerChip();
+}
+</script>
+</body>
+</html>
