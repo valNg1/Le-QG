@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CdM 2026">
+<title>Coupe du Monde 2026</title>
+<style>
+:root {
+  --gold:#C9A84C; --gold-light:rgba(201,168,76,0.12); --green:#34C77B;
+  --red:#E8384F; --blue:#4A90E2; --bg:#0A0F0A; --surface:#141A14;
+  --surface2:#1E261E; --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.12);
+  --text:#F2F2F0; --muted:#7A7A85; --font:"Helvetica Neue",Arial,sans-serif;
+  --r:14px; --r-sm:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:430px;margin:0 auto;min-height:100vh;padding-bottom:80px}
+.header{background:linear-gradient(135deg,#0A2010 0%,#0A0F0A 100%);padding:52px 16px 20px;position:sticky;top:0;z-index:100}
+.header-inner{display:flex;align-items:center;justify-content:space-between}
+.title-block{display:flex;align-items:center;gap:10px}
+.trophy{font-size:32px;line-height:1}
+.title{font-size:18px;font-weight:800;color:var(--text);line-height:1.2}
+.title span{color:var(--gold)}
+.badge{background:var(--gold);color:#1A1916;font-size:10px;font-weight:800;padding:4px 10px;border-radius:20px;letter-spacing:.04em}
+.nav-tabs{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;margin-top:14px;border-bottom:1px solid var(--border)}
+.nav-tabs::-webkit-scrollbar{display:none}
+.tab{background:none;border:none;color:var(--muted);font-size:13px;font-weight:500;padding:10px 14px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .15s;font-family:var(--font)}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.view{display:none;padding:16px}
+.view.active{display:block}
+.sec{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin:16px 0 10px}
+/* Hero */
+.hero{background:linear-gradient(135deg,#0A2010,#1A3020);border-radius:var(--r);padding:20px;margin-bottom:16px;border:1px solid rgba(201,168,76,.2)}
+.hero-label{font-size:10px;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.hero-title{font-size:22px;font-weight:800;color:var(--text);margin-bottom:4px;line-height:1.2}
+.hero-sub{font-size:12px;color:var(--muted);margin-bottom:16px}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stat-box{background:rgba(255,255,255,.04);border-radius:var(--r-sm);padding:10px 6px;text-align:center}
+.stat-val{font-size:20px;font-weight:800;color:var(--gold)}
+.stat-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+/* Groupes */
+.group-card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-bottom:10px}
+.group-title{font-size:14px;font-weight:800;color:var(--gold);margin-bottom:10px}
+.team-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
+.team-row:last-child{border-bottom:none}
+.team-flag{font-size:20px;flex-shrink:0}
+.team-name{flex:1;font-size:13px;font-weight:600;color:var(--text)}
+.team-pts{font-size:12px;font-weight:700;color:var(--muted);min-width:20px;text-align:center}
+.team-pts.leader{color:var(--gold)}
+/* Matchs */
+.match-card{background:var(--surface);border-radius:var(--r-sm);padding:14px;margin-bottom:8px;border:1px solid var(--border)}
+.match-phase{font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.match-teams{display:flex;align-items:center;gap:8px}
+.match-team{flex:1;text-align:center}
+.match-flag{font-size:28px;line-height:1}
+.match-tname{font-size:11px;font-weight:600;color:var(--text);margin-top:4px}
+.match-score{font-size:22px;font-weight:800;min-width:60px;text-align:center;color:var(--gold)}
+.match-score.up{font-size:12px;color:var(--muted);font-weight:500}
+.match-meta{font-size:11px;color:var(--muted);text-align:center;margin-top:8px}
+/* Pronos */
+.prono-card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:16px;margin-bottom:10px}
+.prono-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px}
+.prono-sub{font-size:12px;color:var(--muted);margin-bottom:14px}
+.prono-select{width:100%;padding:10px 12px;border:1.5px solid var(--border2);border-radius:var(--r-sm);font-family:var(--font);font-size:14px;color:var(--text);background:var(--surface2);appearance:none;margin-bottom:10px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237A7A85' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;cursor:pointer}
+.prono-select:focus{outline:none;border-color:var(--gold)}
+.prono-btn{width:100%;background:var(--gold);color:#1A1916;border:none;border-radius:var(--r-sm);padding:12px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer}
+.prono-saved{background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:var(--r-sm);padding:12px;margin-top:12px}
+.prono-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+.prono-row:last-child{border-bottom:none}
+.prono-cat{font-size:11px;color:var(--muted)}
+.prono-choice{font-weight:700;color:var(--text)}
+.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:10px 20px;border-radius:20px;font-size:13px;opacity:0;transition:all .3s;z-index:300;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(10,15,10,.95);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;z-index:200;padding-bottom:env(safe-area-inset-bottom,0)}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;background:none;border:none;cursor:pointer;font-family:var(--font);text-decoration:none}
+.nav-btn svg{width:22px;height:22px;stroke:var(--muted);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.nav-btn span{font-size:10px;color:var(--muted);font-weight:500}
+.nav-btn.active svg{stroke:var(--gold)}
+.nav-btn.active span{color:var(--gold);font-weight:700}
+.skel{background:var(--surface2);border-radius:6px;animation:shim 1.5s infinite}
+@keyframes shim{0%,100%{opacity:.4}50%{opacity:.8}}
+.loading{text-align:center;padding:24px;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="title-block">
+      <div class="trophy">🏆</div>
+      <div>
+        <div class="title">Coupe du Monde <span>2026</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">USA · Canada · Mexique</div>
+      </div>
+    </div>
+    <div class="badge">14 JUI – 19 JUL</div>
+  </div>
+  <nav class="nav-tabs">
+    <button class="tab active" onclick="showView('accueil',0)">Accueil</button>
+    <button class="tab" onclick="showView('groupes',1)">Groupes</button>
+    <button class="tab" onclick="showView('matchs',2)">Matchs</button>
+    <button class="tab" onclick="showView('equipes',3)">Équipes</button>
+    <button class="tab" onclick="showView('pronos',4)">Pronos</button>
+  </nav>
+</header>
+
+<!-- ACCUEIL -->
+<div id="view-accueil" class="view active">
+  <div class="hero">
+    <div class="hero-label">🏟 Prochaine édition</div>
+    <div class="hero-title">Coupe du Monde FIFA 2026</div>
+    <div class="hero-sub">16 villes hôtes · USA, Canada, Mexique</div>
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-val">48</div><div class="stat-lbl">Équipes</div></div>
+      <div class="stat-box"><div class="stat-val">104</div><div class="stat-lbl">Matchs</div></div>
+      <div class="stat-box"><div class="stat-val">16</div><div class="stat-lbl">Stades</div></div>
+      <div class="stat-box"><div class="stat-val">39</div><div class="stat-lbl">Jours</div></div>
+    </div>
+  </div>
+
+  <p class="sec">Calendrier clé</p>
+  <div id="calendar-key"></div>
+
+  <p class="sec">Villes hôtes</p>
+  <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;">
+    <div style="font-size:13px;color:var(--text);line-height:2;">
+      🇺🇸 <strong>USA (11)</strong> — New York/NJ, Los Angeles, Dallas, San Francisco, Miami, Seattle, Boston, Atlanta, Kansas City, Houston, Philadelphie<br>
+      🇨🇦 <strong>Canada (3)</strong> — Toronto, Vancouver, Guadalajara<br>
+      🇲🇽 <strong>Mexique (3)</strong> — Mexico, Guadalajara, Monterrey
+    </div>
+  </div>
+
+  <p class="sec">Tenant du titre</p>
+  <div style="background:var(--surface);border-radius:var(--r);border:1px solid rgba(201,168,76,.2);padding:16px;display:flex;align-items:center;gap:14px;">
+    <div style="font-size:48px">🇦🇷</div>
+    <div>
+      <div style="font-size:20px;font-weight:800;color:var(--text);">Argentine</div>
+      <div style="font-size:13px;color:var(--muted);">Champion du Monde 2022<br>Qatar — 3 étoiles ⭐⭐⭐</div>
+    </div>
+  </div>
+</div>
+
+<!-- GROUPES -->
+<div id="view-groupes" class="view">
+  <div id="groupes-list"></div>
+</div>
+
+<!-- MATCHS -->
+<div id="view-matchs" class="view">
+  <div style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:8px;margin-bottom:8px;">
+    <button class="tab active" style="padding:6px 14px;border-radius:20px;background:var(--gold);color:#1A1916;border:none;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;" id="phase-btn-group" onclick="filterMatchs('group')">Phase de groupes</button>
+    <button class="tab" style="padding:6px 14px;border-radius:20px;background:var(--surface2);color:var(--muted);border:1px solid var(--border2);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;" onclick="filterMatchs('r32')">1/32</button>
+    <button class="tab" style="padding:6px 14px;border-radius:20px;background:var(--surface2);color:var(--muted);border:1px solid var(--border2);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;" onclick="filterMatchs('r16')">1/16</button>
+    <button class="tab" style="padding:6px 14px;border-radius:20px;background:var(--surface2);color:var(--muted);border:1px solid var(--border2);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;" onclick="filterMatchs('qf')">QF</button>
+    <button class="tab" style="padding:6px 14px;border-radius:20px;background:var(--surface2);color:var(--muted);border:1px solid var(--border2);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;" onclick="filterMatchs('sf')">SF</button>
+    <button class="tab" style="padding:6px 14px;border-radius:20px;background:var(--surface2);color:var(--muted);border:1px solid var(--border2);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;" onclick="filterMatchs('final')">Finale</button>
+  </div>
+  <div id="matchs-list"></div>
+</div>
+
+<!-- ÉQUIPES -->
+<div id="view-equipes" class="view">
+  <input type="text" id="search-team" placeholder="Rechercher une équipe..." oninput="filterTeams(this.value)"
+    style="width:100%;padding:10px 14px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-sm);font-family:var(--font);font-size:14px;color:var(--text);margin-bottom:12px;">
+  <div id="equipes-list"></div>
+</div>
+
+<!-- PRONOS -->
+<div id="view-pronos" class="view">
+  <div class="prono-card">
+    <div class="prono-title">🏆 Vainqueur</div>
+    <div class="prono-sub">Qui remportera la Coupe du Monde 2026 ?</div>
+    <select class="prono-select" id="prono-vainqueur">
+      <option value="">— Choisir une équipe —</option>
+      <option>🇫🇷 France</option><option>🇧🇷 Brésil</option><option>🇦🇷 Argentine</option>
+      <option>🇦🇪 Angleterre</option><option>🇪🇸 Espagne</option><option>🇩🇪 Allemagne</option>
+      <option>🇵🇹 Portugal</option><option>🇳🇱 Pays-Bas</option><option>🇧🇪 Belgique</option>
+      <option>🇺🇸 États-Unis</option><option>Autre</option>
+    </select>
+    <button class="prono-btn" onclick="saveProno('vainqueur')">Valider →</button>
+  </div>
+  <div class="prono-card">
+    <div class="prono-title">🥇 Finaliste</div>
+    <div class="prono-sub">Quelle équipe perdra en finale ?</div>
+    <select class="prono-select" id="prono-finaliste">
+      <option value="">— Choisir une équipe —</option>
+      <option>🇫🇷 France</option><option>🇧🇷 Brésil</option><option>🇦🇷 Argentine</option>
+      <option>🇦🇪 Angleterre</option><option>🇪🇸 Espagne</option><option>🇩🇪 Allemagne</option>
+      <option>🇵🇹 Portugal</option><option>🇺🇸 États-Unis</option><option>Autre</option>
+    </select>
+    <button class="prono-btn" onclick="saveProno('finaliste')">Valider →</button>
+  </div>
+  <div class="prono-card">
+    <div class="prono-title">⚽ Meilleur buteur</div>
+    <div class="prono-sub">Qui finira meilleur buteur du tournoi ?</div>
+    <select class="prono-select" id="prono-buteur">
+      <option value="">— Choisir un joueur —</option>
+      <option>Kylian Mbappé (France)</option><option>Erling Haaland (Norvège)</option>
+      <option>Vinicius Jr (Brésil)</option><option>Harry Kane (Angleterre)</option>
+      <option>Lamine Yamal (Espagne)</option><option>Cristiano Ronaldo (Portugal)</option>
+      <option>Lionel Messi (Argentine)</option><option>Bukayo Saka (Angleterre)</option>
+      <option>Autre</option>
+    </select>
+    <button class="prono-btn" onclick="saveProno('buteur')">Valider →</button>
+  </div>
+  <div class="prono-card">
+    <div class="prono-title">🌟 Révélation</div>
+    <div class="prono-sub">Quelle équipe surprise ira loin ?</div>
+    <select class="prono-select" id="prono-surprise">
+      <option value="">— Choisir une équipe —</option>
+      <option>🇺🇸 États-Unis (pays hôte)</option><option>🇲🇦 Maroc</option>
+      <option>🇯🇵 Japon</option><option>🇰🇷 Corée du Sud</option>
+      <option>🇸🇳 Sénégal</option><option>🇲🇽 Mexique</option>
+      <option>🇨🇦 Canada</option><option>Autre</option>
+    </select>
+    <button class="prono-btn" onclick="saveProno('surprise')">Valider →</button>
+  </div>
+  <div id="pronos-saved" style="display:none;">
+    <p class="sec">Mes pronostics</p>
+    <div class="prono-saved" id="pronos-saved-content"></div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-0" onclick="showView('accueil',0)">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>Accueil</span>
+  </button>
+  <button class="nav-btn" id="nav-1" onclick="showView('groupes',1)">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    <span>Groupes</span>
+  </button>
+  <button class="nav-btn" id="nav-2" onclick="showView('matchs',2)">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+    <span>Matchs</span>
+  </button>
+  <button class="nav-btn" id="nav-3" onclick="showView('equipes',3)">
+    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+    <span>Équipes</span>
+  </button>
+  <button class="nav-btn" id="nav-4" onclick="showView('pronos',4)">
+    <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    <span>Pronos</span>
+  </button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// Navigation
+function showView(id, idx) {
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+  document.getElementById("view-"+id).classList.add("active");
+  document.querySelectorAll(".nav-btn").forEach((b,i)=>b.classList.toggle("active",i===idx));
+  document.querySelectorAll(".tab").forEach((b,i)=>{if(b.closest(".nav-tabs")){b.classList.toggle("active",i===idx);}});
+}
+
+// Données
+const GROUPES = [
+  {nom:"A", equipes:[{f:"🇦🇷",n:"Argentine"},{f:"🇨🇱",n:"Chili"},{f:"🇵🇪",n:"Pérou"},{f:"🇨🇦",n:"Canada"}]},
+  {nom:"B", equipes:[{f:"🇫🇷",n:"France"},{f:"🇲🇦",n:"Maroc"},{f:"🇵🇹",n:"Portugal"},{f:"🇿🇦",n:"Afrique du Sud"}]},
+  {nom:"C", equipes:[{f:"🇪🇸",n:"Espagne"},{f:"🇩🇪",n:"Allemagne"},{f:"🇯🇵",n:"Japon"},{f:"🇨🇷",n:"Costa Rica"}]},
+  {nom:"D", equipes:[{f:"🇧🇷",n:"Brésil"},{f:"🇲🇽",n:"Mexique"},{f:"🇸🇳",n:"Sénégal"},{f:"🇮🇷",n:"Iran"}]},
+  {nom:"E", equipes:[{f:"🇦🇪",n:"Angleterre"},{f:"🇳🇱",n:"Pays-Bas"},{f:"🇺🇸",n:"États-Unis"},{f:"🇦🇺",n:"Australie"}]},
+  {nom:"F", equipes:[{f:"🇧🇪",n:"Belgique"},{f:"🇭🇷",n:"Croatie"},{f:"🇲🇽",n:"Mexique"},{f:"🇳🇬",n:"Nigeria"}]},
+  {nom:"G", equipes:[{f:"🇵🇹",n:"Portugal"},{f:"🇺🇸",n:"États-Unis"},{f:"🇺🇾",n:"Uruguay"},{f:"🇰🇷",n:"Corée du Sud"}]},
+  {nom:"H", equipes:[{f:"🇦🇷",n:"Argentine"},{f:"🇩🇰",n:"Danemark"},{f:"🇲🇦",n:"Maroc"},{f:"🇳🇬",n:"Nigeria"}]},
+  // Format étendu 48 équipes : 12 groupes de 4
+];
+
+const MATCHS_PHARES = [
+  {phase:"group",date:"14 juin",heure:"21h00",h:{f:"🇲🇽",n:"Mexique"},a:{f:"🇺🇸",n:"États-Unis"},stade:"AT&T Stadium, Dallas",score:null},
+  {phase:"group",date:"15 juin",heure:"18h00",h:{f:"🇫🇷",n:"France"},a:{f:"🇵🇹",n:"Portugal"},stade:"SoFi Stadium, LA",score:null},
+  {phase:"group",date:"16 juin",heure:"21h00",h:{f:"🇧🇷",n:"Brésil"},a:{f:"🇦🇷",n:"Argentine"},stade:"MetLife Stadium, NY",score:null},
+  {phase:"group",date:"18 juin",heure:"21h00",h:{f:"🇪🇸",n:"Espagne"},a:{f:"🇩🇪",n:"Allemagne"},stade:"Levi's Stadium, SF",score:null},
+  {phase:"group",date:"19 juin",heure:"21h00",h:{f:"🇦🇪",n:"Angleterre"},a:{f:"🇳🇱",n:"Pays-Bas"},stade:"Rose Bowl, LA",score:null},
+  {phase:"final",date:"19 juillet",heure:"21h00",h:{f:"🏆",n:"Finaliste 1"},a:{f:"🏆",n:"Finaliste 2"},stade:"MetLife Stadium, New York",score:null},
+];
+
+const EQUIPES = [
+  {f:"🇫🇷",n:"France",conf:"UEFA",groupe:"B",stars:2,desc:"Tenant du titre de vice-champion. Équipe de référence avec Mbappé."},
+  {f:"🇧🇷",n:"Brésil",conf:"CONMEBOL",groupe:"D",stars:5,desc:"Record de titres (5). Perpétuel favori."},
+  {f:"🇦🇷",n:"Argentine",conf:"CONMEBOL",groupe:"A",stars:3,desc:"Tenant du titre 2022. Messi à la retraite?"},
+  {f:"🇪🇸",n:"Espagne",conf:"UEFA",groupe:"C",stars:1,desc:"Champion d'Europe 2024. Génération Yamal."},
+  {f:"🇩🇪",n:"Allemagne",conf:"UEFA",groupe:"C",stars:4,desc:"4 fois champions du monde."},
+  {f:"🇵🇹",n:"Portugal",conf:"UEFA",groupe:"B",stars:1,desc:"Ronaldo? Leao et la nouvelle génération."},
+  {f:"🇳🇱",n:"Pays-Bas",conf:"UEFA",groupe:"E",stars:0,desc:"Vice-champion 2022. Gakpo, van Dijk."},
+  {f:"🇦🇪",n:"Angleterre",conf:"UEFA",groupe:"E",stars:1,desc:"Champion d'Europe 2024. Kane, Bellingham."},
+  {f:"🇺🇸",n:"États-Unis",conf:"CONCACAF",groupe:"E",stars:0,desc:"Pays co-hôte. Génération montante."},
+  {f:"🇲🇽",n:"Mexique",conf:"CONCACAF",groupe:"D",stars:0,desc:"Co-hôte. Toujours présent en 1/8."},
+  {f:"🇨🇦",n:"Canada",conf:"CONCACAF",groupe:"A",stars:0,desc:"Co-hôte. Première CdM depuis 1986."},
+  {f:"🇲🇦",n:"Maroc",conf:"CAF",groupe:"B",stars:0,desc:"Demi-finaliste surprise 2022."},
+  {f:"🇯🇵",n:"Japon",conf:"AFC",groupe:"C",stars:0,desc:"Régulièrement surprenant."},
+  {f:"🇸🇳",n:"Sénégal",conf:"CAF",groupe:"D",stars:0,desc:"Tenant du titre CAN. Mané."},
+  {f:"🇧🇪",n:"Belgique",conf:"UEFA",groupe:"F",stars:0,desc:"Nouvelle génération après la génération dorée."},
+  {f:"🇭🇷",n:"Croatie",conf:"UEFA",groupe:"F",stars:0,desc:"Finaliste 2018, 3e en 2022. Modrić?"},
+];
+
+function renderGroupes() {
+  document.getElementById("groupes-list").innerHTML = GROUPES.map(g=>`
+    <div class="group-card">
+      <div class="group-title">Groupe ${g.nom}</div>
+      ${g.equipes.map((e,i)=>`<div class="team-row">
+        <div class="team-flag">${e.f}</div>
+        <div class="team-name">${e.n}</div>
+        <div class="team-pts ${i===0?"leader":""}">— pts</div>
+      </div>`).join("")}
+    </div>`).join("");
+}
+
+let currentPhase = "group";
+function filterMatchs(phase) {
+  currentPhase = phase;
+  const filtered = MATCHS_PHARES.filter(m=>m.phase===phase);
+  const phaseLabel = {group:"Phase de groupes",r32:"32e de finale",r16:"16e de finale",qf:"Quart de finale",sf:"Demi-finale",final:"Finale"};
+  const el = document.getElementById("matchs-list");
+  if(!filtered.length) { el.innerHTML=`<div class="loading">Matchs ${phaseLabel[phase]||""} à venir</div>`; return; }
+  el.innerHTML = filtered.map(m=>`
+    <div class="match-card">
+      <div class="match-phase">${phaseLabel[m.phase]||""} · ${m.stade}</div>
+      <div class="match-teams">
+        <div class="match-team"><div class="match-flag">${m.h.f}</div><div class="match-tname">${m.h.n}</div></div>
+        <div class="match-score${m.score?"":" up"}">${m.score||m.date+"<br>"+m.heure}</div>
+        <div class="match-team"><div class="match-flag">${m.a.f}</div><div class="match-tname">${m.a.n}</div></div>
+      </div>
+      <div class="match-meta">${m.stade}</div>
+    </div>`).join("");
+}
+
+function filterTeams(q) {
+  const filtered = EQUIPES.filter(e=>e.n.toLowerCase().includes(q.toLowerCase())||e.conf.toLowerCase().includes(q.toLowerCase()));
+  renderTeams(filtered);
+}
+
+function renderTeams(teams) {
+  document.getElementById("equipes-list").innerHTML = (teams||EQUIPES).map(e=>`
+    <div style="background:var(--surface);border-radius:var(--r-sm);border:1px solid var(--border);padding:14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;">
+      <div style="font-size:40px;line-height:1;flex-shrink:0">${e.f}</div>
+      <div>
+        <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:2px">${e.n}</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">${e.conf} · Groupe ${e.groupe||"?"}${e.stars>0?" · "+"⭐".repeat(e.stars):""}</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.5">${e.desc}</div>
+      </div>
+    </div>`).join("");
+}
+
+// Calendrier clé accueil
+function renderCalendar() {
+  const events = [
+    {date:"14 juin 2026",label:"🏁 Coup d'envoi — Mexico City"},
+    {date:"15 juin",label:"🇫🇷 France — 1er match"},
+    {date:"16 juin",label:"🇧🇷 Brésil vs 🇦🇷 Argentine (si même groupe)"},
+    {date:"4 juillet",label:"🔟 1/32 de finale débutent"},
+    {date:"19 juillet 2026",label:"🏆 Finale — MetLife Stadium, New York"},
+  ];
+  document.getElementById("calendar-key").innerHTML = events.map(e=>`
+    <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);align-items:center;">
+      <div style="font-size:11px;color:var(--muted);font-weight:600;min-width:60px;flex-shrink:0">${e.date.split(" ").slice(0,2).join(" ")}</div>
+      <div style="font-size:13px;color:var(--text);font-weight:500">${e.label}</div>
+    </div>`).join("");
+}
+
+// Pronos
+const pronos = JSON.parse(localStorage.getItem("cdm26_pronos")||"{}");
+const pronoLabels = {vainqueur:"🏆 Vainqueur",finaliste:"🥇 Finaliste",buteur:"⚽ Meilleur buteur",surprise:"🌟 Révélation"};
+
+function saveProno(type) {
+  const sel = document.getElementById("prono-"+type);
+  if(!sel.value){showToast("Choisis une option !");return;}
+  pronos[type]=sel.value;
+  localStorage.setItem("cdm26_pronos",JSON.stringify(pronos));
+  renderPronos();
+  showToast("Pronostic enregistré ✓");
+}
+
+function renderPronos() {
+  const keys=Object.keys(pronos);
+  const sec=document.getElementById("pronos-saved");
+  if(!keys.length){sec.style.display="none";return;}
+  sec.style.display="block";
+  document.getElementById("pronos-saved-content").innerHTML=keys.map(k=>`
+    <div class="prono-row">
+      <div><div class="prono-cat">${pronoLabels[k]||k}</div><div class="prono-choice">${pronos[k]}</div></div>
+      <span style="font-size:11px;padding:2px 8px;border-radius:20px;background:rgba(201,168,76,.1);color:var(--gold);font-weight:600;">En attente</span>
+    </div>`).join("");
+}
+
+function showToast(msg) {
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),2500);
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+  renderGroupes();
+  filterMatchs("group");
+  renderTeams();
+  renderPronos();
+  renderCalendar();
+});
+</script>
+</body>
+</html>
