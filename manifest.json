@@ -1,7 +1,7 @@
 {
-  "name": "Le QG",
-  "short_name": "Le QG",
-  "description": "Votre aide au quotidien — météo, tâches, agenda, sports et plus",
+  "name": "Le Général",
+  "short_name": "Le Général",
+  "description": "Votre aide au quotidien",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
