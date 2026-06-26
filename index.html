@@ -911,13 +911,15 @@ body {
 <!-- ═══════════════════════════════════════ -->
 <!--  MODAL : ADD EVENT                     -->
 <!-- ═══════════════════════════════════════ -->
-<div class="modal-overlay hidden" id="event-modal" onclick="closeModal(event)">
+<div class="modal-overlay hidden" id="event-modal">
   <div class="modal">
     <div class="modal-title">Nouvel événement</div>
     <div style="display:flex;gap:8px;margin-bottom:12px;">
-      <button class="tache-tag tache-tag-vaisselle" onclick="selectAdder('Diego')" data-adder="Diego" style="flex:1;justify-content:center;">D Diego</button>
-      <button class="tache-tag tache-tag-poubelles" onclick="selectAdder('Luca')" data-adder="Luca" style="flex:1;justify-content:center;">L Luca</button>
-      <button class="tache-tag tache-tag-menage" onclick="selectAdder('Romain')" data-adder="Romain" style="flex:1;justify-content:center;">R Romain</button>
+      <button class="tache-tag tache-tag-vaisselle" data-adder="Diego" style="flex:1;justify-content:center;">D Diego</button>
+      <button class="tache-tag tache-tag-poubelles" data-adder="Luca" style="flex:1;justify-content:center;">L Luca</button>
+      <button class="tache-tag tache-tag-menage" data-adder="Romain" style="flex:1;justify-content:center;">R Romain</button>
+      <button class="tache-tag" data-adder="Cora" style="flex:1;justify-content:center;background:rgba(245,135,74,0.15);color:#F5874A;border:1px solid rgba(245,135,74,0.2);">C Cora</button>
+      <button class="tache-tag" data-adder="Valery" style="flex:1;justify-content:center;background:rgba(232,56,79,0.15);color:#E8384F;border:1px solid rgba(232,56,79,0.2);">V Val.</button>
     </div>
     <input class="modal-input" id="ev-title" placeholder="Titre de l'événement" type="text">
     <div class="modal-row">
@@ -926,14 +928,14 @@ body {
     </div>
     <input class="modal-input" id="ev-who" placeholder="Qui est concerné ? (optionnel)" type="text">
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px;">
-      <button class="tache-tag tache-tag-vaisselle" onclick="selectEvColor('blue')" data-color="blue">💙 Famille</button>
-      <button class="tache-tag tache-tag-repas" onclick="selectEvColor('orange')" data-color="orange">🟠 Perso</button>
-      <button class="tache-tag tache-tag-poubelles" onclick="selectEvColor('green')" data-color="green">🟢 Sport</button>
-      <button class="tache-tag tache-tag-menage" onclick="selectEvColor('purple')" data-color="purple">🟣 École</button>
+      <button class="tache-tag tache-tag-vaisselle" data-color="blue">💙 Famille</button>
+      <button class="tache-tag tache-tag-repas" data-color="orange">🟠 Perso</button>
+      <button class="tache-tag tache-tag-poubelles" data-color="green">🟢 Sport</button>
+      <button class="tache-tag tache-tag-menage" data-color="purple">🟣 École</button>
     </div>
     <div class="modal-actions">
-      <button class="modal-btn secondary" onclick="closeEventModal()">Annuler</button>
-      <button class="modal-btn primary" onclick="addEvent()">Ajouter</button>
+      <button class="modal-btn secondary" id="ev-cancel-btn">Annuler</button>
+      <button class="modal-btn primary" id="ev-submit-btn">Ajouter</button>
     </div>
   </div>
 </div>
@@ -991,7 +993,7 @@ function selectAdder(name) {
   selectedAdder = name;
   document.querySelectorAll('[data-adder]').forEach(b => {
     b.style.outline = b.dataset.adder === name ? '2px solid white' : 'none';
-    b.style.opacity = b.dataset.adder === name ? '1' : '0.5';
+    b.style.opacity = b.dataset.adder === name ? '1' : '0.4';
   });
 }
 
@@ -1245,12 +1247,31 @@ function renderEvents() {
 }
 
 function showAddEvent() {
-  document.getElementById('event-modal').classList.remove('hidden');
+  const modal = document.getElementById('event-modal');
+  modal.classList.remove('hidden');
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('ev-date').value = today;
-  // Reset adder buttons
   selectedAdder = '';
-  document.querySelectorAll('[data-adder]').forEach(b => { b.style.outline = 'none'; b.style.opacity = '0.7'; });
+  selectedEvColor = 'blue';
+
+  // Branche les boutons adder
+  document.querySelectorAll('[data-adder]').forEach(b => {
+    b.style.outline = 'none'; b.style.opacity = '0.6';
+    b.onclick = function() { selectAdder(this.dataset.adder); };
+  });
+
+  // Branche les boutons couleur
+  document.querySelectorAll('[data-color]').forEach(b => {
+    b.style.outline = 'none'; b.style.opacity = '0.6';
+    b.onclick = function() { selectEvColor(this.dataset.color); };
+  });
+
+  // Boutons modal
+  document.getElementById('ev-cancel-btn').onclick = closeEventModal;
+  document.getElementById('ev-submit-btn').onclick = addEvent;
+
+  // Ferme si tap en dehors
+  modal.onclick = function(e) { if (e.target === this) closeEventModal(); };
 }
 
 function closeEventModal() {
@@ -1265,6 +1286,7 @@ function selectEvColor(color) {
   selectedEvColor = color;
   document.querySelectorAll('[data-color]').forEach(b => {
     b.style.outline = b.dataset.color === color ? '2px solid white' : 'none';
+    b.style.opacity = b.dataset.color === color ? '1' : '0.5';
   });
 }
 
@@ -2429,7 +2451,7 @@ function openTDF() {
   const iframe = document.getElementById('tdf-iframe');
   // Charge l'app TDF — remplace l'URL par ton GitHub Pages une fois déployé
   if (!iframe.src || iframe.src === 'about:blank') {
-    iframe.src = 'tdf2026.html'; // github.com/valNg1/Le-QG
+    iframe.src = '/Le-QG/tdf2026.html';
   }
   modal.classList.remove('hidden');
   // Désactiver scroll body
