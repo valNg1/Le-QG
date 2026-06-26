@@ -569,23 +569,23 @@ body {
   <div class="profile-tagline">Votre aide au quotidien</div>
   <div class="profile-question">Qui es-tu ?</div>
   <div class="profile-grid" id="profile-grid">
-    <button class="profile-btn" onclick="selectMember('Diego')" style="background:#18181E;border:1.5px solid rgba(255,255,255,0.12);border-radius:14px;padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;">
+    <button class="profile-btn" data-member="Diego" style="background:#18181E;border:1.5px solid rgba(255,255,255,0.12);border-radius:14px;padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;">
       <div style="font-size:32px">👦</div>
       <div style="font-size:13px;font-weight:700;color:#F2F2F0;">Diego</div>
     </button>
-    <button class="profile-btn" onclick="selectMember('Luca')" style="background:#18181E;border:1.5px solid rgba(255,255,255,0.12);border-radius:14px;padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;">
+    <button class="profile-btn" data-member="Luca" style="background:#18181E;border:1.5px solid rgba(255,255,255,0.12);border-radius:14px;padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;">
       <div style="font-size:32px">👦</div>
       <div style="font-size:13px;font-weight:700;color:#F2F2F0;">Luca</div>
     </button>
-    <button class="profile-btn" onclick="selectMember('Romain')" style="background:#18181E;border:1.5px solid rgba(255,255,255,0.12);border-radius:14px;padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;">
+    <button class="profile-btn" data-member="Romain" style="background:#18181E;border:1.5px solid rgba(255,255,255,0.12);border-radius:14px;padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;">
       <div style="font-size:32px">👦</div>
       <div style="font-size:13px;font-weight:700;color:#F2F2F0;">Romain</div>
     </button>
-    <button class="profile-btn" onclick="selectMember('Cora')" style="background:#18181E;border:1.5px solid rgba(255,255,255,0.12);border-radius:14px;padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;">
+    <button class="profile-btn" data-member="Cora" style="background:#18181E;border:1.5px solid rgba(255,255,255,0.12);border-radius:14px;padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;">
       <div style="font-size:32px">👧</div>
       <div style="font-size:13px;font-weight:700;color:#F2F2F0;">Cora</div>
     </button>
-    <button class="profile-btn" onclick="selectMember('Val\u00e9ry')" style="background:#18181E;border:1.5px solid rgba(255,255,255,0.12);border-radius:14px;padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;">
+    <button class="profile-btn" data-member="Valery" style="background:#18181E;border:1.5px solid rgba(255,255,255,0.12);border-radius:14px;padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;">
       <div style="font-size:32px">🧑</div>
       <div style="font-size:13px;font-weight:700;color:#F2F2F0;">Val&#233;ry</div>
     </button>
@@ -959,7 +959,7 @@ const MEMBRES = [
   { name: 'Luca',   avatar: 'L', color: '#34C77B', bg: 'rgba(52,199,123,0.15)',  emoji: '👦' },
   { name: 'Romain', avatar: 'R', color: '#9B6BFF', bg: 'rgba(155,107,255,0.15)', emoji: '👦' },
   { name: 'Cora',   avatar: 'C', color: '#F5874A', bg: 'rgba(245,135,74,0.15)',  emoji: '👧' },
-  { name: 'Valéry', avatar: 'V', color: '#E8384F', bg: 'rgba(232,56,79,0.15)',   emoji: '🧑' },
+  { name: 'Valery', avatar: 'V', color: '#E8384F', bg: 'rgba(232,56,79,0.15)',   emoji: '🧑' },
 ];
 
 const TACHES_DEF = [
@@ -1639,7 +1639,7 @@ function getMemberTeams() {
   const saved = localStorage.getItem(getPersoKey('teams'));
   if (saved) return JSON.parse(saved);
   // Défauts selon le membre
-  const defaults = { Diego:['133604','133919'], Luca:['133601','133919'], Romain:['133604','134674'], Cora:['133601'], 'Valéry':['133604','133919'] };
+  const defaults = { Diego:['133604','133919'], Luca:['133601','133919'], Romain:['133604','134674'], Cora:['133601'], Valery:['133604','133919'] };
   return defaults[currentMember] || ['133604','133919'];
 }
 
@@ -1660,18 +1660,11 @@ function saveMemberAnnivs(data) {
 
 // ── Onboarding ──────────────────────────────────────────────
 function initProfile() {
-  const grid = document.getElementById('profile-grid');
-  if (!grid) return;
-
-  grid.innerHTML = MEMBRES.map((m, i) =>
-    `<button class="profile-btn" data-idx="${i}" style="background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--r);padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;">
-      <div style="font-size:32px;line-height:1;">${m.emoji}</div>
-      <div style="font-size:13px;font-weight:700;color:var(--text);">${m.name}</div>
-    </button>`
-  ).join('');
-
-  grid.querySelectorAll('.profile-btn').forEach((btn, i) => {
-    btn.addEventListener('click', () => selectMember(MEMBRES[i].name));
+  // Les boutons sont déjà dans le HTML — on branche juste les events
+  document.querySelectorAll('.profile-btn[data-member]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      selectMember(this.dataset.member);
+    });
   });
 
   // Si déjà connecté → cache l'overlay immédiatement
