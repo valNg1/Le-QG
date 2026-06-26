@@ -2535,10 +2535,203 @@ function showToast(msg) {
 }
 
 // ============================================================
+
+// ============================================================
+// VARIABLES GLOBALES FIREBASE + GROUPES
+// ============================================================
+let db = null;
+let firebaseReady = false;
+let currentGroupCode = localStorage.getItem('qg_group') || null;
+let currentGroupName = localStorage.getItem('qg_group_name') || null;
+
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBjQ72rEOs71--GgpQn7zJP24eNMGUSicU",
+  authDomain: "le-qg-1a6e7.firebaseapp.com",
+  projectId: "le-qg-1a6e7",
+  storageBucket: "le-qg-1a6e7.firebasestorage.app",
+  messagingSenderId: "214637875104",
+  appId: "1:214637875104:web:ca52a7b8c95bb584845ec5"
+};
+
+function initFirebase() {
+  try {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.firestore();
+    firebaseReady = true;
+    console.log('✅ Firebase connecté');
+    if (currentGroupCode) loadGroupData();
+  } catch(e) {
+    console.log('Firebase error', e);
+  }
+}
+
+function generateGroupCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from({length:6}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+}
+
+async function createGroup(name) {
+  if (!firebaseReady) { showToast('Firebase non connecté'); return; }
+  const code = generateGroupCode();
+  try {
+    await db.collection('groupes').doc(code).set({
+      code, name, createdBy: currentMember,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      members: [currentMember],
+    });
+    currentGroupCode = code; currentGroupName = name;
+    localStorage.setItem('qg_group', code);
+    localStorage.setItem('qg_group_name', name);
+    showToast('Groupe "' + name + '" créé ! Code : ' + code);
+    renderGroupPanel();
+    loadGroupData();
+  } catch(e) { showToast('Erreur création'); console.log(e); }
+}
+
+async function joinGroup(code) {
+  if (!firebaseReady) { showToast('Firebase non connecté'); return; }
+  code = code.toUpperCase().trim();
+  try {
+    const doc = await db.collection('groupes').doc(code).get();
+    if (!doc.exists) { showToast('Code invalide'); return; }
+    const data = doc.data();
+    if (!data.members.includes(currentMember)) {
+      await db.collection('groupes').doc(code).update({
+        members: firebase.firestore.FieldValue.arrayUnion(currentMember)
+      });
+    }
+    currentGroupCode = code; currentGroupName = data.name;
+    localStorage.setItem('qg_group', code);
+    localStorage.setItem('qg_group_name', data.name);
+    showToast('Groupe "' + data.name + '" rejoint !');
+    renderGroupPanel();
+    loadGroupData();
+  } catch(e) { showToast('Erreur — réessaie'); console.log(e); }
+}
+
+function leaveGroup() {
+  if (!confirm('Quitter "' + currentGroupName + '" ?')) return;
+  currentGroupCode = null; currentGroupName = null;
+  localStorage.removeItem('qg_group'); localStorage.removeItem('qg_group_name');
+  renderGroupPanel();
+  showToast('Groupe quitté');
+}
+
+async function loadGroupData() {
+  if (!firebaseReady || !currentGroupCode) return;
+  // Sync events
+  db.collection('groupes').doc(currentGroupCode).collection('events')
+    .orderBy('date').onSnapshot(snap => {
+      const fbIds = eventsState.map(e => e.fbId).filter(Boolean);
+      snap.forEach(doc => {
+        const e = { ...doc.data(), fbId: doc.id };
+        if (!fbIds.includes(e.fbId)) eventsState.push(e);
+      });
+      eventsState.sort((a,b) => new Date(a.date)-new Date(b.date));
+      saveEvents(); renderEvents();
+    });
+  // Sync mur
+  db.collection('groupes').doc(currentGroupCode).collection('mur')
+    .orderBy('ts','desc').limit(30).onSnapshot(snap => {
+      murState = [];
+      snap.forEach(doc => murState.push({ ...doc.data(), id: doc.id }));
+      renderMur();
+    });
+  // Sync diner
+  db.collection('groupes').doc(currentGroupCode).collection('diner')
+    .doc(getDinerDateKey()).onSnapshot(doc => {
+      if (doc.exists) { dinerState = { date: getDinerDateKey(), choices: doc.data().choices||{} }; renderDiner(); }
+    });
+}
+
+async function saveEventToFirebase(event) {
+  if (!firebaseReady || !currentGroupCode) return;
+  try {
+    const ref = await db.collection('groupes').doc(currentGroupCode).collection('events').add(event);
+    event.fbId = ref.id; saveEvents();
+  } catch(e) { console.log(e); }
+}
+
+async function saveMsgToFirebase(msg) {
+  if (!firebaseReady || !currentGroupCode) return;
+  try {
+    await db.collection('groupes').doc(currentGroupCode).collection('mur')
+      .add({ ...msg, ts: firebase.firestore.FieldValue.serverTimestamp() });
+  } catch(e) { console.log(e); }
+}
+
+async function saveDinerToFirebase() {
+  if (!firebaseReady || !currentGroupCode || !dinerState) return;
+  try {
+    await db.collection('groupes').doc(currentGroupCode).collection('diner')
+      .doc(getDinerDateKey()).set({ choices: dinerState.choices, date: getDinerDateKey() });
+  } catch(e) { console.log(e); }
+}
+
+function renderGroupPanel() {
+  const el = document.getElementById('group-panel');
+  if (!el) return;
+  if (currentGroupCode) {
+    el.innerHTML = `
+      <div style="background:rgba(247,193,4,0.08);border:1px solid rgba(247,193,4,0.2);border-radius:var(--r-sm);padding:14px;margin-bottom:10px;">
+        <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Groupe actif</div>
+        <div style="font-size:18px;font-weight:800;color:var(--text);">${currentGroupName}</div>
+        <div style="font-size:16px;color:var(--yellow);font-weight:800;margin-top:4px;letter-spacing:0.12em;">${currentGroupCode}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">Partage ce code à tes proches pour qu'ils rejoignent</div>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <button id="copy-code-btn" style="background:rgba(247,193,4,0.15);border:1px solid rgba(247,193,4,0.3);color:var(--yellow);border-radius:20px;padding:6px 14px;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;">📋 Copier le code</button>
+          <button id="leave-group-btn" style="background:none;border:1px solid var(--border2);color:var(--muted);border-radius:20px;padding:6px 14px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;">Quitter</button>
+        </div>
+      </div>
+      <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">Données partagées</div>
+        <div style="font-size:13px;color:var(--text);line-height:2;">📅 Agenda · 💬 Mur · 🍽 Dîner du soir</div>
+      </div>`;
+    setTimeout(() => {
+      const copyBtn = document.getElementById('copy-code-btn');
+      const leaveBtn = document.getElementById('leave-group-btn');
+      if (copyBtn) copyBtn.onclick = () => navigator.clipboard.writeText(currentGroupCode).then(() => showToast('Code copié !'));
+      if (leaveBtn) leaveBtn.onclick = leaveGroup;
+    }, 50);
+  } else {
+    el.innerHTML = `
+      <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:16px;margin-bottom:10px;">
+        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:10px;">Rejoindre un groupe existant</div>
+        <div style="display:flex;gap:8px;">
+          <input id="group-code-input" placeholder="Code à 6 lettres" maxlength="8"
+            style="flex:1;padding:10px 12px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r-sm);font-family:var(--font);font-size:15px;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:0.1em;">
+          <button id="join-group-btn" style="background:var(--yellow);border:none;border-radius:var(--r-sm);padding:10px 16px;font-family:var(--font);font-size:13px;font-weight:700;color:#1A1916;cursor:pointer;">Rejoindre</button>
+        </div>
+      </div>
+      <div style="text-align:center;color:var(--muted);font-size:12px;padding:6px 0;">— ou créer un nouveau groupe —</div>
+      <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:16px;margin-top:10px;">
+        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:10px;">Créer un nouveau groupe</div>
+        <div style="display:flex;gap:8px;">
+          <input id="group-name-input" placeholder="Ex: Famille, Potes, Coloc..."
+            style="flex:1;padding:10px 12px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r-sm);font-family:var(--font);font-size:14px;color:var(--text);">
+          <button id="create-group-btn" style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r-sm);padding:10px 16px;font-family:var(--font);font-size:13px;font-weight:700;color:var(--text);cursor:pointer;">Créer</button>
+        </div>
+      </div>`;
+    setTimeout(() => {
+      const joinBtn = document.getElementById('join-group-btn');
+      const createBtn = document.getElementById('create-group-btn');
+      if (joinBtn) joinBtn.onclick = () => {
+        const code = document.getElementById('group-code-input')?.value || '';
+        if (code.length >= 4) joinGroup(code); else showToast('Entre un code valide');
+      };
+      if (createBtn) createBtn.onclick = () => {
+        const name = document.getElementById('group-name-input')?.value?.trim() || '';
+        if (name) createGroup(name); else showToast('Entre un nom de groupe');
+      };
+    }, 50);
+  }
+}
+
 // INIT
 // ============================================================
 // Attend que le DOM soit complètement chargé
 document.addEventListener('DOMContentLoaded', function() {
+  initFirebase();
   initProfile();
   updateHeader();
   if (currentGroupCode) { renderGroupPanel(); }
