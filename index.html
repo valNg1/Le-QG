@@ -223,6 +223,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .loading{text-align:center;padding:24px;color:var(--muted);font-size:13px}
 
+
+/* ── MODULES TABS ── */
+.mod-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 16px; overflow-x: auto; scrollbar-width: none; }
+.mod-tabs::-webkit-scrollbar { display: none; }
+.mod-tab { background: none; border: none; color: var(--muted); font-size: 13px; font-weight: 500; padding: 10px 16px; cursor: pointer; white-space: nowrap; border-bottom: 2px solid transparent; transition: all .15s; font-family: var(--font); }
+.mod-tab.active { color: var(--yellow); border-bottom-color: var(--yellow); }
+
 /* ── MODULES ── */
 .module-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
 .module-card { background: var(--surface); border-radius: var(--r); border: 1px solid var(--border); padding: 16px; cursor: pointer; transition: all .15s; text-align: center; position: relative; }
@@ -435,8 +442,14 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
 
   <!-- SÉLECTEUR MODULES -->
   <div id="modules-home">
-    <p class="sec" style="margin-top:8px;">Mes modules</p>
+    <div class="mod-tabs" style="margin-top:8px;">
+      <button class="mod-tab active" data-theme="all">Tous</button>
+      <button class="mod-tab" data-theme="sante">🏃 Santé</button>
+      <button class="mod-tab" data-theme="culture">🎭 Culture</button>
+      <button class="mod-tab" data-theme="sport">⚽ Sport</button>
+    </div>
     <div class="module-grid" id="module-grid"></div>
+    <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px;">Tap = ouvrir · Double-tap = activer/désactiver</div>
   </div>
 
   <!-- JEÛNE INTERMITTENT -->
@@ -481,6 +494,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
       <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
       <div style="font-size:16px;font-weight:700;color:var(--text);">🧠 Quiz culture</div>
+      <button onclick="backToModules()" style="margin-left:auto;background:none;border:1px solid var(--border2);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;font-family:var(--font);">Quitter</button>
     </div>
     <div id="quiz-content"></div>
   </div>
@@ -506,6 +520,40 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     <div id="cine-list"></div>
   </div>
 
+  <!-- SCORES LIVE -->
+  <div id="module-scores" style="display:none;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
+      <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
+      <div style="font-size:16px;font-weight:700;color:var(--text);">⚽ Résultats sportifs</div>
+    </div>
+    <div id="scores-mod-content"><div class="loading">Chargement...</div></div>
+  </div>
+
+  <!-- TDF MODULE -->
+  <div id="module-tdf_mod" style="display:none;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
+      <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
+      <div style="font-size:16px;font-weight:700;color:var(--text);">🚴 Tour de France 2026</div>
+    </div>
+    <a href="https://legeneral.org/tdf2026.html" target="_blank" class="tdf-open" style="display:flex;margin-bottom:12px;">🚴 Ouvrir l'app complète</a>
+    <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:16px;font-size:13px;color:var(--muted);line-height:1.8;">
+      📅 4–26 juillet 2026<br>🏁 Départ : Barcelone<br>🏔 21 étapes · 3 333 km<br>⛰ Double Alpe d'Huez · Galibier
+    </div>
+  </div>
+
+  <!-- CdM MODULE -->
+  <div id="module-cdm_mod" style="display:none;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
+      <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
+      <div style="font-size:16px;font-weight:700;color:var(--text);">🏆 Coupe du Monde 2026</div>
+    </div>
+    <a href="https://legeneral.org/cdm2026.html" target="_blank" class="tdf-open" style="display:flex;margin-bottom:12px;color:var(--green);border-color:rgba(52,199,123,.3);background:rgba(52,199,123,.1);">🏆 Ouvrir l'app complète</a>
+    <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:16px;font-size:13px;color:var(--muted);line-height:1.8;">
+      🔴 En cours — 11 juin → 19 juillet 2026<br>🇫🇷 France : qualifiée pour les 16es !<br>🏟 16 stades · USA, Canada, Mexique<br>⚽ 48 équipes · 104 matchs
+    </div>
+  </div>
+
+  <!-- LECTURE -->
   <!-- LECTURE -->
   <div id="module-lecture" style="display:none;">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
@@ -1523,18 +1571,27 @@ document.getElementById("save-perso-btn").addEventListener("click",()=>{
 // MODULES
 // ════════════════════════════════════════════
 const ALL_MODULES = [
-  { id:"jeune",   name:"Jeûne intermittent", desc:"Timer + prochain repas", emoji:"⏱", color:"#F7C104" },
-  { id:"mot",     name:"Mot du jour",        desc:"Apprends une langue",    emoji:"🗣", color:"#4A90E2" },
-  { id:"quiz",    name:"Quiz culture",       desc:"10 questions par session",emoji:"🧠", color:"#9B6BFF" },
-  { id:"cine",    name:"Ciné & Spectacles",  desc:"Avis du groupe",         emoji:"🎬", color:"#E8384F" },
-  { id:"lecture", name:"Lectures",           desc:"Recommandations du groupe",emoji:"📚",color:"#34C77B" },
+  { id:"jeune",   name:"Jeûne intermittent", desc:"Timer + prochain repas",       emoji:"⏱", color:"#F7C104", theme:"sante"   },
+  { id:"mot",     name:"Mot du jour",        desc:"Apprends une langue",          emoji:"🗣", color:"#4A90E2", theme:"culture" },
+  { id:"quiz",    name:"Quiz culture",       desc:"10 questions par session",     emoji:"🧠", color:"#9B6BFF", theme:"culture" },
+  { id:"cine",    name:"Ciné & Spectacles",  desc:"Avis du groupe",               emoji:"🎬", color:"#E8384F", theme:"culture" },
+  { id:"lecture", name:"Lectures",           desc:"Recommandations du groupe",    emoji:"📚", color:"#34C77B", theme:"culture" },
+  { id:"scores",  name:"Scores live",        desc:"Résultats de tes équipes",     emoji:"⚽", color:"#F5874A", theme:"sport"   },
+  { id:"tdf_mod", name:"Tour de France",     desc:"App TDF 2026",                 emoji:"🚴", color:"#C9A84C", theme:"sport"   },
+  { id:"cdm_mod", name:"Coupe du Monde",     desc:"App CdM 2026",                 emoji:"🏆", color:"#34C77B", theme:"sport"   },
 ];
+
+let currentModuleTheme = "all";
 
 function renderModulesHome() {
   const el = document.getElementById("module-grid");
   if (!el) return;
   const activeIds = state.activeModules || [];
-  el.innerHTML = ALL_MODULES.map(m => `
+  const filtered = currentModuleTheme === "all"
+    ? ALL_MODULES
+    : ALL_MODULES.filter(m => m.theme === currentModuleTheme);
+
+  el.innerHTML = filtered.map(m => `
     <div class="module-card${activeIds.includes(m.id)?" active":""}" data-mod="${m.id}">
       <div class="module-icon">${m.emoji}</div>
       <div class="module-name">${m.name}</div>
@@ -1543,10 +1600,7 @@ function renderModulesHome() {
     </div>`).join("");
 
   el.querySelectorAll(".module-card").forEach(card => {
-    card.addEventListener("click", function() {
-      const id = this.dataset.mod;
-      openModule(id);
-    });
+    card.addEventListener("click", () => openModule(card.dataset.mod));
     card.addEventListener("dblclick", function() {
       const id = this.dataset.mod;
       if (!state.activeModules) state.activeModules = [];
@@ -1554,6 +1608,16 @@ function renderModulesHome() {
       else state.activeModules.push(id);
       saveState(); renderModulesHome();
       showToast(state.activeModules.includes(id)?"Module activé ✓":"Module désactivé");
+    });
+  });
+
+  // Branche les onglets thématiques
+  document.querySelectorAll(".mod-tab").forEach(tab => {
+    tab.addEventListener("click", function() {
+      document.querySelectorAll(".mod-tab").forEach(t => t.classList.remove("active"));
+      this.classList.add("active");
+      currentModuleTheme = this.dataset.theme;
+      renderModulesHome();
     });
   });
 }
@@ -1569,6 +1633,8 @@ function openModule(id) {
   if (id==="quiz") initQuiz();
   if (id==="cine") initCine();
   if (id==="lecture") initLecture();
+  if (id==="scores") initScoresMod();
+  if (id==="tdf_mod" || id==="cdm_mod") {} // HTML statique
 }
 
 function backToModules() {
@@ -1804,7 +1870,10 @@ function renderQuiz() {
       <div class="quiz-score-num">${score}/${questions.length}</div>
       <div class="quiz-score-label">${pct>=80?"🌟 Excellent !":pct>=60?"👍 Bien !":pct>=40?"😐 Passable":"📚 Révise !"}</div>
       <div style="font-size:13px;color:var(--muted);margin-top:8px;">Score : ${pct}%</div>
-      <button onclick="startQuiz()" style="margin-top:20px;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:12px 32px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">Rejouer</button>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:20px;">
+        <button onclick="startQuiz()" style="background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:12px 24px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">↺ Rejouer</button>
+        <button onclick="backToModules()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:var(--r-sm);padding:12px 24px;font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;">← Modules</button>
+      </div>
     </div>`;
     return;
   }
@@ -1867,6 +1936,25 @@ function submitCine() {
 // LECTURE
 // ════════════════
 let livreStar = 0, livreCat = "roman";
+
+
+function initScoresMod() {
+  const el = document.getElementById("scores-mod-content");
+  if (!el) return;
+  el.innerHTML = `<div class="loading">Chargement...</div>`;
+  const teams = ALL_TEAMS.filter(t => (state.teamIds||[]).includes(t.id));
+  if (!teams.length) { el.innerHTML=`<div class="loading">Choisis tes équipes dans Mon QG</div>`; return; }
+  Promise.allSettled(teams.map(async t => {
+    const [last,next] = await Promise.all([
+      fetch("https://www.thesportsdb.com/api/v1/json/3/eventslast.php?id="+t.id).then(r=>r.json()),
+      fetch("https://www.thesportsdb.com/api/v1/json/3/eventsnext.php?id="+t.id).then(r=>r.json()),
+    ]);
+    return { team:t, last:(last.results||[]).slice(-2), next:(next.events||[])[0] };
+  })).then(results => {
+    const data = results.map((r,i)=>r.status==="fulfilled"?r.value:{team:teams[i],last:[],next:null});
+    el.innerHTML = data.map(d => buildSportCard(d.team, d.last, d.next)).join("");
+  });
+}
 
 function initLecture() {
   renderStarsInput("livre-stars-input", (n)=>{ livreStar=n; });
