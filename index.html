@@ -675,7 +675,7 @@ body {
   </div>
 
   <!-- 5. SPORTS -->
-  <p class="sec" style="margin-top:16px;">Nos équipes</p>
+  <p class="sec" style="margin-top:16px;">Résultats sportifs</p>
   <div class="sports-section" id="sports-section">
     <div class="sports-loading">Chargement...</div>
   </div>
@@ -735,7 +735,10 @@ body {
 <div id="view-perso" class="view">
 
   <!-- ÉQUIPES À SUIVRE -->
-  <p class="sec" style="margin-top:8px;">Mes équipes à suivre</p>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;margin-bottom:10px;">
+    <p class="sec" style="margin:0;">Mes équipes à suivre</p>
+    <button onclick="sportsCache=null;fetchSports(true);showToast('Résultats mis à jour !');" style="background:none;border:1px solid var(--border2);border-radius:20px;padding:4px 12px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--font);">↻ Résultats</button>
+  </div>
   <div class="perso-section">
     <div class="teams-picker" id="teams-picker"></div>
   </div>
@@ -1319,8 +1322,8 @@ function addEvent() {
   const time  = document.getElementById('ev-time').value;
   const who   = document.getElementById('ev-who').value.trim();
   if (!title || !date) { showToast('Titre et date requis !'); return; }
-  if (!selectedAdder) { showToast('Qui ajoute cet événement ?'); return; }
-  const newEvent = { title, date, time, who, color: selectedEvColor, adder: selectedAdder, id: Date.now() };
+  const adder = selectedAdder || currentMember || 'Moi';
+  const newEvent = { title, date, time, who, color: selectedEvColor, adder, id: Date.now() };
   eventsState.push(newEvent);
   saveEvents();
   renderEvents();
@@ -1328,7 +1331,7 @@ function addEvent() {
   closeEventModal();
   document.getElementById('ev-title').value = '';
   document.getElementById('ev-who').value = '';
-  showToast(`${selectedAdder} a ajouté un événement ✓`);
+  showToast('Événement ajouté ✓');
 }
 
 
@@ -1347,6 +1350,7 @@ async function fetchPodcasts(force = false) {
     renderPodcasts(podcastsCache.data);
     return;
   }
+  document.getElementById('podcasts-section').innerHTML = '<div class="sports-loading">Chargement des podcasts...</div>';
   try {
     const memberPodIds = currentMember ? getMemberPodcasts() : ['judoka','gdiy','thinker'];
   const PODCASTS = ALL_PODCASTS.filter(p => memberPodIds.includes(p.id));
@@ -2064,9 +2068,9 @@ function renderTransportLines(affected, isFallback = false) {
 
 let sportsCache = JSON.parse(localStorage.getItem('fam_sports') || 'null');
 
-async function fetchSports() {
+async function fetchSports(force = false) {
   const now = Date.now();
-  if (sportsCache && (now - sportsCache.ts) < 30 * 60 * 1000) {
+  if (!force && sportsCache && (now - sportsCache.ts) < 30 * 60 * 1000) {
     renderSports(sportsCache.data);
     return;
   }
@@ -2481,7 +2485,7 @@ function openTDF() {
   const iframe = document.getElementById('tdf-iframe');
   // Charge l'app TDF — remplace l'URL par ton GitHub Pages une fois déployé
   if (!iframe.src || iframe.src === 'about:blank') {
-    iframe.src = '/Le-QG/tdf2026.html';
+    iframe.src = 'https://valng1.github.io/Le-QG/tdf2026.html';
   }
   modal.classList.remove('hidden');
   // Désactiver scroll body
@@ -2760,8 +2764,8 @@ document.addEventListener('DOMContentLoaded', function() {
   renderMur();
   fetchAirQuality();
   fetchTransport();
-  fetchSports();
-  fetchPodcasts();
+  sportsCache = null; fetchSports(true);
+  podcastsCache = null; fetchPodcasts(true);
   checkCoursesWeek();
   renderCourses();
 
