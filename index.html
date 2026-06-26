@@ -144,23 +144,23 @@ body {
 .sec { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin: 20px 0 10px; }
 
 /* ── WEATHER CARDS ── */
-.meteo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px; }
+.meteo-row { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
 .meteo-card {
-  background: var(--surface); border-radius: var(--r);
-  border: 1px solid var(--border); padding: 16px; position: relative; overflow: hidden;
+  background: var(--surface); border-radius: var(--r-sm);
+  border: 1px solid var(--border); padding: 12px 14px;
+  display: flex; align-items: center; gap: 12px; cursor: pointer;
+  transition: border-color 0.15s; text-decoration: none;
 }
-.meteo-card::before {
-  content: ''; position: absolute; top: -20px; right: -20px;
-  width: 80px; height: 80px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(74,144,226,0.15) 0%, transparent 70%);
-}
-.meteo-city { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
-.meteo-icon { font-size: 32px; margin-bottom: 6px; line-height: 1; }
-.meteo-temp { font-size: 28px; font-weight: 800; color: var(--text); line-height: 1; }
-.meteo-temp sup { font-size: 14px; font-weight: 500; color: var(--muted); }
-.meteo-desc { font-size: 11px; color: var(--muted); margin-top: 4px; }
-.meteo-minmax { font-size: 11px; color: var(--muted2); margin-top: 2px; }
-.meteo-extra { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+.meteo-card:active { border-color: var(--border2); }
+.meteo-city { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; min-width: 60px; }
+.meteo-icon { font-size: 28px; line-height: 1; flex-shrink: 0; }
+.meteo-main { display: flex; align-items: baseline; gap: 4px; }
+.meteo-temp { font-size: 22px; font-weight: 800; color: var(--text); line-height: 1; }
+.meteo-temp sup { font-size: 12px; font-weight: 500; color: var(--muted); }
+.meteo-right { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.meteo-desc { font-size: 11px; color: var(--muted); }
+.meteo-minmax { font-size: 10px; color: var(--muted2); }
+.meteo-extra { display: flex; gap: 10px; margin-left: auto; flex-shrink: 0; }
 .meteo-extra-item { font-size: 10px; color: var(--muted); display: flex; align-items: center; gap: 3px; }
 
 /* ── TDF EMBED ── */
@@ -611,29 +611,31 @@ body {
 <!-- ═══════════════════════════════════════ -->
 <div id="view-accueil" class="view active">
 
-  <!-- MÉTÉO -->
+  <!-- 1. MÉTÉO COMPACTE -->
   <p class="sec">Météo</p>
   <div class="meteo-row">
-    <div class="meteo-card" id="meteo-paris">
+    <a class="meteo-card" id="meteo-paris" href="https://meteofrance.com/previsions-meteo-france/paris/75000" target="_blank">
       <div class="meteo-city">Paris</div>
-      <div class="meteo-icon skeleton" style="width:40px;height:40px;border-radius:8px;"></div>
-      <div class="meteo-temp skeleton" style="width:60px;height:32px;margin-top:8px;"></div>
-      <div class="meteo-desc skeleton" style="width:80px;height:12px;margin-top:6px;"></div>
-    </div>
-    <div class="meteo-card" id="meteo-quiberon">
+      <div class="meteo-icon skeleton" style="width:28px;height:28px;border-radius:6px;font-size:24px;"></div>
+      <div class="meteo-right">
+        <div class="meteo-main"><span class="meteo-temp skeleton" style="width:44px;height:22px;display:inline-block;"></span></div>
+        <div class="meteo-desc skeleton" style="width:70px;height:10px;margin-top:2px;"></div>
+      </div>
+      <div class="meteo-extra"></div>
+    </a>
+    <a class="meteo-card" id="meteo-quiberon" href="https://meteofrance.com/previsions-meteo-france/quiberon/56170" target="_blank">
       <div class="meteo-city">Quiberon</div>
-      <div class="meteo-icon skeleton" style="width:40px;height:40px;border-radius:8px;"></div>
-      <div class="meteo-temp skeleton" style="width:60px;height:32px;margin-top:8px;"></div>
-      <div class="meteo-desc skeleton" style="width:80px;height:12px;margin-top:6px;"></div>
-    </div>
+      <div class="meteo-icon skeleton" style="width:28px;height:28px;border-radius:6px;font-size:24px;"></div>
+      <div class="meteo-right">
+        <div class="meteo-main"><span class="meteo-temp skeleton" style="width:44px;height:22px;display:inline-block;"></span></div>
+        <div class="meteo-desc skeleton" style="width:70px;height:10px;margin-top:2px;"></div>
+      </div>
+      <div class="meteo-extra"></div>
+    </a>
+  </div>
 
-
-  <!-- CETTE SEMAINE -->
-  <p class="sec">Cette semaine</p>
-  <div id="anniv-home-strips"></div>
-  <div id="events-home-list"></div>
-
-  <!-- QUI EST LÀ CE SOIR -->
+  <!-- 2. QUI EST LÀ CE SOIR -->
+  <p class="sec" style="margin-top:16px;">Ce soir</p>
   <div class="diner-card" id="diner-card">
     <div class="diner-header">
       <div class="diner-icon">🍽</div>
@@ -647,17 +649,16 @@ body {
     <div class="diner-summary-bar" id="diner-summary-bar" style="display:none;"></div>
   </div>
 
-  <!-- PICKER DINER -->
-  <div class="diner-picker-overlay hidden" id="diner-picker-overlay" onclick="closeDinerPicker(event)">
-    <div class="diner-picker" id="diner-picker">
-      <div class="diner-picker-who" id="diner-picker-who">— Qui es-tu ? —</div>
-      <div class="diner-picker-choices" id="diner-picker-choices"></div>
-      <button class="diner-picker-cancel" onclick="closeDinerPicker()">Annuler</button>
-    </div>
+  <!-- 3. CETTE SEMAINE + AGENDA RAPIDE -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;margin-bottom:10px;">
+    <p class="sec" style="margin:0;">Cette semaine</p>
+    <button onclick="showAddEvent()" style="background:rgba(247,193,4,0.15);border:1px solid rgba(247,193,4,0.3);color:var(--yellow);border-radius:20px;padding:5px 12px;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;">+ Ajouter</button>
   </div>
+  <div id="anniv-home-strips"></div>
+  <div id="events-home-list"></div>
 
-  <!-- AIR + TRANSPORT -->
-  <p class="sec">Environnement & Transport</p>
+  <!-- 4. AIR + TRANSPORT -->
+  <p class="sec" style="margin-top:16px;">Environnement & Transport</p>
   <div class="info-row">
     <div class="info-card" id="air-card">
       <div class="info-label">Qualité de l'air</div>
@@ -669,26 +670,24 @@ body {
       <div class="transport-lines" id="transport-lines">
         <div class="skeleton" style="height:20px;border-radius:4px;"></div>
         <div class="skeleton" style="height:20px;border-radius:4px;margin-top:4px;"></div>
-        <div class="skeleton" style="height:20px;border-radius:4px;margin-top:4px;"></div>
       </div>
     </div>
   </div>
 
-
-  <!-- PODCASTS -->
-  <p class="sec">Derniers podcasts</p>
-  <div id="podcasts-section">
-    <div class="sports-loading">Chargement des podcasts...</div>
-  </div>
-
-  <!-- SPORTS -->
-  <p class="sec">Nos équipes</p>
+  <!-- 5. SPORTS -->
+  <p class="sec" style="margin-top:16px;">Nos équipes</p>
   <div class="sports-section" id="sports-section">
-    <div class="sports-loading">Chargement des résultats...</div>
+    <div class="sports-loading">Chargement...</div>
   </div>
 
-  <!-- TDF WIDGET -->
-  <p class="sec">Tour de France 2026</p>
+  <!-- 6. PODCASTS -->
+  <p class="sec" style="margin-top:16px;">Derniers podcasts</p>
+  <div id="podcasts-section">
+    <div class="sports-loading">Chargement...</div>
+  </div>
+
+  <!-- 7. TDF WIDGET -->
+  <p class="sec" style="margin-top:16px;">Tour de France 2026</p>
   <div class="tdf-card">
     <div class="tdf-header">
       <div class="tdf-logo">
@@ -717,6 +716,15 @@ body {
     </div>
   </div>
 
+</div>
+
+<!-- PICKER DINER (global, pas dans accueil) -->
+<div class="diner-picker-overlay hidden" id="diner-picker-overlay">
+  <div class="diner-picker" id="diner-picker">
+    <div class="diner-picker-who" id="diner-picker-who">— Qui es-tu ? —</div>
+    <div class="diner-picker-choices" id="diner-picker-choices"></div>
+    <button class="diner-picker-cancel" onclick="closeDinerPicker()">Annuler</button>
+  </div>
 </div>
 
 
@@ -1163,15 +1171,18 @@ async function fetchMeteo(cityKey) {
     const tmax = Math.round(daily.temperature_2m_max[0]);
     const tmin = Math.round(daily.temperature_2m_min[0]);
 
-    document.getElementById(`meteo-${cityKey}`).innerHTML = `
+    const el = document.getElementById(`meteo-${cityKey}`);
+    // Garde le href et la structure <a>, remplace juste le contenu
+    el.innerHTML = `
       <div class="meteo-city">${c.label}</div>
       <div class="meteo-icon">${icon}</div>
-      <div class="meteo-temp">${Math.round(cur.temperature_2m)}<sup>°C</sup></div>
-      <div class="meteo-desc">${desc}</div>
-      <div class="meteo-minmax">↑${tmax}° ↓${tmin}°</div>
+      <div class="meteo-right">
+        <div class="meteo-main"><span class="meteo-temp">${Math.round(cur.temperature_2m)}<sup>°C</sup></span></div>
+        <div class="meteo-desc">${desc} · ↑${tmax}° ↓${tmin}°</div>
+      </div>
       <div class="meteo-extra">
-        <div class="meteo-extra-item">💨 ${Math.round(cur.windspeed_10m)} km/h</div>
-        <div class="meteo-extra-item">💧 ${cur.relative_humidity_2m}%</div>
+        <div class="meteo-extra-item">💨${Math.round(cur.windspeed_10m)}</div>
+        <div class="meteo-extra-item">💧${cur.relative_humidity_2m}%</div>
       </div>`;
   } catch(e) {
     document.getElementById(`meteo-${cityKey}`).innerHTML = `
@@ -1453,11 +1464,18 @@ function openDinerPicker(membreName) {
 }
 
 function closeDinerPicker(e) {
-  if (!e || e.target === document.getElementById('diner-picker-overlay')) {
+  if (!e || !e.target || !document.getElementById('diner-picker').contains(e.target)) {
     document.getElementById('diner-picker-overlay').classList.add('hidden');
     dinerPickerTarget = null;
   }
 }
+// Tap overlay pour fermer
+document.addEventListener('DOMContentLoaded', function() {
+  const overlay = document.getElementById('diner-picker-overlay');
+  if (overlay) overlay.addEventListener('click', function(e) {
+    if (e.target === this) closeDinerPicker(null);
+  });
+});
 
 function setDinerChoice(membre, choiceId) {
   // toggle
