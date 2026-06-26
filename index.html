@@ -1640,12 +1640,17 @@ function saveMemberAnnivs(data) {
 // ── Onboarding ──────────────────────────────────────────────
 function initProfile() {
   const grid = document.getElementById('profile-grid');
-  grid.innerHTML = MEMBRES.map(m =>
-    `<button class="profile-btn" onclick="selectMember('${m.name}')">
+  grid.innerHTML = MEMBRES.map((m, i) =>
+    `<button class="profile-btn" data-idx="${i}">
       <div class="profile-btn-emoji">${m.emoji}</div>
       <div class="profile-btn-name">${m.name}</div>
     </button>`
   ).join('');
+
+  // Event listeners propres (évite les problèmes d'accents dans onclick)
+  grid.querySelectorAll('.profile-btn').forEach((btn, i) => {
+    btn.addEventListener('click', () => selectMember(MEMBRES[i].name));
+  });
 
   if (currentMember) {
     document.getElementById('profile-overlay').classList.add('hidden');
@@ -1696,9 +1701,9 @@ function renderPerso() {
 
   // Teams picker
   const teamsPicker = document.getElementById('teams-picker');
-  teamsPicker.innerHTML = ALL_TEAMS.map(t => {
+  teamsPicker.innerHTML = ALL_TEAMS.map((t, i) => {
     const sel = selectedTeamIds.includes(t.id);
-    return `<div class="team-pick-row${sel?' selected':''}" onclick="toggleTeam('${t.id}')">
+    return `<div class="team-pick-row${sel?' selected':''}" data-team-id="${t.id}">
       <div class="team-pick-emoji">${t.emoji}</div>
       <div class="team-pick-info">
         <div class="team-pick-name">${t.short} — ${t.name}</div>
@@ -1707,18 +1712,23 @@ function renderPerso() {
       <div class="team-pick-check">${sel?'✓':''}</div>
     </div>`;
   }).join('');
+  teamsPicker.querySelectorAll('.team-pick-row').forEach(row => {
+    row.addEventListener('click', () => toggleTeam(row.dataset.teamId));
+  });
 
   // Podcasts picker
   const podcastsPicker = document.getElementById('podcasts-picker');
-  podcastsPicker.innerHTML = ALL_PODCASTS.map(p => {
+  podcastsPicker.innerHTML = ALL_PODCASTS.map((p, i) => {
     const sel = selectedPodcastIds.includes(p.id);
-    return `<div class="podcast-pick-row${sel?' selected':''}" onclick="togglePodcast('${p.id}')">
+    return `<div class="podcast-pick-row${sel?' selected':''}" data-pod-id="${p.id}">
       <div class="podcast-pick-dot" style="background:${p.color}"></div>
       <div class="podcast-pick-name">${p.name}</div>
       <div class="podcast-pick-check">${sel?'✓':''}</div>
     </div>`;
   }).join('');
-
+  podcastsPicker.querySelectorAll('.podcast-pick-row').forEach(row => {
+    row.addEventListener('click', () => togglePodcast(row.dataset.podId));
+  });
   // Annivs
   annivState = getMemberAnnivs();
   renderAnniv();
