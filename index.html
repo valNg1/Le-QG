@@ -1347,56 +1347,34 @@ function addEvent() {
 let podcastsCache = JSON.parse(localStorage.getItem('fam_podcasts') || 'null');
 
 async function fetchPodcasts(force = false) {
-  const now = Date.now();
-  if (!force && podcastsCache && (now - podcastsCache.ts) < 60 * 60 * 1000) {
-    renderPodcasts(podcastsCache.data);
-    return;
-  }
-  document.getElementById('podcasts-section').innerHTML = '<div class="sports-loading">Chargement des podcasts...</div>';
-  try {
-    const memberPodIds = currentMember ? getMemberPodcasts() : ['judoka','gdiy','thinker'];
+  const el = document.getElementById('podcasts-section');
+  if (!el) return;
+  // Vide le cache corrompu
+  localStorage.removeItem('fam_podcasts');
+  podcastsCache = null;
+
+  const memberPodIds = currentMember ? getMemberPodcasts() : ['judoka','gdiy','thinker'];
   const PODCASTS = ALL_PODCASTS.filter(p => memberPodIds.includes(p.id));
-  const results = await Promise.allSettled(
-      PODCASTS.map(async p => {
-        // 1. Trouve le podcast
-        const searchUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(p.search)}&media=podcast&entity=podcast&limit=3&country=fr`;
-        const searchRes = await fetch(searchUrl);
-        const searchData = await searchRes.json();
-        const podcast = searchData.results?.[0];
-        if (!podcast) return { show: p, episodes: [] };
 
-        // 2. Récupère les derniers épisodes via le feed RSS
-        const feedUrl = podcast.feedUrl;
-        if (!feedUrl) return { show: p, episodes: [], podcastUrl: podcast.collectionViewUrl };
+  el.innerHTML = '<div class="sports-loading">Chargement des podcasts...</div>';
 
-        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(feedUrl)}`;
-        const feedRes = await fetch(proxyUrl);
-        const feedText = await feedRes.text();
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(feedText, 'text/xml');
-        const items = [...xml.querySelectorAll('item')].slice(0, 2);
+  const results = await Promise.allSettled(PODCASTS.map(async p => {
+    // iTunes Search API — épisodes récents, sans proxy, sans RSS
+    const url = `https://itunes.apple.com/search?term=${encodeURIComponent(p.search)}&media=podcast&entity=podcastEpisode&limit=2&country=fr&lang=fr_FR`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('iTunes error');
+    const data = await res.json();
+    const episodes = (data.results || []).map(ep => ({
+      title: ep.trackName || '',
+      date: ep.releaseDate ? new Date(ep.releaseDate).toLocaleDateString('fr-FR', {day:'numeric', month:'short'}) : '',
+      duration: ep.trackTimeMillis ? Math.round(ep.trackTimeMillis / 60000) + ' min' : '',
+      url: ep.episodeUrl || ep.trackViewUrl || '',
+    }));
+    return { show: p, episodes, podcastUrl: data.results?.[0]?.collectionViewUrl || '' };
+  }));
 
-        const episodes = items.map(item => ({
-          title: item.querySelector('title')?.textContent || '',
-          date: item.querySelector('pubDate')?.textContent || '',
-          duration: item.querySelector('itunes\:duration, duration')?.textContent || '',
-          url: item.querySelector('enclosure')?.getAttribute('url') || podcast.collectionViewUrl,
-          link: item.querySelector('link')?.textContent || podcast.collectionViewUrl,
-        }));
-        return { show: p, episodes, podcastUrl: podcast.collectionViewUrl };
-      })
-    );
-
-    const data = results.map((r, i) =>
-      r.status === 'fulfilled' ? r.value : { show: PODCASTS[i], episodes: [] }
-    );
-    podcastsCache = { ts: now, data };
-    localStorage.setItem('fam_podcasts', JSON.stringify(podcastsCache));
-    renderPodcasts(data);
-  } catch(e) {
-    document.getElementById('podcasts-section').innerHTML =
-      '<div style="text-align:center;padding:16px;color:var(--muted);font-size:13px;">Podcasts indisponibles</div>';
-  }
+  const data = results.map((r, i) => r.status === 'fulfilled' ? r.value : { show: PODCASTS[i], episodes: [] });
+  renderPodcasts(data);
 }
 
 function formatPodcastDate(dateStr) {
@@ -2757,7 +2735,7 @@ document.addEventListener('DOMContentLoaded', function() {
   fetchAirQuality();
   fetchTransport();
   sportsCache = null; fetchSports(true);
-  podcastsCache = null; fetchPodcasts(true);
+  localStorage.removeItem("fam_podcasts"); podcastsCache = null; fetchPodcasts(true);
   checkCoursesWeek();
   renderCourses();
 
