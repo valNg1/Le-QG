@@ -1640,18 +1640,20 @@ function saveMemberAnnivs(data) {
 // ── Onboarding ──────────────────────────────────────────────
 function initProfile() {
   const grid = document.getElementById('profile-grid');
+  if (!grid) return;
+
   grid.innerHTML = MEMBRES.map((m, i) =>
-    `<button class="profile-btn" data-idx="${i}">
-      <div class="profile-btn-emoji">${m.emoji}</div>
-      <div class="profile-btn-name">${m.name}</div>
+    `<button class="profile-btn" data-idx="${i}" style="background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--r);padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;">
+      <div style="font-size:32px;line-height:1;">${m.emoji}</div>
+      <div style="font-size:13px;font-weight:700;color:var(--text);">${m.name}</div>
     </button>`
   ).join('');
 
-  // Event listeners propres (évite les problèmes d'accents dans onclick)
   grid.querySelectorAll('.profile-btn').forEach((btn, i) => {
     btn.addEventListener('click', () => selectMember(MEMBRES[i].name));
   });
 
+  // Si déjà connecté → cache l'overlay immédiatement
   if (currentMember) {
     document.getElementById('profile-overlay').classList.add('hidden');
     updateMemberChip();
@@ -2450,50 +2452,50 @@ function showToast(msg) {
 // ============================================================
 // INIT
 // ============================================================
-initProfile();
-updateHeader();
-fetchMeteo('paris');
-fetchMeteo('quiberon');
-initTaches();
-renderEvents();
-
-// Ajout événements de démo si vide
-if (eventsState.length === 0) {
-  const today = new Date();
-  const addDays = (n) => { const d = new Date(today); d.setDate(d.getDate()+n); return d.toISOString().split('T')[0]; };
-  eventsState = [
-    { title: 'Tour de France — Départ Barcelone', date: '2026-07-04', time: '10:45', who: 'Toute la famille', color: 'orange', adder: 'Diego',  id: 1 },
-    { title: 'Vacances Quiberon (rappel)',         date: addDays(4),   time: '',      who: 'Toute la famille',   color: 'blue', adder: 'Luca',   id: 2 },
-    { title: 'Vacances Quiberon',                 date: addDays(10),  time: '',      who: 'Toute la famille',   color: 'green', adder: 'Romain', id: 3 },
-  ];
-  saveEvents();
+// Attend que le DOM soit complètement chargé
+document.addEventListener('DOMContentLoaded', function() {
+  initProfile();
+  updateHeader();
+  fetchMeteo('paris');
+  fetchMeteo('quiberon');
+  initTaches();
   renderEvents();
-}
 
-initDiner();
-initMenu();
-if(currentMember) { annivState = getMemberAnnivs(); }
-renderAnnivHome();
-renderMur();
-fetchAirQuality();
-fetchTransport();
-fetchSports();
-fetchPodcasts();
-checkCoursesWeek();
-renderCourses();
+  // Ajout événements de démo si vide
+  if (eventsState.length === 0) {
+    const today = new Date();
+    const addDays = (n) => { const d = new Date(today); d.setDate(d.getDate()+n); return d.toISOString().split('T')[0]; };
+    eventsState = [
+      { title: 'Tour de France — Départ Barcelone', date: '2026-07-04', time: '10:45', who: 'Toute la famille', color: 'orange', adder: 'Diego',  id: 1 },
+      { title: 'Vacances Quiberon (rappel)',         date: addDays(4),   time: '',      who: 'Toute la famille',   color: 'blue', adder: 'Luca',   id: 2 },
+      { title: 'Vacances Quiberon',                 date: addDays(10),  time: '',      who: 'Toute la famille',   color: 'green', adder: 'Romain', id: 3 },
+    ];
+    saveEvents();
+    renderEvents();
+  }
 
-// Refresh toutes les 30 min
-setInterval(fetchAirQuality, 30 * 60 * 1000);
-setInterval(fetchTransport, 10 * 60 * 1000);
-setInterval(fetchSports, 30 * 60 * 1000);
-setInterval(fetchPodcasts, 60 * 60 * 1000);
-setInterval(() => { if (document.getElementById("view-medias").classList.contains("active")) fetchNews(); }, 30 * 60 * 1000);
-// Refresh météo toutes les 30 min
-setInterval(() => { fetchMeteo('paris'); fetchMeteo('quiberon'); }, 30 * 60 * 1000);
-// Refresh header chaque minute
-setInterval(updateHeader, 60 * 1000);
-// Reset diner chaque jour à minuit
-setInterval(() => { if(getDinerDateKey() !== dinerState?.date) initDiner(); }, 60 * 1000);
+  initDiner();
+  initMenu();
+  if (currentMember) { annivState = getMemberAnnivs(); }
+  renderAnnivHome();
+  renderMur();
+  fetchAirQuality();
+  fetchTransport();
+  fetchSports();
+  fetchPodcasts();
+  checkCoursesWeek();
+  renderCourses();
+
+  // Refresh toutes les 30 min
+  setInterval(fetchAirQuality, 30 * 60 * 1000);
+  setInterval(fetchTransport, 10 * 60 * 1000);
+  setInterval(fetchSports, 30 * 60 * 1000);
+  setInterval(fetchPodcasts, 60 * 60 * 1000);
+  setInterval(() => { if (document.getElementById("view-medias").classList.contains("active")) fetchNews(); }, 30 * 60 * 1000);
+  setInterval(() => { fetchMeteo('paris'); fetchMeteo('quiberon'); }, 30 * 60 * 1000);
+  setInterval(updateHeader, 60 * 1000);
+  setInterval(() => { if(getDinerDateKey() !== dinerState?.date) initDiner(); }, 60 * 1000);
+});
 </script>
 </body>
 </html>
