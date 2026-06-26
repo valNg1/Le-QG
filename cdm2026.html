@@ -94,7 +94,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
         <div style="font-size:11px;color:var(--muted);margin-top:2px;">USA · Canada · Mexique</div>
       </div>
     </div>
-    <div class="badge">14 JUI – 19 JUL</div>
+    <div class="badge" style="background:#34C77B;animation:blink 2s infinite;">🔴 EN COURS</div>
   </div>
   <nav class="nav-tabs">
     <button class="tab active" onclick="showView('accueil',0)">Accueil</button>
@@ -110,7 +110,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
   <div class="hero">
     <div class="hero-label">🏟 Prochaine édition</div>
     <div class="hero-title">Coupe du Monde FIFA 2026</div>
-    <div class="hero-sub">16 villes hôtes · USA, Canada, Mexique</div>
+    <div class="hero-sub">🟢 Compétition en cours · 16 villes hôtes · USA, Canada, Mexique</div>
     <div class="stats-grid">
       <div class="stat-box"><div class="stat-val">48</div><div class="stat-lbl">Équipes</div></div>
       <div class="stat-box"><div class="stat-val">104</div><div class="stat-lbl">Matchs</div></div>
@@ -136,7 +136,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     <div style="font-size:48px">🇦🇷</div>
     <div>
       <div style="font-size:20px;font-weight:800;color:var(--text);">Argentine</div>
-      <div style="font-size:13px;color:var(--muted);">Champion du Monde 2022<br>Qatar — 3 étoiles ⭐⭐⭐</div>
+      <div style="font-size:13px;color:var(--muted);">Champion du Monde 2022<br>Qatar — 3 étoiles ⭐⭐⭐<br><span style="color:#34C77B;font-weight:600;">✅ Qualifiée pour les 16es</span></div>
     </div>
   </div>
 </div>
@@ -257,7 +257,8 @@ function showView(id, idx) {
 }
 
 // Données
-const GROUPES = [
+// anciens groupes remplacés
+
   {nom:"A", equipes:[{f:"🇦🇷",n:"Argentine"},{f:"🇨🇱",n:"Chili"},{f:"🇵🇪",n:"Pérou"},{f:"🇨🇦",n:"Canada"}]},
   {nom:"B", equipes:[{f:"🇫🇷",n:"France"},{f:"🇲🇦",n:"Maroc"},{f:"🇵🇹",n:"Portugal"},{f:"🇿🇦",n:"Afrique du Sud"}]},
   {nom:"C", equipes:[{f:"🇪🇸",n:"Espagne"},{f:"🇩🇪",n:"Allemagne"},{f:"🇯🇵",n:"Japon"},{f:"🇨🇷",n:"Costa Rica"}]},
@@ -269,13 +270,38 @@ const GROUPES = [
   // Format étendu 48 équipes : 12 groupes de 4
 ];
 
+const GROUPES = [
+  {nom:"A", equipes:[{f:"🇲🇽",n:"Mexique"},{f:"🇿🇦",n:"Afrique du Sud"},{f:"🇰🇷",n:"Corée du Sud"},{f:"🇨🇿",n:"Tchéquie"}]},
+  {nom:"B", equipes:[{f:"🇨🇦",n:"Canada"},{f:"🇧🇦",n:"Bosnie"},{f:"🇶🇦",n:"Qatar"},{f:"🇨🇭",n:"Suisse"}]},
+  {nom:"C", equipes:[{f:"🇧🇷",n:"Brésil"},{f:"🇲🇦",n:"Maroc"},{f:"🇭🇹",n:"Haïti"},{f:"🏴󠁧󠁢󠁳󠁣󠁴󠁿",n:"Écosse"}]},
+  {nom:"D", equipes:[{f:"🇺🇸",n:"États-Unis"},{f:"🇵🇾",n:"Paraguay"},{f:"🇦🇺",n:"Australie"},{f:"🇹🇷",n:"Turquie"}]},
+  {nom:"E", equipes:[{f:"🇩🇪",n:"Allemagne"},{f:"🇨🇼",n:"Curaçao"},{f:"🇨🇮",n:"Côte d'Ivoire"},{f:"🇪🇨",n:"Équateur"}]},
+  {nom:"F", equipes:[{f:"🇳🇱",n:"Pays-Bas"},{f:"🇯🇵",n:"Japon"},{f:"🇸🇪",n:"Suède"},{f:"🇹🇳",n:"Tunisie"}]},
+  {nom:"G", equipes:[{f:"🇧🇪",n:"Belgique"},{f:"🇪🇬",n:"Égypte"},{f:"🇮🇷",n:"Iran"},{f:"🇳🇿",n:"Nouvelle-Zélande"}]},
+  {nom:"H", equipes:[{f:"🇪🇸",n:"Espagne"},{f:"🇨🇻",n:"Cap-Vert"},{f:"🇸🇦",n:"Arabie Saoudite"},{f:"🇺🇾",n:"Uruguay"}]},
+  {nom:"I", equipes:[{f:"🇫🇷",n:"France ★★"},{f:"🇸🇳",n:"Sénégal"},{f:"🇮🇶",n:"Irak"},{f:"🇳🇴",n:"Norvège"}]},
+  {nom:"J", equipes:[{f:"🇦🇷",n:"Argentine ★★★"},{f:"🇩🇿",n:"Algérie"},{f:"🇦🇹",n:"Autriche"},{f:"🇯🇴",n:"Jordanie"}]},
+  {nom:"K", equipes:[{f:"🇵🇹",n:"Portugal"},{f:"🇨🇩",n:"RD Congo"},{f:"🇺🇿",n:"Ouzbékistan"},{f:"🇨🇴",n:"Colombie"}]},
+  {nom:"L", equipes:[{f:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",n:"Angleterre"},{f:"🇭🇷",n:"Croatie"},{f:"🇬🇭",n:"Ghana"},{f:"🇵🇦",n:"Panama"}]},
+];
+
 const MATCHS_PHARES = [
-  {phase:"group",date:"14 juin",heure:"21h00",h:{f:"🇲🇽",n:"Mexique"},a:{f:"🇺🇸",n:"États-Unis"},stade:"AT&T Stadium, Dallas",score:null},
-  {phase:"group",date:"15 juin",heure:"18h00",h:{f:"🇫🇷",n:"France"},a:{f:"🇵🇹",n:"Portugal"},stade:"SoFi Stadium, LA",score:null},
-  {phase:"group",date:"16 juin",heure:"21h00",h:{f:"🇧🇷",n:"Brésil"},a:{f:"🇦🇷",n:"Argentine"},stade:"MetLife Stadium, NY",score:null},
-  {phase:"group",date:"18 juin",heure:"21h00",h:{f:"🇪🇸",n:"Espagne"},a:{f:"🇩🇪",n:"Allemagne"},stade:"Levi's Stadium, SF",score:null},
-  {phase:"group",date:"19 juin",heure:"21h00",h:{f:"🇦🇪",n:"Angleterre"},a:{f:"🇳🇱",n:"Pays-Bas"},stade:"Rose Bowl, LA",score:null},
-  {phase:"final",date:"19 juillet",heure:"21h00",h:{f:"🏆",n:"Finaliste 1"},a:{f:"🏆",n:"Finaliste 2"},stade:"MetLife Stadium, New York",score:null},
+  // Matchs d'ouverture joués
+  {phase:"group",date:"11 juin",heure:"21h00",h:{f:"🇲🇽",n:"Mexique"},a:{f:"🇿🇦",n:"Afrique du Sud"},stade:"Estadio Azteca, Mexico",score:"2 - 0"},
+  // France (résultats réels)
+  {phase:"group",date:"17 juin",heure:"21h00 (FR)",h:{f:"🇫🇷",n:"France"},a:{f:"🇮🇶",n:"Irak"},stade:"Lincoln Financial Field, Philadelphie",score:"3 - 0"},
+  {phase:"group",date:"23 juin",heure:"02h00 (FR)",h:{f:"🇫🇷",n:"France"},a:{f:"🇸🇳",n:"Sénégal"},stade:"MetLife Stadium, New York",score:"3 - 2"},
+  {phase:"group",date:"26 juin",heure:"21h00 (FR)",h:{f:"🇳🇴",n:"Norvège"},a:{f:"🇫🇷",n:"France"},stade:"Lincoln Financial Field, Boston",score:null},
+  // Allemagne
+  {phase:"group",date:"14 juin",heure:"20h00 (FR)",h:{f:"🇩🇪",n:"Allemagne"},a:{f:"🇯🇵",n:"Japon"},stade:"AT&T Stadium, Dallas",score:"2 - 2"},
+  // Argentine
+  {phase:"group",date:"15 juin",heure:"21h00 (FR)",h:{f:"🇦🇷",n:"Argentine"},a:{f:"🇩🇿",n:"Algérie"},stade:"Rose Bowl, Los Angeles",score:null},
+  // 16es de finale
+  {phase:"r16",date:"28 juin",heure:"21h00 (FR)",h:{f:"🇿🇦",n:"Afrique du Sud"},a:{f:"🇨🇦",n:"Canada"},stade:"Rose Bowl, Los Angeles",score:null},
+  {phase:"r16",date:"29 juin",heure:"19h00 (FR)",h:{f:"🇧🇷",n:"Brésil"},a:{f:"🇯🇵",n:"Japon"},stade:"NRG Stadium, Houston",score:null},
+  {phase:"r16",date:"30 juin",heure:"19h00 (FR)",h:{f:"🇨🇮",n:"Côte d'Ivoire"},a:{f:"2e gr.I",n:"2e Gr.I"},stade:"AT&T Stadium, Dallas",score:null},
+  // Finale
+  {phase:"final",date:"19 juillet",heure:"21h00 (FR)",h:{f:"🏆",n:"Finaliste 1"},a:{f:"🏆",n:"Finaliste 2"},stade:"MetLife Stadium, New York",score:null},
 ];
 
 const EQUIPES = [
@@ -348,11 +374,12 @@ function renderTeams(teams) {
 // Calendrier clé accueil
 function renderCalendar() {
   const events = [
-    {date:"14 juin 2026",label:"🏁 Coup d'envoi — Mexico City"},
-    {date:"15 juin",label:"🇫🇷 France — 1er match"},
-    {date:"16 juin",label:"🇧🇷 Brésil vs 🇦🇷 Argentine (si même groupe)"},
-    {date:"4 juillet",label:"🔟 1/32 de finale débutent"},
-    {date:"19 juillet 2026",label:"🏆 Finale — MetLife Stadium, New York"},
+    {date:"11 juin",label:"✅ Mexique 2-0 Afrique du Sud (ouverture)"},
+    {date:"17 juin",label:"✅ France 3-0 Irak — Les Bleus lancés !"},
+    {date:"23 juin",label:"✅ France 3-2 Sénégal — Qualifiés !"},
+    {date:"26 juin",label:"🔴 EN COURS — Norvège vs France (Boston, 21h FR)"},
+    {date:"28-30 juin",label:"⚽ Seizièmes de finale — 32 équipes"},
+    {date:"19 juillet",label:"🏆 Finale — MetLife Stadium, New York"},
   ];
   document.getElementById("calendar-key").innerHTML = events.map(e=>`
     <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);align-items:center;">
