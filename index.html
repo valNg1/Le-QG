@@ -222,6 +222,61 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
 .toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;opacity:0;transition:all .3s;z-index:300;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .loading{text-align:center;padding:24px;color:var(--muted);font-size:13px}
+
+/* ── MODULES ── */
+.module-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.module-card { background: var(--surface); border-radius: var(--r); border: 1px solid var(--border); padding: 16px; cursor: pointer; transition: all .15s; text-align: center; position: relative; }
+.module-card.active { border-color: var(--yellow); background: var(--yellow-light); }
+.module-card:active { transform: scale(.97); }
+.module-icon { font-size: 32px; margin-bottom: 8px; }
+.module-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.module-desc { font-size: 11px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+.module-badge { position: absolute; top: 8px; right: 8px; background: var(--yellow); color: #1A1916; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 10px; }
+/* Jeûne */
+.jeune-timer { text-align: center; padding: 24px 0; }
+.jeune-circle { width: 160px; height: 160px; border-radius: 50%; border: 6px solid var(--surface2); margin: 0 auto 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+.jeune-circle svg { position: absolute; top: -3px; left: -3px; transform: rotate(-90deg); }
+.jeune-time { font-size: 32px; font-weight: 800; color: var(--text); line-height: 1; }
+.jeune-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
+.jeune-status { font-size: 14px; font-weight: 700; margin-bottom: 16px; }
+.jeune-btn { background: var(--yellow); color: #1A1916; border: none; border-radius: var(--r-sm); padding: 12px 32px; font-family: var(--font); font-size: 14px; font-weight: 700; cursor: pointer; margin: 4px; }
+.jeune-btn.stop { background: rgba(232,56,79,.15); color: var(--red); border: 1px solid rgba(232,56,79,.3); }
+.proto-row { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+.proto-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border2); background: none; color: var(--muted); font-family: var(--font); font-size: 12px; font-weight: 600; cursor: pointer; }
+.proto-btn.sel { background: var(--yellow); border-color: var(--yellow); color: #1A1916; }
+/* Mot du jour */
+.mot-card { background: var(--surface); border-radius: var(--r); border: 1px solid var(--border); padding: 20px; margin-bottom: 10px; text-align: center; }
+.mot-lang { font-size: 11px; font-weight: 700; color: var(--yellow); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+.mot-word { font-size: 32px; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+.mot-phonetic { font-size: 13px; color: var(--muted); margin-bottom: 12px; font-style: italic; }
+.mot-nature { display: inline-block; background: var(--surface2); border-radius: 20px; padding: 3px 10px; font-size: 11px; color: var(--muted); margin-bottom: 12px; }
+.mot-traduction { font-size: 18px; font-weight: 700; color: var(--green); margin-bottom: 10px; }
+.mot-exemple { font-size: 13px; color: var(--muted); line-height: 1.5; font-style: italic; padding: 10px; background: var(--surface2); border-radius: var(--r-sm); }
+.lang-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+.lang-btn { padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border2); background: none; color: var(--muted); font-family: var(--font); font-size: 13px; cursor: pointer; }
+.lang-btn.sel { background: var(--yellow); border-color: var(--yellow); color: #1A1916; font-weight: 700; }
+/* Quiz */
+.quiz-q { font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.4; margin-bottom: 20px; }
+.quiz-opts { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.quiz-opt { background: var(--surface); border: 1px solid var(--border2); border-radius: var(--r-sm); padding: 13px 16px; font-family: var(--font); font-size: 14px; font-weight: 500; color: var(--text); cursor: pointer; text-align: left; transition: all .15s; }
+.quiz-opt:active { transform: scale(.98); }
+.quiz-opt.correct { border-color: var(--green); background: rgba(52,199,123,.1); color: var(--green); }
+.quiz-opt.wrong { border-color: var(--red); background: rgba(232,56,79,.1); color: var(--red); }
+.quiz-progress { height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; margin-bottom: 20px; }
+.quiz-prog-fill { height: 100%; background: var(--yellow); border-radius: 2px; transition: width .3s; }
+.quiz-score { text-align: center; padding: 24px 0; }
+.quiz-score-num { font-size: 48px; font-weight: 800; color: var(--yellow); line-height: 1; }
+.quiz-score-label { font-size: 14px; color: var(--muted); margin-top: 8px; }
+/* Avis (ciné + lecture) */
+.avis-form { background: var(--surface); border-radius: var(--r); border: 1px solid var(--border); padding: 14px; margin-bottom: 12px; }
+.stars-input { display: flex; gap: 6px; margin-bottom: 10px; }
+.star-inp { font-size: 28px; cursor: pointer; line-height: 1; transition: transform .1s; }
+.star-inp:active { transform: scale(1.3); }
+.avis-card { background: var(--surface); border-radius: var(--r-sm); border: 1px solid var(--border); padding: 13px; margin-bottom: 8px; }
+.avis-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.avis-meta { font-size: 11px; color: var(--muted); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+.avis-comment { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.avis-stars { color: var(--yellow); font-size: 14px; }
 </style>
 </head>
 <body>
@@ -374,6 +429,106 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
   <button id="save-perso-btn" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:13px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;margin-top:16px;">💾 Enregistrer</button>
 </div>
 
+
+<!-- ═══ VIEW MODULES ═══ -->
+<div id="view-modules" class="view">
+
+  <!-- SÉLECTEUR MODULES -->
+  <div id="modules-home">
+    <p class="sec" style="margin-top:8px;">Mes modules</p>
+    <div class="module-grid" id="module-grid"></div>
+  </div>
+
+  <!-- JEÛNE INTERMITTENT -->
+  <div id="module-jeune" style="display:none;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
+      <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
+      <div style="font-size:16px;font-weight:700;color:var(--text);">⏱ Jeûne intermittent</div>
+    </div>
+    <div class="proto-row" id="proto-row"></div>
+    <div class="jeune-timer">
+      <div class="jeune-circle" id="jeune-circle">
+        <svg width="166" height="166" id="jeune-svg"><circle cx="83" cy="83" r="77" fill="none" stroke="var(--yellow)" stroke-width="6" stroke-dasharray="484" stroke-dashoffset="484" id="jeune-arc" stroke-linecap="round"/></svg>
+        <div class="jeune-time" id="jeune-time">00:00:00</div>
+        <div class="jeune-label" id="jeune-label">—</div>
+      </div>
+      <div class="jeune-status" id="jeune-status"></div>
+      <div>
+        <button class="jeune-btn" id="jeune-start-btn">Commencer le jeûne</button>
+        <button class="jeune-btn stop" id="jeune-stop-btn" style="display:none;">Arrêter</button>
+      </div>
+    </div>
+    <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-top:8px;">
+      <div class="info-label">Prochain repas</div>
+      <div id="jeune-next-meal" style="font-size:15px;font-weight:700;color:var(--green);">—</div>
+      <div id="jeune-history" style="margin-top:10px;font-size:12px;color:var(--muted);"></div>
+    </div>
+  </div>
+
+  <!-- MOT DU JOUR -->
+  <div id="module-mot" style="display:none;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
+      <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
+      <div style="font-size:16px;font-weight:700;color:var(--text);">🗣 Mot du jour</div>
+    </div>
+    <div class="lang-row" id="lang-row"></div>
+    <div id="mot-content"><div class="loading">Chargement...</div></div>
+    <button onclick="nextMot()" style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r-sm);padding:11px;font-family:var(--font);font-size:13px;font-weight:600;color:var(--text);cursor:pointer;margin-top:10px;">→ Mot suivant</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="module-quiz" style="display:none;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
+      <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
+      <div style="font-size:16px;font-weight:700;color:var(--text);">🧠 Quiz culture</div>
+    </div>
+    <div id="quiz-content"></div>
+  </div>
+
+  <!-- CINÉ / SPECTACLES -->
+  <div id="module-cine" style="display:none;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
+      <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
+      <div style="font-size:16px;font-weight:700;color:var(--text);">🎬 Ciné & Spectacles</div>
+    </div>
+    <div class="avis-form">
+      <input id="cine-title" class="modal-input" placeholder="Titre du film / spectacle / pièce..." type="text">
+      <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
+        <button class="tag sel" data-cine-cat="film">🎬 Film</button>
+        <button class="tag" data-cine-cat="theatre">🎭 Théâtre</button>
+        <button class="tag" data-cine-cat="spectacle">🎪 Spectacle</button>
+        <button class="tag" data-cine-cat="serie">📺 Série</button>
+      </div>
+      <div class="stars-input" id="cine-stars-input"></div>
+      <input id="cine-comment" class="modal-input" placeholder="Ton avis en quelques mots..." type="text">
+      <button id="cine-submit-btn" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:11px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">Publier mon avis</button>
+    </div>
+    <div id="cine-list"></div>
+  </div>
+
+  <!-- LECTURE -->
+  <div id="module-lecture" style="display:none;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
+      <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
+      <div style="font-size:16px;font-weight:700;color:var(--text);">📚 Lectures & Livres</div>
+    </div>
+    <div class="avis-form">
+      <input id="livre-title" class="modal-input" placeholder="Titre du livre..." type="text">
+      <input id="livre-author" class="modal-input" placeholder="Auteur" type="text">
+      <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
+        <button class="tag sel" data-livre-cat="roman">📖 Roman</button>
+        <button class="tag" data-livre-cat="essai">💡 Essai</button>
+        <button class="tag" data-livre-cat="bd">🎨 BD/Manga</button>
+        <button class="tag" data-livre-cat="bio">👤 Biographie</button>
+      </div>
+      <div class="stars-input" id="livre-stars-input"></div>
+      <input id="livre-comment" class="modal-input" placeholder="Pourquoi le recommander ?" type="text">
+      <button id="livre-submit-btn" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:11px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">Publier ma recommandation</button>
+    </div>
+    <div id="livre-list"></div>
+  </div>
+
+</div>
 <!-- ═══ VIEW MUR ═══ -->
 <div id="view-mur" class="view">
   <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-bottom:12px;margin-top:8px;">
@@ -404,6 +559,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
   <button class="nav-btn" id="nav-groupe" data-view="groupe">
     <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
     <span>Groupe</span>
+  </button>
+  <button class="nav-btn" id="nav-modules" data-view="modules">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    <span>Modules</span>
   </button>
   <button class="nav-btn" id="nav-mur" data-view="mur">
     <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
@@ -708,6 +867,7 @@ function showView(id) {
   if (id==="perso") renderPerso();
   if (id==="groupe") renderGroupe();
   if (id==="mur") renderMurList();
+  if (id==="modules") renderModulesHome();
 }
 
 // ════════════════════════════════════════════
@@ -1357,6 +1517,420 @@ document.getElementById("save-perso-btn").addEventListener("click",()=>{
 });
 
 
+
+
+// ════════════════════════════════════════════
+// MODULES
+// ════════════════════════════════════════════
+const ALL_MODULES = [
+  { id:"jeune",   name:"Jeûne intermittent", desc:"Timer + prochain repas", emoji:"⏱", color:"#F7C104" },
+  { id:"mot",     name:"Mot du jour",        desc:"Apprends une langue",    emoji:"🗣", color:"#4A90E2" },
+  { id:"quiz",    name:"Quiz culture",       desc:"10 questions par session",emoji:"🧠", color:"#9B6BFF" },
+  { id:"cine",    name:"Ciné & Spectacles",  desc:"Avis du groupe",         emoji:"🎬", color:"#E8384F" },
+  { id:"lecture", name:"Lectures",           desc:"Recommandations du groupe",emoji:"📚",color:"#34C77B" },
+];
+
+function renderModulesHome() {
+  const el = document.getElementById("module-grid");
+  if (!el) return;
+  const activeIds = state.activeModules || [];
+  el.innerHTML = ALL_MODULES.map(m => `
+    <div class="module-card${activeIds.includes(m.id)?" active":""}" data-mod="${m.id}">
+      <div class="module-icon">${m.emoji}</div>
+      <div class="module-name">${m.name}</div>
+      <div class="module-desc">${m.desc}</div>
+      ${activeIds.includes(m.id)?`<div class="module-badge">ON</div>`:""}
+    </div>`).join("");
+
+  el.querySelectorAll(".module-card").forEach(card => {
+    card.addEventListener("click", function() {
+      const id = this.dataset.mod;
+      openModule(id);
+    });
+    card.addEventListener("dblclick", function() {
+      const id = this.dataset.mod;
+      if (!state.activeModules) state.activeModules = [];
+      if (state.activeModules.includes(id)) state.activeModules = state.activeModules.filter(x=>x!==id);
+      else state.activeModules.push(id);
+      saveState(); renderModulesHome();
+      showToast(state.activeModules.includes(id)?"Module activé ✓":"Module désactivé");
+    });
+  });
+}
+
+function openModule(id) {
+  document.getElementById("modules-home").style.display = "none";
+  document.querySelectorAll("[id^='module-']").forEach(el => el.style.display = "none");
+  const el = document.getElementById("module-"+id);
+  if (el) el.style.display = "block";
+  // Init module
+  if (id==="jeune") initJeune();
+  if (id==="mot") initMot();
+  if (id==="quiz") initQuiz();
+  if (id==="cine") initCine();
+  if (id==="lecture") initLecture();
+}
+
+function backToModules() {
+  document.querySelectorAll("[id^='module-']").forEach(el => el.style.display = "none");
+  document.getElementById("modules-home").style.display = "block";
+  if (jeuneInterval) { clearInterval(jeuneInterval); jeuneInterval = null; }
+}
+
+// ════════════════
+// JEÛNE INTERMITTENT
+// ════════════════
+const PROTOCOLES = [
+  { id:"16_8",  label:"16/8",  jeune:16, repas:8  },
+  { id:"18_6",  label:"18/6",  jeune:18, repas:6  },
+  { id:"20_4",  label:"20/4",  jeune:20, repas:4  },
+  { id:"5_2",   label:"5:2",   jeune:36, repas:12 },
+];
+let jeuneInterval = null;
+
+function initJeune() {
+  const proto = state.jeuneProto || "16_8";
+  const row = document.getElementById("proto-row");
+  row.innerHTML = PROTOCOLES.map(p => `<button class="proto-btn${p.id===proto?" sel":""}" data-proto="${p.id}">${p.label}</button>`).join("");
+  row.querySelectorAll(".proto-btn").forEach(b => {
+    b.addEventListener("click", function() {
+      state.jeuneProto = this.dataset.proto;
+      saveState(); initJeune();
+    });
+  });
+  document.getElementById("jeune-start-btn").onclick = startJeune;
+  document.getElementById("jeune-stop-btn").onclick = stopJeune;
+  updateJeuneDisplay();
+  if (state.jeuneStart) {
+    document.getElementById("jeune-start-btn").style.display = "none";
+    document.getElementById("jeune-stop-btn").style.display = "inline-block";
+    jeuneInterval = setInterval(updateJeuneDisplay, 1000);
+  }
+}
+
+function startJeune() {
+  state.jeuneStart = Date.now();
+  saveState();
+  document.getElementById("jeune-start-btn").style.display = "none";
+  document.getElementById("jeune-stop-btn").style.display = "inline-block";
+  jeuneInterval = setInterval(updateJeuneDisplay, 1000);
+  updateJeuneDisplay();
+}
+
+function stopJeune() {
+  if (!state.jeuneHistory) state.jeuneHistory = [];
+  if (state.jeuneStart) {
+    const dur = Math.floor((Date.now() - state.jeuneStart) / 3600000);
+    state.jeuneHistory.unshift({ date: new Date().toLocaleDateString("fr-FR"), dur });
+    if (state.jeuneHistory.length > 7) state.jeuneHistory = state.jeuneHistory.slice(0,7);
+  }
+  state.jeuneStart = null;
+  saveState();
+  clearInterval(jeuneInterval); jeuneInterval = null;
+  document.getElementById("jeune-start-btn").style.display = "inline-block";
+  document.getElementById("jeune-stop-btn").style.display = "none";
+  updateJeuneDisplay();
+}
+
+function updateJeuneDisplay() {
+  const proto = PROTOCOLES.find(p=>p.id===(state.jeuneProto||"16_8"));
+  const jeuneDurMs = proto.jeune * 3600000;
+  const el = { time: document.getElementById("jeune-time"), label: document.getElementById("jeune-label"), status: document.getElementById("jeune-status"), arc: document.getElementById("jeune-arc"), next: document.getElementById("jeune-next-meal"), hist: document.getElementById("jeune-history") };
+  if (!el.time) return;
+
+  if (state.jeuneStart) {
+    const elapsed = Date.now() - state.jeuneStart;
+    const remaining = Math.max(0, jeuneDurMs - elapsed);
+    const pct = Math.min(1, elapsed / jeuneDurMs);
+    const circumference = 484;
+    if(el.arc) el.arc.setAttribute("stroke-dashoffset", circumference - pct * circumference);
+    const h = Math.floor(remaining/3600000), m = Math.floor((remaining%3600000)/60000), s = Math.floor((remaining%60000)/1000);
+    if(el.time) el.time.textContent = String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+    if(el.label) el.label.textContent = remaining > 0 ? "restant" : "✅ Terminé !";
+    if(el.status) el.status.innerHTML = remaining > 0 ? `<span style="color:var(--yellow)">⏳ Jeûne en cours — ${proto.label}</span>` : `<span style="color:var(--green)">🎉 Jeûne terminé !</span>`;
+    const nextMeal = new Date(state.jeuneStart + jeuneDurMs);
+    if(el.next) el.next.textContent = nextMeal.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}) + " — " + nextMeal.toLocaleDateString("fr-FR",{weekday:"long"});
+  } else {
+    if(el.time) el.time.textContent = "00:00:00";
+    if(el.label) el.label.textContent = "en attente";
+    if(el.status) el.status.innerHTML = `<span style="color:var(--muted)">Protocole ${proto.label} sélectionné</span>`;
+    if(el.arc) el.arc.setAttribute("stroke-dashoffset","484");
+    if(el.next) el.next.textContent = "Lance ton jeûne pour calculer";
+  }
+  if(el.hist && state.jeuneHistory?.length) {
+    el.hist.innerHTML = "<strong>Historique</strong> : " + state.jeuneHistory.map(h=>`${h.date} (${h.dur}h)`).join(" · ");
+  }
+}
+
+// ════════════════
+// MOT DU JOUR
+// ════════════════
+const LANGUES = [
+  { id:"en", label:"🇬🇧 Anglais" },
+  { id:"es", label:"🇪🇸 Espagnol" },
+  { id:"de", label:"🇩🇪 Allemand" },
+  { id:"it", label:"🇮🇹 Italien" },
+  { id:"pt", label:"🇵🇹 Portugais" },
+];
+
+const MOTS_DB = {
+  en: [
+    {word:"Serendipity",phonetic:"/ˌser.ənˈdɪp.ɪ.ti/",nature:"nom",trad:"La sérendipité",exemple:"It was pure serendipity that we met here."},
+    {word:"Ephemeral",phonetic:"/ɪˈfem.ər.əl/",nature:"adj.",trad:"Éphémère",exemple:"Social media fame is often ephemeral."},
+    {word:"Resilience",phonetic:"/rɪˈzɪl.i.əns/",nature:"nom",trad:"Résilience",exemple:"Her resilience helped her overcome difficulties."},
+    {word:"Eloquent",phonetic:"/ˈel.ə.kwənt/",nature:"adj.",trad:"Éloquent",exemple:"He gave an eloquent speech."},
+    {word:"Tenacity",phonetic:"/təˈnæs.ɪ.ti/",nature:"nom",trad:"Ténacité",exemple:"Success requires tenacity and hard work."},
+    {word:"Wanderlust",phonetic:"/ˈwɒn.dəlʌst/",nature:"nom",trad:"L'envie de voyager",exemple:"His wanderlust took him across the world."},
+    {word:"Ameliorate",phonetic:"/əˈmiː.li.ə.reɪt/",nature:"verbe",trad:"Améliorer",exemple:"New policies should ameliorate the situation."},
+  ],
+  es: [
+    {word:"Madrugada",phonetic:"/ma.ðɾu.ˈɣa.ða/",nature:"nom",trad:"Les heures avant l'aube",exemple:"Llegó a casa en la madrugada."},
+    {word:"Sobremesa",phonetic:"/so.βɾeˈme.sa/",nature:"nom",trad:"La conversation après repas",exemple:"La sobremesa duró dos horas."},
+    {word:"Chapuza",phonetic:"/tʃaˈpu.θa/",nature:"nom",trad:"Travail bâclé",exemple:"Este trabajo es una chapuza."},
+    {word:"Añoranza",phonetic:"/a.ɲoˈɾan.θa/",nature:"nom",trad:"Nostalgie",exemple:"Siente añoranza de su tierra natal."},
+    {word:"Estrenar",phonetic:"/es.tɾeˈnaɾ/",nature:"verbe",trad:"Étrenner / inaugurer",exemple:"Hoy estreno mis zapatos nuevos."},
+  ],
+  de: [
+    {word:"Fernweh",phonetic:"/ˈfɛʁnveː/",nature:"nom",trad:"L'envie d'ailleurs",exemple:"Fernweh treibt ihn in die Welt."},
+    {word:"Torschlusspanik",phonetic:"/ˈtoːɐ̯ʃlʊsˌpanik/",nature:"nom",trad:"Peur de rater le coche",exemple:"Mit 30 bekam sie Torschlusspanik."},
+    {word:"Weltanschauung",phonetic:"/ˈvɛltʔanˌʃaʊʊŋ/",nature:"nom",trad:"Vision du monde",exemple:"Jeder hat eine eigene Weltanschauung."},
+    {word:"Drachenfutter",phonetic:"/ˈdʁaxənˌfʊtɐ/",nature:"nom",trad:"Cadeau de réconciliation",exemple:"Er brachte ihr Blumen als Drachenfutter."},
+    {word:"Verschlimmbessern",phonetic:"/fɛɐ̯ˈʃlɪmbɛsɐn/",nature:"verbe",trad:"Empirer en voulant améliorer",exemple:"Er hat alles verschlimmbesserst."},
+  ],
+  it: [
+    {word:"Abbiocco",phonetic:"/ab.ˈbjok.ko/",nature:"nom",trad:"Somnolence post-repas",exemple:"Dopo pranzo mi viene sempre l'abbiocco."},
+    {word:"Culaccino",phonetic:"/ku.lat.ˈtʃi.no/",nature:"nom",trad:"Trace de verre sur une table",exemple:"Il culaccino del bicchiere è rimasto."},
+    {word:"Meriggiare",phonetic:"/me.rid.ˈdʒa.re/",nature:"verbe",trad:"Se reposer à l'ombre",exemple:"D'estate si meriggia sotto gli alberi."},
+    {word:"Gattara",phonetic:"/gat.ˈta.ɾa/",nature:"nom",trad:"Dame qui nourrit les chats errants",exemple:"La gattara del quartiere conosce tutti i gatti."},
+  ],
+  pt: [
+    {word:"Saudade",phonetic:"/saw.ˈda.dɨ/",nature:"nom",trad:"Mélancolie nostalgique",exemple:"Tenho saudade de Lisboa."},
+    {word:"Desenrascanço",phonetic:"/de.zẽ.ʁaʃ.ˈkɐ̃.su/",nature:"nom",trad:"L'art de se débrouiller",exemple:"O desenrascanço é tipicamente português."},
+    {word:"Madrugada",phonetic:"/ma.dɾu.ˈɡa.da/",nature:"nom",trad:"Les petites heures du matin",exemple:"Chegou em casa de madrugada."},
+    {word:"Açodado",phonetic:"/a.su.ˈda.du/",nature:"adj.",trad:"Précipité, bâclé",exemple:"Um trabalho açodado não tem qualidade."},
+  ],
+};
+
+let motIdx = {};
+
+function initMot() {
+  const lang = state.motLang || "en";
+  const row = document.getElementById("lang-row");
+  row.innerHTML = LANGUES.map(l => `<button class="lang-btn${l.id===lang?" sel":""}" data-lang="${l.id}">${l.label}</button>`).join("");
+  row.querySelectorAll("[data-lang]").forEach(b => {
+    b.addEventListener("click", function() {
+      state.motLang = this.dataset.lang;
+      saveState(); initMot();
+    });
+  });
+  renderMot();
+}
+
+function renderMot() {
+  const lang = state.motLang || "en";
+  const mots = MOTS_DB[lang] || MOTS_DB.en;
+  // Mot du jour basé sur la date (stable dans la journée)
+  const dayIdx = Math.floor(Date.now() / 86400000);
+  if (motIdx[lang] === undefined) motIdx[lang] = (dayIdx + (state.motOffset||0)) % mots.length;
+  const m = mots[motIdx[lang] % mots.length];
+  document.getElementById("mot-content").innerHTML = `
+    <div class="mot-card">
+      <div class="mot-lang">${LANGUES.find(l=>l.id===lang)?.label||lang}</div>
+      <div class="mot-word">${m.word}</div>
+      <div class="mot-phonetic">${m.phonetic}</div>
+      <span class="mot-nature">${m.nature}</span>
+      <div class="mot-traduction">${m.trad}</div>
+      <div class="mot-exemple">"${m.exemple}"</div>
+    </div>`;
+}
+
+function nextMot() {
+  const lang = state.motLang || "en";
+  const mots = MOTS_DB[lang] || MOTS_DB.en;
+  motIdx[lang] = ((motIdx[lang]||0) + 1) % mots.length;
+  state.motOffset = (state.motOffset||0) + 1;
+  saveState(); renderMot();
+}
+
+// ════════════════
+// QUIZ CULTURE
+// ════════════════
+const QUIZ_QUESTIONS = [
+  {q:"Qui a peint la Joconde ?",opts:["Léonard de Vinci","Michel-Ange","Raphaël","Botticelli"],a:0},
+  {q:"En quelle année a eu lieu la Révolution française ?",opts:["1789","1776","1804","1815"],a:0},
+  {q:"Quelle est la capitale de l'Australie ?",opts:["Canberra","Sydney","Melbourne","Brisbane"],a:0},
+  {q:"Qui a écrit 'Les Misérables' ?",opts:["Victor Hugo","Gustave Flaubert","Émile Zola","Honoré de Balzac"],a:0},
+  {q:"Combien de planètes dans le système solaire ?",opts:["8","9","7","10"],a:0},
+  {q:"Quelle est la monnaie du Japon ?",opts:["Yen","Won","Yuan","Baht"],a:0},
+  {q:"Qui a découvert la pénicilline ?",opts:["Alexander Fleming","Louis Pasteur","Marie Curie","Albert Einstein"],a:0},
+  {q:"Quel est le plus long fleuve du monde ?",opts:["Le Nil","L'Amazone","Le Yangtsé","Le Mississippi"],a:0},
+  {q:"En quelle année l'homme a-t-il marché sur la Lune ?",opts:["1969","1965","1972","1961"],a:0},
+  {q:"Qui a composé la Cinquième Symphonie ?",opts:["Beethoven","Mozart","Bach","Chopin"],a:0},
+  {q:"Quelle est la capitale du Brésil ?",opts:["Brasília","São Paulo","Rio de Janeiro","Salvador"],a:0},
+  {q:"Quel élément chimique a pour symbole 'Au' ?",opts:["Or","Argent","Cuivre","Aluminium"],a:0},
+  {q:"Qui a écrit 'Don Quichotte' ?",opts:["Cervantès","Lope de Vega","García Márquez","Borges"],a:0},
+  {q:"Combien de côtés a un hexagone ?",opts:["6","5","7","8"],a:0},
+  {q:"Quel pays a remporté la Coupe du Monde 2022 ?",opts:["Argentine","France","Maroc","Croatie"],a:0},
+];
+
+let quizState = { questions:[], idx:0, score:0, answered:false };
+
+function initQuiz() { startQuiz(); }
+
+function startQuiz() {
+  // Mélange et prend 10 questions
+  const shuffled = [...QUIZ_QUESTIONS].sort(()=>Math.random()-.5).slice(0,10);
+  // Mélange les options de chaque question
+  quizState = {
+    questions: shuffled.map(q => {
+      const opts = [...q.opts];
+      const correct = opts[q.a];
+      opts.sort(()=>Math.random()-.5);
+      return { ...q, opts, a: opts.indexOf(correct) };
+    }),
+    idx: 0, score: 0, answered: false
+  };
+  renderQuiz();
+}
+
+function renderQuiz() {
+  const el = document.getElementById("quiz-content");
+  if (!el) return;
+  const { questions, idx, score } = quizState;
+  if (idx >= questions.length) {
+    // Score final
+    const pct = Math.round(score/questions.length*100);
+    el.innerHTML = `<div class="quiz-score">
+      <div class="quiz-score-num">${score}/${questions.length}</div>
+      <div class="quiz-score-label">${pct>=80?"🌟 Excellent !":pct>=60?"👍 Bien !":pct>=40?"😐 Passable":"📚 Révise !"}</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:8px;">Score : ${pct}%</div>
+      <button onclick="startQuiz()" style="margin-top:20px;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:12px 32px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">Rejouer</button>
+    </div>`;
+    return;
+  }
+  const q = questions[idx];
+  el.innerHTML = `
+    <div class="quiz-progress"><div class="quiz-prog-fill" style="width:${idx/questions.length*100}%"></div></div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Question ${idx+1} / ${questions.length} · Score : ${score}</div>
+    <div class="quiz-q">${q.q}</div>
+    <div class="quiz-opts">${q.opts.map((opt,i)=>`<button class="quiz-opt" data-opt="${i}">${opt}</button>`).join("")}</div>`;
+  el.querySelectorAll(".quiz-opt").forEach(btn => {
+    btn.addEventListener("click", function() {
+      if (quizState.answered) return;
+      quizState.answered = true;
+      const chosen = +this.dataset.opt;
+      const correct = q.a;
+      el.querySelectorAll(".quiz-opt").forEach((b,i) => {
+        if (i===correct) b.classList.add("correct");
+        else if (i===chosen && chosen!==correct) b.classList.add("wrong");
+      });
+      if (chosen===correct) quizState.score++;
+      setTimeout(() => { quizState.idx++; quizState.answered=false; renderQuiz(); }, 1200);
+    });
+  });
+}
+
+// ════════════════
+// CINÉ & SPECTACLES
+// ════════════════
+let cineStar = 0, cineCat = "film";
+
+function initCine() {
+  renderStarsInput("cine-stars-input", (n)=>{ cineStar=n; });
+  document.querySelectorAll("[data-cine-cat]").forEach(b => {
+    b.addEventListener("click", function() {
+      document.querySelectorAll("[data-cine-cat]").forEach(x=>{x.classList.remove("sel");});
+      this.classList.add("sel");
+      cineCat = this.dataset.cineCat;
+    });
+  });
+  document.getElementById("cine-submit-btn").onclick = submitCine;
+  renderAvisList("cine-list", state.cineAvis||[], "film");
+}
+
+function submitCine() {
+  const title = document.getElementById("cine-title").value.trim();
+  if (!title) { showToast("Entre un titre !"); return; }
+  if (!cineStar) { showToast("Donne une note !"); return; }
+  if (!state.cineAvis) state.cineAvis = [];
+  state.cineAvis.unshift({ id:Date.now(), title, cat:cineCat, stars:cineStar, comment:document.getElementById("cine-comment").value.trim(), author:state.name, date:new Date().toLocaleDateString("fr-FR",{day:"numeric",month:"short"}) });
+  saveState();
+  document.getElementById("cine-title").value="";
+  document.getElementById("cine-comment").value="";
+  cineStar=0;
+  renderStarsInput("cine-stars-input", (n)=>{ cineStar=n; });
+  renderAvisList("cine-list", state.cineAvis, "film");
+  showToast("Avis publié ✓");
+}
+
+// ════════════════
+// LECTURE
+// ════════════════
+let livreStar = 0, livreCat = "roman";
+
+function initLecture() {
+  renderStarsInput("livre-stars-input", (n)=>{ livreStar=n; });
+  document.querySelectorAll("[data-livre-cat]").forEach(b => {
+    b.addEventListener("click", function() {
+      document.querySelectorAll("[data-livre-cat]").forEach(x=>x.classList.remove("sel"));
+      this.classList.add("sel");
+      livreCat = this.dataset.livreCat;
+    });
+  });
+  document.getElementById("livre-submit-btn").onclick = submitLivre;
+  renderAvisList("livre-list", state.livreAvis||[], "livre");
+}
+
+function submitLivre() {
+  const title = document.getElementById("livre-title").value.trim();
+  const author = document.getElementById("livre-author").value.trim();
+  if (!title) { showToast("Entre un titre !"); return; }
+  if (!livreStar) { showToast("Donne une note !"); return; }
+  if (!state.livreAvis) state.livreAvis = [];
+  state.livreAvis.unshift({ id:Date.now(), title, author, cat:livreCat, stars:livreStar, comment:document.getElementById("livre-comment").value.trim(), author2:state.name, date:new Date().toLocaleDateString("fr-FR",{day:"numeric",month:"short"}) });
+  saveState();
+  document.getElementById("livre-title").value="";
+  document.getElementById("livre-author").value="";
+  document.getElementById("livre-comment").value="";
+  livreStar=0;
+  renderStarsInput("livre-stars-input", (n)=>{ livreStar=n; });
+  renderAvisList("livre-list", state.livreAvis, "livre");
+  showToast("Recommandation publiée ✓");
+}
+
+// ════════════════
+// UTILS AVIS
+// ════════════════
+function renderStarsInput(containerId, onChange) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  let current = 0;
+  el.innerHTML = [1,2,3,4,5].map(n=>`<span class="star-inp" data-n="${n}">☆</span>`).join("");
+  el.querySelectorAll(".star-inp").forEach(s => {
+    s.addEventListener("click", function() {
+      current = +this.dataset.n;
+      el.querySelectorAll(".star-inp").forEach((x,i) => x.textContent = i<current?"⭐":"☆");
+      onChange(current);
+    });
+  });
+}
+
+function renderAvisList(containerId, avis, type) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  if (!avis.length) { el.innerHTML=`<div class="loading">Aucun avis pour l'instant.<br>Sois le premier !</div>`; return; }
+  const catEmoji = { film:"🎬", theatre:"🎭", spectacle:"🎪", serie:"📺", roman:"📖", essai:"💡", bd:"🎨", bio:"👤" };
+  el.innerHTML = avis.map(a => `
+    <div class="avis-card">
+      <div class="avis-title">${a.title}${a.author?" — "+a.author:""}</div>
+      <div class="avis-meta">
+        <span>${catEmoji[a.cat]||"📌"} ${a.cat}</span>
+        <span class="avis-stars">${"⭐".repeat(a.stars)}</span>
+        <span style="margin-left:auto">${a.author||a.author2||""} · ${a.date}</span>
+      </div>
+      ${a.comment?`<div class="avis-comment">"${a.comment}"</div>`:""}
+    </div>`).join("");
+}
 
 // ════════════════════════════════════════════
 // TÂCHES MÉNAGÈRES
