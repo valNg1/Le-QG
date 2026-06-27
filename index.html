@@ -328,6 +328,34 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
 .avis-meta { font-size: 11px; color: var(--muted); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
 .avis-comment { font-size: 13px; color: var(--muted); line-height: 1.5; }
 .avis-stars { color: var(--yellow); font-size: 14px; }
+
+/* ── RECOMMANDATIONS IA ── */
+.reco-form { background: var(--surface); border-radius: var(--r); border: 1px solid var(--border); padding: 16px; margin-bottom: 14px; }
+.reco-input { width: 100%; padding: 12px 14px; background: var(--surface2); border: 1.5px solid var(--border2); border-radius: var(--r-sm); font-family: var(--font); font-size: 16px; color: var(--text); margin-bottom: 10px; resize: none; min-height: 80px; }
+.reco-input:focus { outline: none; border-color: var(--yellow); }
+.reco-input::placeholder { color: var(--muted); }
+.reco-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.reco-chip { padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border2); background: none; color: var(--muted); font-family: var(--font); font-size: 13px; cursor: pointer; transition: all .15s; white-space: nowrap; }
+.reco-chip:active { background: var(--yellow-light); border-color: var(--yellow); color: var(--yellow); }
+.reco-btn { width: 100%; background: var(--yellow); color: #1A1916; border: none; border-radius: var(--r-sm); padding: 13px; font-family: var(--font); font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.reco-btn:disabled { opacity: .5; cursor: not-allowed; }
+.reco-loading { text-align: center; padding: 32px; color: var(--muted); }
+.reco-loading-dots::after { content: ""; animation: dots 1.5s infinite; }
+@keyframes dots { 0%,20%{content:"."} 40%{content:".."} 60%,100%{content:"..."} }
+.reco-card { background: var(--surface); border-radius: var(--r-sm); border: 1px solid var(--border); padding: 16px; margin-bottom: 10px; }
+.reco-num { font-size: 11px; font-weight: 800; color: var(--yellow); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+.reco-title { font-size: 17px; font-weight: 800; color: var(--text); margin-bottom: 4px; line-height: 1.3; }
+.reco-meta { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+.reco-desc { font-size: 14px; color: var(--text); line-height: 1.6; }
+.reco-why { font-size: 13px; color: var(--yellow); margin-top: 8px; font-style: italic; }
+.reco-save-btn { margin-top: 10px; background: none; border: 1px solid var(--border2); border-radius: 20px; padding: 5px 14px; font-family: var(--font); font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; }
+.reco-saved-section { margin-top: 8px; }
+.reco-saved-item { background: var(--surface); border-radius: var(--r-sm); border: 1px solid var(--border); padding: 12px 14px; margin-bottom: 6px; display: flex; align-items: flex-start; gap: 10px; }
+.reco-saved-icon { font-size: 22px; flex-shrink: 0; }
+.reco-saved-info { flex: 1; }
+.reco-saved-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.reco-saved-meta { font-size: 13px; color: var(--muted); }
+.reco-saved-del { background: none; border: none; color: var(--muted2); font-size: 16px; cursor: pointer; flex-shrink: 0; padding: 4px; }
 </style>
 </head>
 <body>
@@ -562,21 +590,16 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
   <div id="module-cine" style="display:none;">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
       <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
-      <div style="font-size:16px;font-weight:700;color:var(--text);">🎬 Ciné & Spectacles</div>
+      <div style="font-size:17px;font-weight:700;color:var(--text);">🎬 Ciné & Spectacles</div>
     </div>
-    <div class="avis-form">
-      <input id="cine-title" class="modal-input" placeholder="Titre du film / spectacle / pièce..." type="text">
-      <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
-        <button class="tag sel" data-cine-cat="film">🎬 Film</button>
-        <button class="tag" data-cine-cat="theatre">🎭 Théâtre</button>
-        <button class="tag" data-cine-cat="spectacle">🎪 Spectacle</button>
-        <button class="tag" data-cine-cat="serie">📺 Série</button>
-      </div>
-      <div class="stars-input" id="cine-stars-input"></div>
-      <input id="cine-comment" class="modal-input" placeholder="Ton avis en quelques mots..." type="text">
-      <button id="cine-submit-btn" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:11px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">Publier mon avis</button>
+    <div class="reco-form">
+      <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:8px;">Qu'est-ce que tu as envie de voir ?</div>
+      <textarea class="reco-input" id="cine-prompt" placeholder="Ex : un film feel-good à regarder en famille, une comédie des années 90, un thriller psychologique..."></textarea>
+      <div class="reco-chips" id="cine-chips"></div>
+      <button class="reco-btn" id="cine-reco-btn">✨ Trouver des idées</button>
     </div>
-    <div id="cine-list"></div>
+    <div id="cine-reco-result"></div>
+    <div id="cine-saved-section" class="reco-saved-section"></div>
   </div>
 
   <!-- ANNIVERSAIRES -->
@@ -698,22 +721,16 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
   <div id="module-lecture" style="display:none;">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
       <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
-      <div style="font-size:16px;font-weight:700;color:var(--text);">📚 Lectures & Livres</div>
+      <div style="font-size:17px;font-weight:700;color:var(--text);">📚 Lectures & Livres</div>
     </div>
-    <div class="avis-form">
-      <input id="livre-title" class="modal-input" placeholder="Titre du livre..." type="text">
-      <input id="livre-author" class="modal-input" placeholder="Auteur" type="text">
-      <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
-        <button class="tag sel" data-livre-cat="roman">📖 Roman</button>
-        <button class="tag" data-livre-cat="essai">💡 Essai</button>
-        <button class="tag" data-livre-cat="bd">🎨 BD/Manga</button>
-        <button class="tag" data-livre-cat="bio">👤 Biographie</button>
-      </div>
-      <div class="stars-input" id="livre-stars-input"></div>
-      <input id="livre-comment" class="modal-input" placeholder="Pourquoi le recommander ?" type="text">
-      <button id="livre-submit-btn" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:11px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">Publier ma recommandation</button>
+    <div class="reco-form">
+      <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:8px;">Quel genre de lecture tu cherches ?</div>
+      <textarea class="reco-input" id="livre-prompt" placeholder="Ex : un roman policier qui se passe au Japon, une biographie inspirante, un essai sur l'intelligence artificielle..."></textarea>
+      <div class="reco-chips" id="livre-chips"></div>
+      <button class="reco-btn" id="livre-reco-btn">✨ Trouver des idées</button>
     </div>
-    <div id="livre-list"></div>
+    <div id="livre-reco-result"></div>
+    <div id="livre-saved-section" class="reco-saved-section"></div>
   </div>
 
 </div>
@@ -987,7 +1004,7 @@ function showStep3(code, name, isNew) {
   document.getElementById("ob-step2").classList.add("hidden");
   document.getElementById("ob-step3").classList.remove("hidden");
   document.getElementById("ob-welcome-name").textContent = "Bienvenue " + state.name + " ! 👋";
-  const inviteUrl = "https://legeneral.org?g=" + code;
+  const inviteUrl = "https://legeneral.org?g=" + code + "&from=" + encodeURIComponent(state.name||"quelqu'un");
   document.getElementById("ob-invite-content").innerHTML = `
     <div class="ob-invite-box">
       <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">${isNew ? "Ton groupe" : "Groupe rejoint"}</div>
@@ -1538,7 +1555,7 @@ async function fetchPodcasts() {
 function renderGroupe() {
   const el = document.getElementById("groupe-panel");
   if(!el) return;
-  const inviteUrl = "https://legeneral.org?g="+(state.groupCode||"");
+  const inviteUrl = "https://legeneral.org?g="+(state.groupCode||"")+"&from="+encodeURIComponent(state.name||"quelqu'un");
   el.innerHTML = state.groupCode ? `
     <div class="groupe-card">
       <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Groupe actif</div>
@@ -2165,33 +2182,9 @@ function renderQuiz() {
 // ════════════════
 let cineStar = 0, cineCat = "film";
 
-function initCine() {
-  renderStarsInput("cine-stars-input", (n)=>{ cineStar=n; });
-  document.querySelectorAll("[data-cine-cat]").forEach(b => {
-    b.addEventListener("click", function() {
-      document.querySelectorAll("[data-cine-cat]").forEach(x=>{x.classList.remove("sel");});
-      this.classList.add("sel");
-      cineCat = this.dataset.cineCat;
-    });
-  });
-  document.getElementById("cine-submit-btn").onclick = submitCine;
-  renderAvisList("cine-list", state.cineAvis||[], "film");
-}
+// initCine remplacé par IA
 
-function submitCine() {
-  const title = document.getElementById("cine-title").value.trim();
-  if (!title) { showToast("Entre un titre !"); return; }
-  if (!cineStar) { showToast("Donne une note !"); return; }
-  if (!state.cineAvis) state.cineAvis = [];
-  state.cineAvis.unshift({ id:Date.now(), title, cat:cineCat, stars:cineStar, comment:document.getElementById("cine-comment").value.trim(), author:state.name, date:new Date().toLocaleDateString("fr-FR",{day:"numeric",month:"short"}) });
-  saveState();
-  document.getElementById("cine-title").value="";
-  document.getElementById("cine-comment").value="";
-  cineStar=0;
-  renderStarsInput("cine-stars-input", (n)=>{ cineStar=n; });
-  renderAvisList("cine-list", state.cineAvis, "film");
-  showToast("Avis publié ✓");
-}
+
 
 // ════════════════
 // LECTURE
@@ -2481,34 +2474,143 @@ function initScoresMod() {
   });
 }
 
-function initLecture() {
-  renderStarsInput("livre-stars-input", (n)=>{ livreStar=n; });
-  document.querySelectorAll("[data-livre-cat]").forEach(b => {
-    b.addEventListener("click", function() {
-      document.querySelectorAll("[data-livre-cat]").forEach(x=>x.classList.remove("sel"));
-      this.classList.add("sel");
-      livreCat = this.dataset.livreCat;
+// initLecture remplacé par IA
+
+
+
+
+// ════════════════════════════════════════════
+// RECOMMANDATIONS IA (Claude API)
+// ════════════════════════════════════════════
+const CINE_CHIPS = ["Film feel-good","Thriller psychologique","Comédie","Film d'action","Drame","Film de culte","Années 80-90","En famille","Science-fiction","Film étranger","Pièce de théâtre","Comédie musicale","Spectacle d'humour","Série courte"];
+const LIVRE_CHIPS = ["Roman policier","Biographie","Essai","Roman historique","Science-fiction","Développement perso","Roman étranger","BD / Manga","Classique","Conte philosophique","Thriller","Romance"];
+
+async function fetchRecos(type, prompt) {
+  const isFilm = type === "cine";
+  const resultEl = document.getElementById(type+"-reco-result");
+  const btn = document.getElementById(type+"-reco-btn");
+
+  resultEl.innerHTML = `<div class="reco-loading">✨ Je cherche des idées<span class="reco-loading-dots"></span></div>`;
+  btn.disabled = true;
+
+  const systemPrompt = isFilm
+    ? "Tu es un expert en cinéma, théâtre et spectacles. L'utilisateur décrit une envie ou un thème. Tu proposes 4 recommandations personnalisées (films, séries, pièces ou spectacles — pas forcément récents). Réponds UNIQUEMENT en JSON valide, sans markdown, sans texte avant ou après. Format : [{\"titre\":\"\",\"type\":\"Film|Série|Pièce|Spectacle\",\"annee\":\"\",\"realisateur\":\"\",\"description\":\"2 phrases max\",\"pourquoi\":\"1 phrase sur pourquoi ça correspond à la demande\"}]"
+    : "Tu es un expert en littérature. L'utilisateur décrit une envie ou un thème de lecture. Tu proposes 4 recommandations de livres (pas forcément récents). Réponds UNIQUEMENT en JSON valide, sans markdown, sans texte avant ou après. Format : [{\"titre\":\"\",\"auteur\":\"\",\"genre\":\"\",\"annee\":\"\",\"description\":\"2 phrases max\",\"pourquoi\":\"1 phrase sur pourquoi ça correspond à la demande\"}]";
+
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: [{ role: "user", content: prompt }]
+      })
     });
-  });
-  document.getElementById("livre-submit-btn").onclick = submitLivre;
-  renderAvisList("livre-list", state.livreAvis||[], "livre");
+
+    const data = await response.json();
+    const text = data.content?.[0]?.text || "[]";
+    const clean = text.replace(/```json|```/g, "").trim();
+    const recos = JSON.parse(clean);
+
+    resultEl.innerHTML = recos.map((r, i) => {
+      const icon = isFilm ? (r.type==="Livre"?"📚":r.type==="Pièce"?"🎭":r.type==="Spectacle"?"🎪":r.type==="Série"?"📺":"🎬") : "📖";
+      const meta = isFilm
+        ? `${r.type||"Film"} · ${r.realisateur||""} · ${r.annee||""}`
+        : `${r.auteur||""} · ${r.genre||""} · ${r.annee||""}`;
+      return `<div class="reco-card">
+        <div class="reco-num">${icon} Suggestion ${i+1}</div>
+        <div class="reco-title">${r.titre}</div>
+        <div class="reco-meta">${meta}</div>
+        <div class="reco-desc">${r.description}</div>
+        <div class="reco-why">💛 ${r.pourquoi}</div>
+        <button class="reco-save-btn" data-reco='${JSON.stringify({...r,icon,type2:type})}'>🔖 Sauvegarder</button>
+      </div>`;
+    }).join("");
+
+    // Branche les boutons save
+    resultEl.querySelectorAll(".reco-save-btn").forEach(btn => {
+      btn.addEventListener("click", function() {
+        const r = JSON.parse(this.dataset.reco);
+        saveReco(r);
+        this.textContent = "✅ Sauvegardé !";
+        this.disabled = true;
+      });
+    });
+
+  } catch(e) {
+    resultEl.innerHTML = `<div class="reco-loading" style="color:var(--red)">Erreur — réessaie dans un moment</div>`;
+    console.log(e);
+  }
+  btn.disabled = false;
 }
 
-function submitLivre() {
-  const title = document.getElementById("livre-title").value.trim();
-  const author = document.getElementById("livre-author").value.trim();
-  if (!title) { showToast("Entre un titre !"); return; }
-  if (!livreStar) { showToast("Donne une note !"); return; }
-  if (!state.livreAvis) state.livreAvis = [];
-  state.livreAvis.unshift({ id:Date.now(), title, author, cat:livreCat, stars:livreStar, comment:document.getElementById("livre-comment").value.trim(), author2:state.name, date:new Date().toLocaleDateString("fr-FR",{day:"numeric",month:"short"}) });
+function saveReco(r) {
+  if (!state.recosSaved) state.recosSaved = [];
+  state.recosSaved.unshift({ ...r, savedAt: Date.now() });
+  if (state.recosSaved.length > 30) state.recosSaved = state.recosSaved.slice(0, 30);
   saveState();
-  document.getElementById("livre-title").value="";
-  document.getElementById("livre-author").value="";
-  document.getElementById("livre-comment").value="";
-  livreStar=0;
-  renderStarsInput("livre-stars-input", (n)=>{ livreStar=n; });
-  renderAvisList("livre-list", state.livreAvis, "livre");
-  showToast("Recommandation publiée ✓");
+  renderSavedRecos(r.type2);
+}
+
+function renderSavedRecos(type) {
+  const el = document.getElementById(type+"-saved-section");
+  if (!el) return;
+  const saved = (state.recosSaved||[]).filter(r => r.type2 === type);
+  if (!saved.length) { el.innerHTML = ""; return; }
+  const isFilm = type === "cine";
+  el.innerHTML = `<div style="font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:16px 0 10px;">🔖 Mes sauvegardes</div>` +
+    saved.map(r => `<div class="reco-saved-item">
+      <div class="reco-saved-icon">${r.icon||"📌"}</div>
+      <div class="reco-saved-info">
+        <div class="reco-saved-title">${r.titre}</div>
+        <div class="reco-saved-meta">${isFilm?(r.realisateur||r.type||""):(r.auteur||"")} · ${r.annee||""}</div>
+        <div style="font-size:13px;color:var(--yellow);margin-top:3px;font-style:italic;">${r.pourquoi||""}</div>
+      </div>
+      <button class="reco-saved-del" data-saved-id="${r.savedAt}">✕</button>
+    </div>`).join("");
+  el.querySelectorAll("[data-saved-id]").forEach(b => {
+    b.addEventListener("click", function() {
+      state.recosSaved = (state.recosSaved||[]).filter(r => r.savedAt !== +this.dataset.savedId);
+      saveState(); renderSavedRecos(type);
+    });
+  });
+}
+
+function initCine() {
+  // Chips suggestions
+  const chips = document.getElementById("cine-chips");
+  if (chips) chips.innerHTML = CINE_CHIPS.map(c => `<button class="reco-chip" data-chip="${c}">${c}</button>`).join("");
+  chips?.querySelectorAll(".reco-chip").forEach(b => {
+    b.addEventListener("click", function() {
+      const inp = document.getElementById("cine-prompt");
+      if (inp) inp.value = this.dataset.chip;
+    });
+  });
+  document.getElementById("cine-reco-btn")?.addEventListener("click", () => {
+    const prompt = document.getElementById("cine-prompt")?.value.trim();
+    if (!prompt) { showToast("Décris ce que tu cherches !"); return; }
+    fetchRecos("cine", prompt);
+  });
+  renderSavedRecos("cine");
+}
+
+function initLecture() {
+  const chips = document.getElementById("livre-chips");
+  if (chips) chips.innerHTML = LIVRE_CHIPS.map(c => `<button class="reco-chip" data-chip="${c}">${c}</button>`).join("");
+  chips?.querySelectorAll(".reco-chip").forEach(b => {
+    b.addEventListener("click", function() {
+      const inp = document.getElementById("livre-prompt");
+      if (inp) inp.value = this.dataset.chip;
+    });
+  });
+  document.getElementById("livre-reco-btn")?.addEventListener("click", () => {
+    const prompt = document.getElementById("livre-prompt")?.value.trim();
+    if (!prompt) { showToast("Décris ce que tu cherches !"); return; }
+    fetchRecos("livre", prompt);
+  });
+  renderSavedRecos("livre");
 }
 
 // ════════════════
@@ -2795,20 +2897,40 @@ document.addEventListener("DOMContentLoaded", function() {
   updateHeader();
   setInterval(updateHeader, 60000);
 
-  // Vérifie si profil existant
-  if(state.name) {
-    // Déjà inscrit — cache tous les overlays onboarding
+  const urlParams = new URLSearchParams(window.location.search);
+  const inviteCode = urlParams.get("g");
+  const inviteFrom = urlParams.get("from");
+
+  if (state.name) {
+    // Déjà inscrit — si lien d'invitation, rejoint le groupe auto
     document.getElementById("ob-step1").classList.add("hidden");
     document.getElementById("ob-step2").classList.add("hidden");
     document.getElementById("ob-step3").classList.add("hidden");
-    startApp();
-  } else {
-    // Check si invitation dans URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const inviteCode = urlParams.get("g");
-    if(inviteCode) {
-      document.getElementById("ob-code").value = inviteCode.toUpperCase();
+    document.getElementById("ob-invite").classList.add("hidden");
+    if (inviteCode && state.groupCode !== inviteCode.toUpperCase()) {
+      // Propose de rejoindre le nouveau groupe
+      if (confirm((inviteFrom||"Quelqu\'un") + " t\'invite à rejoindre un groupe. Rejoindre ?")) {
+        joinGroup(inviteCode);
+      }
     }
+    startApp();
+  } else if (inviteCode) {
+    // Nouvel utilisateur avec lien d'invitation — affiche l'écran d'accueil
+    document.getElementById("ob-step1").classList.add("hidden");
+    const from = inviteFrom ? decodeURIComponent(inviteFrom) : "quelqu\'un";
+    document.getElementById("invite-msg").textContent = from + " t\'invite à rejoindre Le QG !";
+    document.getElementById("invite-sub").innerHTML = `<strong>${from}</strong> partage avec toi son QG — agenda, météo, dîner du soir, et bien plus.<br><br>Crée ton profil en 30 secondes.`;
+    document.getElementById("ob-invite").classList.remove("hidden");
+    // Pré-remplit le code pour l'étape 2
+    document.getElementById("ob-code").value = inviteCode.toUpperCase();
+    document.getElementById("invite-join-btn").addEventListener("click", () => {
+      document.getElementById("ob-invite").classList.add("hidden");
+      document.getElementById("ob-step1").classList.remove("hidden");
+      initOnboarding();
+    });
+  } else {
+    // Première connexion normale
+    document.getElementById("ob-invite").classList.add("hidden");
     initOnboarding();
   }
 });
