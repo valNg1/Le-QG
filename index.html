@@ -1013,10 +1013,15 @@ function showStep3(code, name, isNew) {
       <div class="ob-invite-sub">Partage ce lien à tes proches :</div>
       <div style="font-size:11px;color:var(--yellow);margin-top:4px;word-break:break-all;">${inviteUrl}</div>
     </div>
-    <button class="ob-share-btn" id="ob-copy-btn">📋 Copier le lien d'invitation</button>
+    <button class="ob-btn" id="ob-copy-btn" style="margin-bottom:8px;">📤 Partager l'invitation</button>
   `;
+  const obShareMsg = "👋 " + (state.name||"") + " t'invite à rejoindre Le QG !\n\nUn espace pour organiser le quotidien en famille ou entre amis : météo, agenda partagé, qui dîne ce soir, modules culture, sport et bien plus.\n\n👉 Rejoins-moi ici : " + inviteUrl;
   document.getElementById("ob-copy-btn").addEventListener("click", () => {
-    navigator.clipboard.writeText(inviteUrl).then(() => showToast("Lien copié !"));
+    if(navigator.share) {
+      navigator.share({ title:"Le Général — invitation", text:obShareMsg, url:inviteUrl });
+    } else {
+      navigator.clipboard.writeText(obShareMsg).then(() => showToast("Message copié !"));
+    }
   });
 }
 
@@ -1571,8 +1576,17 @@ function renderGroupe() {
   : `<div class="groupe-card"><div class="loading">Aucun groupe — crée-en un lors de l'inscription</div></div>`;
 
   setTimeout(()=>{
+    const sb=document.getElementById("share-invite-btn");
     const cb=document.getElementById("copy-invite-btn");
     const lb=document.getElementById("leave-group-btn");
+    const shareText = "👋 " + (state.name||"") + " t'invite à rejoindre Le QG !\n\nUn espace pour organiser le quotidien en famille ou entre amis : météo, agenda partagé, qui dîne ce soir, modules culture, sport et bien plus.\n\n👉 Rejoins-moi ici : " + inviteUrl;
+    if(sb) sb.onclick=()=>{
+      if(navigator.share) {
+        navigator.share({ title:"Le Général — invitation", text:shareText, url:inviteUrl });
+      } else {
+        navigator.clipboard.writeText(shareText).then(()=>showToast("Message copié — colle-le dans WhatsApp !"));
+      }
+    };
     if(cb) cb.onclick=()=>navigator.clipboard.writeText(inviteUrl).then(()=>showToast("Lien copié !"));
     if(lb) lb.onclick=()=>{if(confirm("Quitter le groupe ?")){state.groupCode=null;state.groupName=null;saveState();renderGroupe();}};
     if(state.groupCode&&firebaseReady) loadGroupMembers();
