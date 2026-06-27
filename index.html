@@ -535,11 +535,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
   <div id="module-mot" style="display:none;">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
       <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
-      <div style="font-size:16px;font-weight:700;color:var(--text);">🗣 Mot du jour</div>
+      <div style="font-size:16px;font-weight:700;color:var(--text);">🗣 Phrase du jour</div>
     </div>
     <div class="lang-row" id="lang-row"></div>
     <div id="mot-content"><div class="loading">Chargement...</div></div>
-    <button onclick="nextMot()" style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r-sm);padding:11px;font-family:var(--font);font-size:13px;font-weight:600;color:var(--text);cursor:pointer;margin-top:10px;">→ Mot suivant</button>
+    <button onclick="nextMot()" style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r-sm);padding:11px;font-family:var(--font);font-size:13px;font-weight:600;color:var(--text);cursor:pointer;margin-top:10px;">→ Phrase suivante</button>
   </div>
 
   <!-- QUIZ -->
@@ -1724,7 +1724,7 @@ const ALL_MODULES = [
   { id:"anniv",   name:"Anniversaires",       desc:"Rappels automatiques",          emoji:"🎂", color:"#E8384F", theme:"sante"   },
   { id:"taches_perso", name:"Mes tâches",      desc:"Liste perso avec priorités",    emoji:"✅", color:"#4A90E2", theme:"sante"   },
   { id:"jeune",   name:"Jeûne intermittent", desc:"Timer + prochain repas",       emoji:"⏱", color:"#F7C104", theme:"sante"   },
-  { id:"mot",     name:"Mot du jour",        desc:"Apprends une langue",          emoji:"🗣", color:"#4A90E2", theme:"culture" },
+  { id:"mot",     name:"Phrase du jour",      desc:"Small talk en 5 langues",      emoji:"🗣", color:"#4A90E2", theme:"culture" },
   { id:"quiz",    name:"Quiz culture",       desc:"10 questions par session",     emoji:"🧠", color:"#9B6BFF", theme:"culture" },
   { id:"cine",    name:"Ciné & Spectacles",  desc:"Avis du groupe",               emoji:"🎬", color:"#E8384F", theme:"culture" },
   { id:"lecture", name:"Lectures",           desc:"Recommandations du groupe",    emoji:"📚", color:"#34C77B", theme:"culture" },
@@ -1933,39 +1933,104 @@ const LANGUES = [
 
 const MOTS_DB = {
   en: [
-    {word:"Serendipity",phonetic:"/ˌser.ənˈdɪp.ɪ.ti/",nature:"nom",trad:"La sérendipité",exemple:"It was pure serendipity that we met here."},
-    {word:"Ephemeral",phonetic:"/ɪˈfem.ər.əl/",nature:"adj.",trad:"Éphémère",exemple:"Social media fame is often ephemeral."},
-    {word:"Resilience",phonetic:"/rɪˈzɪl.i.əns/",nature:"nom",trad:"Résilience",exemple:"Her resilience helped her overcome difficulties."},
-    {word:"Eloquent",phonetic:"/ˈel.ə.kwənt/",nature:"adj.",trad:"Éloquent",exemple:"He gave an eloquent speech."},
-    {word:"Tenacity",phonetic:"/təˈnæs.ɪ.ti/",nature:"nom",trad:"Ténacité",exemple:"Success requires tenacity and hard work."},
-    {word:"Wanderlust",phonetic:"/ˈwɒn.dəlʌst/",nature:"nom",trad:"L'envie de voyager",exemple:"His wanderlust took him across the world."},
-    {word:"Ameliorate",phonetic:"/əˈmiː.li.ə.reɪt/",nature:"verbe",trad:"Améliorer",exemple:"New policies should ameliorate the situation."},
+    // Courses / Shopping
+    {cat:"🛒 Courses",word:"I need to pick up a few things.",trad:"J'ai quelques courses à faire.",contexte:"Au supermarché, à un ami"},
+    {cat:"🛒 Courses",word:"Do you have this in a different size?",trad:"Vous l'avez dans une autre taille ?",contexte:"En boutique"},
+    {cat:"🛒 Courses",word:"Can I get a bag for this?",trad:"Je peux avoir un sac s'il vous plaît ?",contexte:"En caisse"},
+    {cat:"🛒 Courses",word:"How much is this?",trad:"C'est combien ?",contexte:"Sur un marché"},
+    {cat:"🛒 Courses",word:"I'm just browsing, thanks.",trad:"Je regarde juste, merci.",contexte:"Quand un vendeur approche"},
+    // Vacances / Voyage
+    {cat:"✈️ Vacances",word:"We're thinking of heading to the coast this summer.",trad:"On pense partir sur la côte cet été.",contexte:"Small talk au bureau"},
+    {cat:"✈️ Vacances",word:"I'm still figuring out the details.",trad:"Je suis encore en train de voir les détails.",contexte:"Quand on planifie"},
+    {cat:"✈️ Vacances",word:"Have you been there before?",trad:"Tu y es déjà allé ?",contexte:"Recommandations de voyage"},
+    {cat:"✈️ Vacances",word:"We booked it last minute.",trad:"On a réservé à la dernière minute.",contexte:"Parler de ses vacances"},
+    {cat:"✈️ Vacances",word:"The flight got delayed by two hours.",trad:"Le vol a eu deux heures de retard.",contexte:"En racontant son voyage"},
+    // Boulot / Bureau
+    {cat:"💼 Boulot",word:"I've got back-to-back meetings this afternoon.",trad:"J'ai des réunions enchaînées cet aprèm.",contexte:"À un collègue"},
+    {cat:"💼 Boulot",word:"Let me check my calendar and get back to you.",trad:"Je regarde mon agenda et je te reviens.",contexte:"Pour décliner ou confirmer"},
+    {cat:"💼 Boulot",word:"I'm working from home today.",trad:"Je suis en télétravail aujourd'hui.",contexte:"Expliquer où on est"},
+    {cat:"💼 Boulot",word:"Things have been pretty hectic lately.",trad:"C'est assez chargé en ce moment.",contexte:"Small talk sur le boulot"},
+    {cat:"💼 Boulot",word:"We finally wrapped up that project.",trad:"On a enfin bouclé ce projet.",contexte:"Bonne nouvelle au bureau"},
+    // Sport / Santé
+    {cat:"🏃 Sport",word:"I've been trying to get back into running.",trad:"J'essaie de me remettre à la course.",contexte:"Small talk santé"},
+    {cat:"🏃 Sport",word:"I go to the gym a couple of times a week.",trad:"Je vais à la salle deux-trois fois par semaine.",contexte:"Parler de ses habitudes"},
+    {cat:"🏃 Sport",word:"I pulled a muscle last week.",trad:"Je me suis froissé un muscle la semaine dernière.",contexte:"Expliquer une blessure"},
+    {cat:"🏃 Sport",word:"We won by a narrow margin.",trad:"On a gagné de justesse.",contexte:"Parler d'un match"},
+    // Météo / Small talk
+    {cat:"☀️ Small talk",word:"It's been gorgeous out lately.",trad:"Il fait vraiment beau ces derniers temps.",contexte:"Conversation classique"},
+    {cat:"☀️ Small talk",word:"Typical weather for this time of year.",trad:"C'est la météo habituelle pour cette saison.",contexte:"Ironie ou sincérité"},
+    {cat:"☀️ Small talk",word:"Did you catch the game last night?",trad:"T'as regardé le match hier soir ?",contexte:"Lancer une conversation"},
+    {cat:"☀️ Small talk",word:"Any plans for the weekend?",trad:"T'as des projets pour le week-end ?",contexte:"Fin de semaine au bureau"},
+    {cat:"☀️ Small talk",word:"I can't believe how fast this year is going.",trad:"Je n'arrive pas à croire que l'année passe si vite.",contexte:"Small talk universel"},
+    // Restau / Sortie
+    {cat:"🍽 Resto",word:"Shall we get a table outside?",trad:"On s'installe en terrasse ?",contexte:"Au restaurant"},
+    {cat:"🍽 Resto",word:"I'll have whatever you're having.",trad:"Je prendrai la même chose que toi.",contexte:"Pour simplifier la commande"},
+    {cat:"🍽 Resto",word:"Could we split the bill?",trad:"On peut se partager l'addition ?",contexte:"En fin de repas"},
+    {cat:"🍽 Resto",word:"This place comes highly recommended.",trad:"On m'a beaucoup recommandé cet endroit.",contexte:"Pour justifier le choix du resto"},
   ],
   es: [
-    {word:"Madrugada",phonetic:"/ma.ðɾu.ˈɣa.ða/",nature:"nom",trad:"Les heures avant l'aube",exemple:"Llegó a casa en la madrugada."},
-    {word:"Sobremesa",phonetic:"/so.βɾeˈme.sa/",nature:"nom",trad:"La conversation après repas",exemple:"La sobremesa duró dos horas."},
-    {word:"Chapuza",phonetic:"/tʃaˈpu.θa/",nature:"nom",trad:"Travail bâclé",exemple:"Este trabajo es una chapuza."},
-    {word:"Añoranza",phonetic:"/a.ɲoˈɾan.θa/",nature:"nom",trad:"Nostalgie",exemple:"Siente añoranza de su tierra natal."},
-    {word:"Estrenar",phonetic:"/es.tɾeˈnaɾ/",nature:"verbe",trad:"Étrenner / inaugurer",exemple:"Hoy estreno mis zapatos nuevos."},
+    {cat:"🛒 Compras",word:"¿Tiene algo más barato?",trad:"Vous avez quelque chose de moins cher ?",contexte:"En boutique ou au marché"},
+    {cat:"🛒 Compras",word:"Me lo llevo.",trad:"Je le prends.",contexte:"Pour conclure un achat"},
+    {cat:"🛒 Compras",word:"¿Aceptan tarjeta?",trad:"Vous acceptez la carte ?",contexte:"En caisse"},
+    {cat:"✈️ Vacaciones",word:"Estamos pensando en ir a la playa este verano.",trad:"On pense aller à la plage cet été.",contexte:"Small talk vacances"},
+    {cat:"✈️ Vacaciones",word:"Todavía no hemos decidido nada.",trad:"On n'a encore rien décidé.",contexte:"Quand les plans ne sont pas fixés"},
+    {cat:"✈️ Vacaciones",word:"¿Me puedes recomendar algún sitio?",trad:"Tu peux me recommander un endroit ?",contexte:"Demander des conseils"},
+    {cat:"💼 Trabajo",word:"Estoy hasta arriba de trabajo.",trad:"J'ai du boulot par-dessus la tête.",contexte:"Se plaindre gentiment"},
+    {cat:"💼 Trabajo",word:"Trabajamos desde casa los viernes.",trad:"On travaille de chez soi le vendredi.",contexte:"Parler de son organisation"},
+    {cat:"💼 Trabajo",word:"Por fin hemos terminado el proyecto.",trad:"On a enfin terminé le projet.",contexte:"Soulagement au bureau"},
+    {cat:"🏃 Deporte",word:"Estoy intentando hacer más ejercicio.",trad:"J'essaie de faire plus de sport.",contexte:"Small talk santé"},
+    {cat:"🏃 Deporte",word:"Quedamos en hacer una ruta el finde.",trad:"On s'est donné rendez-vous pour une rando ce week-end.",contexte:"Plans sportifs"},
+    {cat:"☀️ Conversación",word:"¿Qué tal el fin de semana?",trad:"C'était comment le week-end ?",contexte:"Lundi matin au bureau"},
+    {cat:"☀️ Conversación",word:"Hace un tiempo estupendo, ¿verdad?",trad:"Il fait un temps magnifique, non ?",contexte:"Small talk météo"},
+    {cat:"☀️ Conversación",word:"¿Tienes planes para esta noche?",trad:"T'as des plans ce soir ?",contexte:"En fin de journée"},
+    {cat:"🍽 Restaurante",word:"¿Nos ponemos en la terraza?",trad:"On s'installe en terrasse ?",contexte:"Au restaurant"},
+    {cat:"🍽 Restaurante",word:"¿Hacemos cuentas separadas?",trad:"On fait des additions séparées ?",contexte:"En fin de repas"},
   ],
   de: [
-    {word:"Fernweh",phonetic:"/ˈfɛʁnveː/",nature:"nom",trad:"L'envie d'ailleurs",exemple:"Fernweh treibt ihn in die Welt."},
-    {word:"Torschlusspanik",phonetic:"/ˈtoːɐ̯ʃlʊsˌpanik/",nature:"nom",trad:"Peur de rater le coche",exemple:"Mit 30 bekam sie Torschlusspanik."},
-    {word:"Weltanschauung",phonetic:"/ˈvɛltʔanˌʃaʊʊŋ/",nature:"nom",trad:"Vision du monde",exemple:"Jeder hat eine eigene Weltanschauung."},
-    {word:"Drachenfutter",phonetic:"/ˈdʁaxənˌfʊtɐ/",nature:"nom",trad:"Cadeau de réconciliation",exemple:"Er brachte ihr Blumen als Drachenfutter."},
-    {word:"Verschlimmbessern",phonetic:"/fɛɐ̯ˈʃlɪmbɛsɐn/",nature:"verbe",trad:"Empirer en voulant améliorer",exemple:"Er hat alles verschlimmbesserst."},
+    {cat:"🛒 Einkaufen",word:"Ich muss noch schnell einkaufen gehen.",trad:"Je dois encore faire rapidement les courses.",contexte:"Justifier une sortie"},
+    {cat:"🛒 Einkaufen",word:"Haben Sie das in einer anderen Größe?",trad:"Vous avez ça dans une autre taille ?",contexte:"En boutique"},
+    {cat:"🛒 Einkaufen",word:"Kann ich mit Karte zahlen?",trad:"Je peux payer par carte ?",contexte:"En caisse"},
+    {cat:"✈️ Urlaub",word:"Wir fahren diesen Sommer ans Meer.",trad:"On part à la mer cet été.",contexte:"Small talk vacances"},
+    {cat:"✈️ Urlaub",word:"Ich plane gerade meinen Urlaub.",trad:"Je suis en train de planifier mes vacances.",contexte:"Parler de ses projets"},
+    {cat:"✈️ Urlaub",word:"Kannst du mir etwas empfehlen?",trad:"Tu peux me recommander quelque chose ?",contexte:"Demander des conseils"},
+    {cat:"💼 Arbeit",word:"Ich habe den ganzen Tag Meetings.",trad:"J'ai des réunions toute la journée.",contexte:"Se plaindre gentiment"},
+    {cat:"💼 Arbeit",word:"Ich arbeite heute von zu Hause.",trad:"Je travaille de chez moi aujourd'hui.",contexte:"Expliquer où on est"},
+    {cat:"💼 Arbeit",word:"Wir haben das Projekt endlich abgeschlossen.",trad:"On a enfin terminé le projet.",contexte:"Bonne nouvelle"},
+    {cat:"🏃 Sport",word:"Ich versuche, mehr Sport zu treiben.",trad:"J'essaie de faire plus de sport.",contexte:"Small talk santé"},
+    {cat:"🏃 Sport",word:"Wir haben knapp gewonnen.",trad:"On a gagné de justesse.",contexte:"Parler d'un match"},
+    {cat:"☀️ Small talk",word:"Was machst du am Wochenende?",trad:"T'as quoi comme plans ce week-end ?",contexte:"Conversation classique"},
+    {cat:"☀️ Small talk",word:"Das Wetter ist heute super.",trad:"Il fait super beau aujourd'hui.",contexte:"Météo"},
+    {cat:"☀️ Small talk",word:"Wie war dein Wochenende?",trad:"C'était comment ton week-end ?",contexte:"Lundi matin"},
+    {cat:"🍽 Restaurant",word:"Sollen wir draußen sitzen?",trad:"On s'assoit dehors ?",contexte:"Au restaurant"},
+    {cat:"🍽 Restaurant",word:"Können wir getrennt zahlen?",trad:"On peut payer séparément ?",contexte:"En fin de repas"},
   ],
   it: [
-    {word:"Abbiocco",phonetic:"/ab.ˈbjok.ko/",nature:"nom",trad:"Somnolence post-repas",exemple:"Dopo pranzo mi viene sempre l'abbiocco."},
-    {word:"Culaccino",phonetic:"/ku.lat.ˈtʃi.no/",nature:"nom",trad:"Trace de verre sur une table",exemple:"Il culaccino del bicchiere è rimasto."},
-    {word:"Meriggiare",phonetic:"/me.rid.ˈdʒa.re/",nature:"verbe",trad:"Se reposer à l'ombre",exemple:"D'estate si meriggia sotto gli alberi."},
-    {word:"Gattara",phonetic:"/gat.ˈta.ɾa/",nature:"nom",trad:"Dame qui nourrit les chats errants",exemple:"La gattara del quartiere conosce tutti i gatti."},
+    {cat:"🛒 Spesa",word:"Devo passare a fare la spesa.",trad:"Je dois passer faire les courses.",contexte:"Expliquer ses plans"},
+    {cat:"🛒 Spesa",word:"Ce l'avete in un'altra misura?",trad:"Vous l'avez dans une autre taille ?",contexte:"En boutique"},
+    {cat:"🛒 Spesa",word:"Posso pagare con la carta?",trad:"Je peux payer par carte ?",contexte:"En caisse"},
+    {cat:"✈️ Vacanze",word:"Quest'estate andiamo al mare.",trad:"Cet été on va à la mer.",contexte:"Small talk vacances"},
+    {cat:"✈️ Vacanze",word:"Sto ancora pianificando le vacanze.",trad:"Je suis encore en train de planifier mes vacances.",contexte:"Parler de ses projets"},
+    {cat:"✈️ Vacanze",word:"Mi sai consigliare un posto?",trad:"Tu peux me conseiller un endroit ?",contexte:"Demander des conseils"},
+    {cat:"💼 Lavoro",word:"Ho riunioni per tutta la giornata.",trad:"J'ai des réunions toute la journée.",contexte:"Se plaindre gentiment"},
+    {cat:"💼 Lavoro",word:"Oggi lavoro da casa.",trad:"Aujourd'hui je travaille de chez moi.",contexte:"Expliquer où on est"},
+    {cat:"🏃 Sport",word:"Sto cercando di fare più sport.",trad:"J'essaie de faire plus de sport.",contexte:"Small talk santé"},
+    {cat:"☀️ Chiacchiere",word:"Che programmi hai per il weekend?",trad:"T'as quoi comme plans pour le week-end ?",contexte:"Conversation classique"},
+    {cat:"☀️ Chiacchiere",word:"Com'è andata questa settimana?",trad:"Comment ça s'est passé cette semaine ?",contexte:"Small talk boulot"},
+    {cat:"🍽 Ristorante",word:"Ci sediamo fuori?",trad:"On s'assoit dehors ?",contexte:"Au restaurant"},
+    {cat:"🍽 Ristorante",word:"Facciamo conti separati?",trad:"On fait des additions séparées ?",contexte:"En fin de repas"},
   ],
   pt: [
-    {word:"Saudade",phonetic:"/saw.ˈda.dɨ/",nature:"nom",trad:"Mélancolie nostalgique",exemple:"Tenho saudade de Lisboa."},
-    {word:"Desenrascanço",phonetic:"/de.zẽ.ʁaʃ.ˈkɐ̃.su/",nature:"nom",trad:"L'art de se débrouiller",exemple:"O desenrascanço é tipicamente português."},
-    {word:"Madrugada",phonetic:"/ma.dɾu.ˈɡa.da/",nature:"nom",trad:"Les petites heures du matin",exemple:"Chegou em casa de madrugada."},
-    {word:"Açodado",phonetic:"/a.su.ˈda.du/",nature:"adj.",trad:"Précipité, bâclé",exemple:"Um trabalho açodado não tem qualidade."},
+    {cat:"🛒 Compras",word:"Preciso passar no supermercado.",trad:"Je dois passer au supermarché.",contexte:"Expliquer ses plans"},
+    {cat:"🛒 Compras",word:"Tem isso em outro tamanho?",trad:"Vous avez ça dans une autre taille ?",contexte:"En boutique"},
+    {cat:"✈️ Férias",word:"A gente tá pensando em ir à praia esse verão.",trad:"On pense aller à la plage cet été.",contexte:"Small talk vacances"},
+    {cat:"✈️ Férias",word:"Ainda estou planejando as férias.",trad:"Je suis encore en train de planifier les vacances.",contexte:"Parler de ses projets"},
+    {cat:"💼 Trabalho",word:"Hoje vou trabalhar de casa.",trad:"Aujourd'hui je travaille de chez moi.",contexte:"Expliquer où on est"},
+    {cat:"💼 Trabalho",word:"Tô sobrecarregado de trabalho.",trad:"Je suis débordé de boulot.",contexte:"Se plaindre gentiment"},
+    {cat:"🏃 Esporte",word:"Tô tentando me exercitar mais.",trad:"J'essaie de faire plus de sport.",contexte:"Small talk santé"},
+    {cat:"☀️ Conversa",word:"O que você vai fazer no fim de semana?",trad:"T'as quoi comme plans ce week-end ?",contexte:"Conversation classique"},
+    {cat:"☀️ Conversa",word:"Como foi a sua semana?",trad:"Comment ça s'est passé ta semaine ?",contexte:"Small talk boulot"},
+    {cat:"🍽 Restaurante",word:"Vamos sentar do lado de fora?",trad:"On s'assoit dehors ?",contexte:"Au restaurant"},
+    {cat:"🍽 Restaurante",word:"Vamos dividir a conta?",trad:"On partage l'addition ?",contexte:"En fin de repas"},
   ],
 };
 
@@ -1993,12 +2058,10 @@ function renderMot() {
   const m = mots[motIdx[lang] % mots.length];
   document.getElementById("mot-content").innerHTML = `
     <div class="mot-card">
-      <div class="mot-lang">${LANGUES.find(l=>l.id===lang)?.label||lang}</div>
-      <div class="mot-word">${m.word}</div>
-      <div class="mot-phonetic">${m.phonetic}</div>
-      <span class="mot-nature">${m.nature}</span>
-      <div class="mot-traduction">${m.trad}</div>
-      <div class="mot-exemple">"${m.exemple}"</div>
+      <div class="mot-lang">${LANGUES.find(l=>l.id===lang)?.label||lang} · <span style="color:var(--muted)">${m.cat||""}</span></div>
+      <div class="mot-word" style="font-size:20px;line-height:1.3;margin:12px 0;">${m.word}</div>
+      <div class="mot-traduction" style="font-size:16px;margin-bottom:10px;">🇫🇷 ${m.trad}</div>
+      <div class="mot-exemple" style="font-size:13px;">💬 <em>${m.contexte||""}</em></div>
     </div>`;
 }
 
