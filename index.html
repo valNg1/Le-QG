@@ -269,8 +269,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
 .mod-tab.active { color: var(--yellow); border-bottom-color: var(--yellow); }
 
 /* ── MODULES ── */
-.module-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-.module-card { background: var(--surface); border-radius: var(--r); border: 1px solid var(--border); padding: 16px; cursor: pointer; transition: all .15s; text-align: center; position: relative; }
+.module-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 10px; margin-bottom: 16px; }
+.module-card { background: var(--surface); border-radius: var(--r); border: 1px solid var(--border); padding: 16px; cursor: pointer; transition: all .15s; text-align: center; position: relative; display: block !important; min-height: 110px; }
 .module-card.active { border-color: var(--yellow); background: var(--yellow-light); }
 .module-card:active { transform: scale(.97); }
 .module-icon { font-size: 32px; margin-bottom: 8px; }
@@ -493,7 +493,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
       <button class="mod-tab" data-theme="sport">⚽ Sport</button>
     </div>
     <div class="module-grid" id="module-grid"></div>
-    <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px;">Tap = ouvrir · Double-tap = activer/désactiver</div>
+
   </div>
 
   <!-- JEÛNE INTERMITTENT -->
@@ -1734,23 +1734,20 @@ function renderModulesHome() {
     ? ALL_MODULES
     : ALL_MODULES.filter(m => m.theme === currentModuleTheme);
 
-  el.innerHTML = filtered.map(m => `
-    <div class="module-card${activeIds.includes(m.id)?" active":""}" data-mod="${m.id}">
-      <div class="module-icon">${m.emoji}</div>
-      <div class="module-name">${m.name}</div>
-      <div class="module-desc">${m.desc}</div>
-      ${activeIds.includes(m.id)?`<div class="module-badge">ON</div>`:""}
-    </div>`).join("");
+  el.innerHTML = filtered.map(m => {
+    const isActive = activeIds.includes(m.id);
+    return `<div class="module-card${isActive?" active":""}" data-mod="${m.id}" style="display:block;min-height:110px;">
+      ${isActive?`<div class="module-badge">ON</div>`:""}
+      <div class="module-icon" style="font-size:32px;margin-bottom:8px;">${m.emoji}</div>
+      <div class="module-name" style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;">${m.name}</div>
+      <div class="module-desc" style="font-size:12px;color:var(--muted);">${m.desc}</div>
+    </div>`;
+  }).join("");
 
   el.querySelectorAll(".module-card").forEach(card => {
-    card.addEventListener("click", () => openModule(card.dataset.mod));
-    card.addEventListener("dblclick", function() {
-      const id = this.dataset.mod;
-      if (!state.activeModules) state.activeModules = [];
-      if (state.activeModules.includes(id)) state.activeModules = state.activeModules.filter(x=>x!==id);
-      else state.activeModules.push(id);
-      saveState(); renderModulesHome();
-      showToast(state.activeModules.includes(id)?"Module activé ✓":"Module désactivé");
+    card.addEventListener("click", function(e) {
+      e.stopPropagation();
+      openModule(this.dataset.mod);
     });
   });
 
