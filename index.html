@@ -1039,7 +1039,8 @@ function showStep3(code, name, isNew) {
     </div>
     <button class="ob-btn" id="ob-copy-btn" style="margin-bottom:8px;">📤 Partager l'invitation</button>
   `;
-  const obShareMsg = "👋 " + (state.name||"") + " t'invite à rejoindre Le QG !\n\nUn espace pour organiser le quotidien en famille ou entre amis : météo, agenda partagé, qui dîne ce soir, modules culture, sport et bien plus.\n\n👉 Rejoins-moi ici : " + inviteUrl;
+  const prenom2 = state.name || "quelqu'un";
+  const obShareMsg = "\uD83D\uDC4B " + prenom2 + " t\u2019invite \u00e0 rejoindre Le G\u00e9n\u00e9ral !\n\nUn espace pour organiser le quotidien en famille ou entre amis : m\u00e9t\u00e9o, agenda partag\u00e9, qui d\u00eene ce soir, modules culture, sport et bien plus.\n\nRejoins ici : " + inviteUrl;
   document.getElementById("ob-copy-btn").addEventListener("click", () => {
     openShareMenu(obShareMsg, inviteUrl);
   });
@@ -1599,7 +1600,8 @@ function renderGroupe() {
     const sb=document.getElementById("share-invite-btn");
     const cb=document.getElementById("copy-invite-btn");
     const lb=document.getElementById("leave-group-btn");
-    const shareText = "👋 " + (state.name||"") + " t'invite à rejoindre Le QG !\n\nUn espace pour organiser le quotidien en famille ou entre amis : météo, agenda partagé, qui dîne ce soir, modules culture, sport et bien plus.\n\n👉 Rejoins-moi ici : " + inviteUrl;
+    const prenom = state.name || "quelqu'un";
+    const shareText = "\uD83D\uDC4B " + prenom + " t\u2019invite \u00e0 rejoindre Le G\u00e9n\u00e9ral !\n\nUn espace pour organiser le quotidien en famille ou entre amis : m\u00e9t\u00e9o, agenda partag\u00e9, qui d\u00eene ce soir, modules culture, sport et bien plus.\n\nRejoins ici : " + inviteUrl;
     if(sb) sb.onclick=()=>openShareMenu(shareText, inviteUrl);
     if(cb) cb.onclick=()=>navigator.clipboard.writeText(inviteUrl).then(()=>showToast("Lien copié !"));
     if(lb) lb.onclick=()=>{if(confirm("Quitter le groupe ?")){state.groupCode=null;state.groupName=null;saveState();renderGroupe();}};
@@ -2922,9 +2924,13 @@ function openShareMenu(text, url) {
 
   const encoded = encodeURIComponent(text);
   preview.textContent = text;
-  wa.href = "https://wa.me/?text=" + encoded;
+  // WhatsApp : api.whatsapp.com fonctionne mieux que wa.me sur certains appareils
+  wa.href = "https://api.whatsapp.com/send?text=" + encoded;
   wa.target = "_blank";
-  sms.href = "sms:?body=" + encoded;
+  wa.rel = "noopener";
+  // SMS
+  const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+  sms.href = isIOS ? "sms:&body=" + encoded : "sms:?body=" + encoded;
 
   copyBtn.onclick = () => {
     navigator.clipboard.writeText(text).then(() => {
