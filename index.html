@@ -366,6 +366,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     <input class="ob-input" id="ob-group-name" placeholder="Ex: Famille, Potes..." type="text">
     <button class="ob-btn" id="ob-create-btn">Créer mon groupe</button>
     <div id="ob-err2" style="color:var(--red);font-size:12px;margin-top:8px;min-height:16px;"></div>
+    <div style="text-align:center;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+      <button id="ob-solo-btn" style="background:none;border:none;color:var(--muted);font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;text-decoration:underline;">Passer cette étape — utiliser en solo</button>
+    </div>
   </div>
 </div>
 
@@ -871,6 +874,15 @@ function initOnboarding() {
   });
 
   document.getElementById("ob-finish-btn").addEventListener("click", finishOnboarding);
+  document.getElementById("ob-solo-btn").addEventListener("click", () => {
+    // Mode solo : pas de groupe, on passe directement
+    state.groupCode = null;
+    state.groupName = null;
+    saveState();
+    document.getElementById("ob-step2").classList.add("hidden");
+    finishOnboarding();
+    showToast("Mode solo activé — tu pourras rejoindre un groupe plus tard !");
+  });
 }
 
 async function createGroup(name) {
