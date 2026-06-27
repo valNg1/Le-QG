@@ -838,11 +838,12 @@ function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 // DONNÉES
 // ════════════════════════════════════════════
 const DINER_CHOICES = [
-  { id:"present", label:"✅ Présent pour dîner", emoji:"✅", short:"Présent", color:"#34C77B", rgb:"52,199,123" },
-  { id:"sport",   label:"⚽ J'ai sport",          emoji:"⚽", short:"Sport",   color:"#4A90E2", rgb:"74,144,226" },
-  { id:"sansmoi", label:"🍕 Dîner sans moi",       emoji:"🍕", short:"Sans moi",color:"#E8384F", rgb:"232,56,79" },
-  { id:"pasla",   label:"🚪 Pas là",               emoji:"🚪", short:"Pas là", color:"#9B6BFF", rgb:"155,107,255"},
-  { id:"etape",   label:"🎉 Dîne + sort après",    emoji:"🎉", short:"Dîne+sort",color:"#F7C104",rgb:"247,193,4" },
+  { id:"present", label:"Je suis là pour dîner",                    emoji:"🍽", short:"Là pour dîner",  color:"#34C77B", rgb:"52,199,123"   },
+  { id:"pasla",   label:"Pas là",                                   emoji:"🚪", short:"Pas là",         color:"#9B6BFF", rgb:"155,107,255"  },
+  { id:"dehors",  label:"Je dîne dehors",                           emoji:"🍷", short:"Dîne dehors",    color:"#F5874A", rgb:"245,135,74"   },
+  { id:"tard",    label:"Je finis tard, commencez sans moi",        emoji:"⏰", short:"Commencez sans moi", color:"#F7C104", rgb:"247,193,4" },
+  { id:"sport",   label:"J'ai sport, je mange après",               emoji:"⚽", short:"Sport + après",  color:"#4A90E2", rgb:"74,144,226"   },
+  { id:"pot",     label:"J'ai un pot, je me ferai un truc en rentrant", emoji:"🥂", short:"Pot ce soir", color:"#E8384F", rgb:"232,56,79"  },
 ];
 
 const COLORS = { blue:"#4A90E2", orange:"#F5874A", green:"#34C77B", purple:"#9B6BFF", red:"#E8384F" };
