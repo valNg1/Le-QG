@@ -510,9 +510,18 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
         <div class="jeune-label" id="jeune-label">—</div>
       </div>
       <div class="jeune-status" id="jeune-status"></div>
-      <div>
+      <div id="jeune-start-block">
+        <div style="display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:10px;">
+          <span style="font-size:13px;color:var(--muted);font-weight:600;">Démarrage à</span>
+          <input type="time" id="jeune-start-time" style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--yellow);font-family:var(--font);font-size:15px;font-weight:700;padding:6px 10px;cursor:pointer;">
+        </div>
         <button class="jeune-btn" id="jeune-start-btn">Commencer le jeûne</button>
-        <button class="jeune-btn stop" id="jeune-stop-btn" style="display:none;">Arrêter</button>
+      </div>
+      <div id="jeune-running-block" style="display:none;">
+        <button class="jeune-btn stop" id="jeune-stop-btn">Arrêter le jeûne</button>
+        <div style="margin-top:8px;">
+          <button id="jeune-edit-start-btn" style="background:none;border:none;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;text-decoration:underline;font-family:var(--font);">Modifier l'heure de début</button>
+        </div>
       </div>
     </div>
     <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-top:8px;">
@@ -1806,21 +1815,58 @@ function initJeune() {
       saveState(); initJeune();
     });
   });
+  // Prérempli avec l'heure actuelle
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2,"0");
+  const mm = String(now.getMinutes()).padStart(2,"0");
+  const timeInput = document.getElementById("jeune-start-time");
+  if (timeInput) timeInput.value = hh+":"+mm;
+
   document.getElementById("jeune-start-btn").onclick = startJeune;
   document.getElementById("jeune-stop-btn").onclick = stopJeune;
+
+  const editBtn = document.getElementById("jeune-edit-start-btn");
+  if (editBtn) editBtn.onclick = () => {
+    const newTime = prompt("Modifier l'heure de début (HH:MM) :", new Date(state.jeuneStart).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}));
+    if (!newTime) return;
+    const [h,m] = newTime.split(":").map(Number);
+    if (isNaN(h)||isNaN(m)) { showToast("Format invalide (HH:MM)"); return; }
+    const d = new Date();
+    d.setHours(h,m,0,0);
+    // Si l'heure est dans le futur, on prend hier
+    if (d > Date.now()) d.setDate(d.getDate()-1);
+    state.jeuneStart = d.getTime();
+    saveState(); updateJeuneDisplay();
+    showToast("Heure de début modifiée ✓");
+  };
+
   updateJeuneDisplay();
   if (state.jeuneStart) {
-    document.getElementById("jeune-start-btn").style.display = "none";
-    document.getElementById("jeune-stop-btn").style.display = "inline-block";
+    document.getElementById("jeune-start-block").style.display = "none";
+    document.getElementById("jeune-running-block").style.display = "block";
     jeuneInterval = setInterval(updateJeuneDisplay, 1000);
+  } else {
+    document.getElementById("jeune-start-block").style.display = "block";
+    document.getElementById("jeune-running-block").style.display = "none";
   }
 }
 
 function startJeune() {
-  state.jeuneStart = Date.now();
+  // Utilise l'heure saisie dans le champ
+  const timeInput = document.getElementById("jeune-start-time");
+  if (timeInput && timeInput.value) {
+    const [h,m] = timeInput.value.split(":").map(Number);
+    const d = new Date();
+    d.setHours(h,m,0,0);
+    // Si l'heure est dans le futur, c'est hier
+    if (d > Date.now()) d.setDate(d.getDate()-1);
+    state.jeuneStart = d.getTime();
+  } else {
+    state.jeuneStart = Date.now();
+  }
   saveState();
-  document.getElementById("jeune-start-btn").style.display = "none";
-  document.getElementById("jeune-stop-btn").style.display = "inline-block";
+  document.getElementById("jeune-start-block").style.display = "none";
+  document.getElementById("jeune-running-block").style.display = "block";
   jeuneInterval = setInterval(updateJeuneDisplay, 1000);
   updateJeuneDisplay();
 }
@@ -1835,8 +1881,12 @@ function stopJeune() {
   state.jeuneStart = null;
   saveState();
   clearInterval(jeuneInterval); jeuneInterval = null;
-  document.getElementById("jeune-start-btn").style.display = "inline-block";
-  document.getElementById("jeune-stop-btn").style.display = "none";
+  // Remet l'heure actuelle dans le champ
+  const now = new Date();
+  const ti = document.getElementById("jeune-start-time");
+  if (ti) ti.value = String(now.getHours()).padStart(2,"0")+":"+String(now.getMinutes()).padStart(2,"0");
+  document.getElementById("jeune-start-block").style.display = "block";
+  document.getElementById("jeune-running-block").style.display = "none";
   updateJeuneDisplay();
 }
 
