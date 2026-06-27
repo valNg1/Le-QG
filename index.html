@@ -575,11 +575,52 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
       <div style="display:flex;gap:8px;">
         <select class="modal-input" id="anniv-mod-day" style="flex:1;">
           <option value="">Jour</option>
-          ${Array.from({length:31},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join("")}
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10</option>
+          <option value="11">11</option>
+          <option value="12">12</option>
+          <option value="13">13</option>
+          <option value="14">14</option>
+          <option value="15">15</option>
+          <option value="16">16</option>
+          <option value="17">17</option>
+          <option value="18">18</option>
+          <option value="19">19</option>
+          <option value="20">20</option>
+          <option value="21">21</option>
+          <option value="22">22</option>
+          <option value="23">23</option>
+          <option value="24">24</option>
+          <option value="25">25</option>
+          <option value="26">26</option>
+          <option value="27">27</option>
+          <option value="28">28</option>
+          <option value="29">29</option>
+          <option value="30">30</option>
+          <option value="31">31</option>
         </select>
         <select class="modal-input" id="anniv-mod-month" style="flex:1;">
           <option value="">Mois</option>
-          ${["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"].map((m,i)=>`<option value="${i+1}">${m}</option>`).join("")}
+          <option value="1">Janvier</option>
+          <option value="2">Février</option>
+          <option value="3">Mars</option>
+          <option value="4">Avril</option>
+          <option value="5">Mai</option>
+          <option value="6">Juin</option>
+          <option value="7">Juillet</option>
+          <option value="8">Août</option>
+          <option value="9">Septembre</option>
+          <option value="10">Octobre</option>
+          <option value="11">Novembre</option>
+          <option value="12">Décembre</option>
         </select>
       </div>
       <button id="anniv-mod-add-btn" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:11px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;">🎂 Ajouter</button>
@@ -2059,14 +2100,6 @@ function initAnnivMod() {
   const addBtn = document.getElementById("anniv-mod-add-btn");
   if (addBtn) addBtn.onclick = addAnnivMod;
   // Pré-remplit les selects avec des options
-  const dayEl = document.getElementById("anniv-mod-day");
-  const monthEl = document.getElementById("anniv-mod-month");
-  if (dayEl && !dayEl.options.length > 1) {
-    for(let i=1;i<=31;i++) dayEl.add(new Option(i,i));
-  }
-  if (monthEl && monthEl.options.length <= 1) {
-    MOIS_FR.forEach((m,i) => monthEl.add(new Option(m.charAt(0).toUpperCase()+m.slice(1), i+1)));
-  }
   renderAnnivMod();
 }
 
@@ -2276,23 +2309,31 @@ function renderBandeau() {
     </div>`;
   });
 
-  // Tâches ⭐ non faites
+  // Tâches ⭐ non faites — section dédiée
   const starTaches = (state.tachesPerso||[])
     .filter(t => t.star && !t.done)
     .sort((a,b) => (a.date||"9")<(b.date||"9")?-1:1)
-    .slice(0,3);
+    .slice(0,5);
 
-  starTaches.forEach(t => {
-    const dateStr = t.date ? new Date(t.date+"T00:00:00").toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"short"}) : "";
-    html += `<div class="bandeau-item bandeau-tache" onclick="showView('modules');openModule('taches_perso')">
-      <div class="bandeau-icon">⭐</div>
-      <div>
-        <div class="bandeau-text">${t.title}</div>
-        ${dateStr?`<div class="bandeau-sub">${dateStr}</div>`:""}
-      </div>
-      <div class="tache-check" style="width:22px;height:22px;border:2px solid var(--border2);border-radius:50%;cursor:pointer;flex-shrink:0;" data-quick-check="${t.id}"></div>
-    </div>`;
-  });
+  if (starTaches.length > 0) {
+    html += `<div style="margin-bottom:8px;">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+        ⭐ Mes tâches importantes
+        <button onclick="showView('modules');openModule('taches_perso')" style="background:none;border:none;color:var(--yellow);font-size:11px;font-weight:700;cursor:pointer;margin-left:auto;font-family:var(--font);">Voir tout →</button>
+      </div>`;
+    starTaches.forEach(t => {
+      const dateStr = t.date ? new Date(t.date+"T00:00:00").toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"short"}) : "";
+      html += `<div class="bandeau-item bandeau-tache" style="margin-bottom:5px;">
+        <div class="tache-check" style="width:22px;height:22px;border:2px solid var(--blue);border-radius:50%;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;" data-quick-check="${t.id}"></div>
+        <div style="flex:1;min-width:0;">
+          <div class="bandeau-text" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.title}</div>
+          ${dateStr?`<div class="bandeau-sub">${dateStr}</div>`:""}
+        </div>
+        <span style="font-size:16px;">⭐</span>
+      </div>`;
+    });
+    html += `</div>`;
+  }
 
   el.innerHTML = html;
 
