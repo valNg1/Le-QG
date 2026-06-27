@@ -823,6 +823,30 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
   </div>
 </div>
 
+
+<!-- SHARE MODAL -->
+<div class="modal-ov hidden" id="share-modal">
+  <div class="modal" style="padding-bottom:24px;">
+    <div class="modal-title">Partager l'invitation</div>
+    <div id="share-preview" style="background:var(--surface2);border-radius:var(--r-sm);padding:12px;font-size:13px;color:var(--text);line-height:1.6;margin-bottom:16px;white-space:pre-line;"></div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <a id="share-whatsapp" href="#" style="display:flex;align-items:center;gap:12px;background:#25D366;border-radius:var(--r-sm);padding:13px 16px;text-decoration:none;">
+        <span style="font-size:24px;">💬</span>
+        <span style="font-size:15px;font-weight:700;color:white;">WhatsApp</span>
+      </a>
+      <a id="share-sms" href="#" style="display:flex;align-items:center;gap:12px;background:#4A90E2;border-radius:var(--r-sm);padding:13px 16px;text-decoration:none;">
+        <span style="font-size:24px;">✉️</span>
+        <span style="font-size:15px;font-weight:700;color:white;">SMS</span>
+      </a>
+      <button id="share-copy" style="display:flex;align-items:center;gap:12px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r-sm);padding:13px 16px;font-family:var(--font);cursor:pointer;width:100%;">
+        <span style="font-size:24px;">📋</span>
+        <span style="font-size:15px;font-weight:700;color:var(--text);">Copier le message</span>
+      </button>
+      <button onclick="document.getElementById('share-modal').classList.add('hidden')" style="background:none;border:none;color:var(--muted);font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;padding:8px;">Annuler</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1017,11 +1041,7 @@ function showStep3(code, name, isNew) {
   `;
   const obShareMsg = "👋 " + (state.name||"") + " t'invite à rejoindre Le QG !\n\nUn espace pour organiser le quotidien en famille ou entre amis : météo, agenda partagé, qui dîne ce soir, modules culture, sport et bien plus.\n\n👉 Rejoins-moi ici : " + inviteUrl;
   document.getElementById("ob-copy-btn").addEventListener("click", () => {
-    if(navigator.share) {
-      navigator.share({ title:"Le Général — invitation", text:obShareMsg, url:inviteUrl });
-    } else {
-      navigator.clipboard.writeText(obShareMsg).then(() => showToast("Message copié !"));
-    }
+    openShareMenu(obShareMsg, inviteUrl);
   });
 }
 
@@ -1580,13 +1600,7 @@ function renderGroupe() {
     const cb=document.getElementById("copy-invite-btn");
     const lb=document.getElementById("leave-group-btn");
     const shareText = "👋 " + (state.name||"") + " t'invite à rejoindre Le QG !\n\nUn espace pour organiser le quotidien en famille ou entre amis : météo, agenda partagé, qui dîne ce soir, modules culture, sport et bien plus.\n\n👉 Rejoins-moi ici : " + inviteUrl;
-    if(sb) sb.onclick=()=>{
-      if(navigator.share) {
-        navigator.share({ title:"Le Général — invitation", text:shareText, url:inviteUrl });
-      } else {
-        navigator.clipboard.writeText(shareText).then(()=>showToast("Message copié — colle-le dans WhatsApp !"));
-      }
-    };
+    if(sb) sb.onclick=()=>openShareMenu(shareText, inviteUrl);
     if(cb) cb.onclick=()=>navigator.clipboard.writeText(inviteUrl).then(()=>showToast("Lien copié !"));
     if(lb) lb.onclick=()=>{if(confirm("Quitter le groupe ?")){state.groupCode=null;state.groupName=null;saveState();renderGroupe();}};
     if(state.groupCode&&firebaseReady) loadGroupMembers();
@@ -2897,6 +2911,32 @@ async function saveDinerToFirebase() {
 // ════════════════════════════════════════════
 // UTILS
 // ════════════════════════════════════════════
+
+function openShareMenu(text, url) {
+  const modal = document.getElementById("share-modal");
+  const preview = document.getElementById("share-preview");
+  const wa = document.getElementById("share-whatsapp");
+  const sms = document.getElementById("share-sms");
+  const copyBtn = document.getElementById("share-copy");
+  if (!modal) return;
+
+  const encoded = encodeURIComponent(text);
+  preview.textContent = text;
+  wa.href = "https://wa.me/?text=" + encoded;
+  wa.target = "_blank";
+  sms.href = "sms:?body=" + encoded;
+
+  copyBtn.onclick = () => {
+    navigator.clipboard.writeText(text).then(() => {
+      copyBtn.querySelector("span:last-child").textContent = "✅ Copié !";
+      setTimeout(() => copyBtn.querySelector("span:last-child").textContent = "Copier le message", 2000);
+    });
+  };
+
+  modal.classList.remove("hidden");
+  modal.onclick = e => { if (e.target === modal) modal.classList.add("hidden"); };
+}
+
 function showToast(msg) {
   const t=document.getElementById("toast");
   t.textContent=msg; t.classList.add("show");
