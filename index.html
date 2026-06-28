@@ -771,10 +771,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
     <span>Agenda</span>
   </button>
-  <a class="nav-btn" href="https://legeneral.org/tdf2026.html" target="_blank">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    <span>TDF</span>
-  </a>
   <button class="nav-btn" id="nav-groupe" data-view="groupe">
     <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
     <span>Groupe</span>
@@ -783,6 +779,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
     <span>Modules</span>
   </button>
+  <a class="nav-btn" href="https://legeneral.org/tdf2026.html" target="_blank">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    <span>TDF</span>
+  </a>
   <button class="nav-btn" id="nav-mur" data-view="mur">
     <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
     <span>Mur</span>
@@ -1171,7 +1171,7 @@ function renderMeteoCards(villes) {
   if (!row) return;
   row.innerHTML = villes.map(v => {
     const c = CITIES_LIST.find(x=>x.id===v)||{label:v,url:"#"};
-    return `<a class="meteo-card" id="meteo-${v}" href="${c.url}" target="_blank">
+    return `<a class="meteo-card" id="meteo-${v}" href="${c.url}" target="_blank" style="position:relative;">
       <div class="meteo-city">${c.label}</div>
       <div class="skel" style="width:36px;height:36px;border-radius:8px;"></div>
       <div class="skel" style="width:60px;height:26px;margin-top:4px;"></div>
@@ -1197,11 +1197,15 @@ async function fetchMeteo(cityKey) {
     const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
     const tmrLabel = tomorrow.toLocaleDateString("fr-FR",{weekday:"short"});
     const cityInfo = CITIES_LIST.find(x=>x.id===cityKey)||{label:cityKey,url:"#"};
-    document.getElementById("meteo-"+cityKey).innerHTML = `
+    const el = document.getElementById("meteo-"+cityKey);
+    if (!el) return;
+    // Met à jour href sans casser la structure
+    if (el.tagName === "A") el.href = cityInfo.url || "#";
+    el.innerHTML = `
       <div class="meteo-city">${cityInfo.label}</div>
       <div style="display:flex;gap:10px;align-items:flex-start;margin-top:4px;">
         <div style="flex:1;">
-          <div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;">Aujourd'hui</div>
+          <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;">Aujourd'hui</div>
           <div class="meteo-icon">${WMO_ICONS[code]||"🌡"}</div>
           <div class="meteo-temp">${Math.round(cur.temperature_2m)}<sup>°C</sup></div>
           <div class="meteo-mm">↑${tmax0}° ↓${tmin0}°</div>
@@ -1212,16 +1216,17 @@ async function fetchMeteo(cityKey) {
         </div>
         <div style="width:1px;background:var(--border);align-self:stretch;flex-shrink:0;margin-top:4px;"></div>
         <div style="flex:1;">
-          <div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;">${tmrLabel.charAt(0).toUpperCase()+tmrLabel.slice(1)}</div>
+          <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;">${tmrLabel.charAt(0).toUpperCase()+tmrLabel.slice(1)}</div>
           <div style="font-size:22px;line-height:1;margin-bottom:4px;">${WMO_ICONS[code1]||"🌡"}</div>
           <div style="font-size:18px;font-weight:800;color:var(--muted);">↑${tmax1}°</div>
           <div class="meteo-mm">↓${tmin1}°</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:4px;">${WMO_DESC[code1]||""}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">${WMO_DESC[code1]||""}</div>
         </div>
       </div>`;
   } catch(e) {
     const ci2 = CITIES_LIST.find(x=>x.id===cityKey)||{label:cityKey};
-    document.getElementById("meteo-"+cityKey).innerHTML = `<div class="meteo-city">${ci2.label}</div><div class="meteo-icon">❓</div><div class="meteo-desc" style="color:var(--muted)">Indisponible</div>`;
+    const elFb = document.getElementById("meteo-"+cityKey);
+    if (elFb) elFb.innerHTML = `<div class="meteo-city">${ci2.label}</div><div class="meteo-icon">❓</div><div class="meteo-desc" style="color:var(--muted)">Indisponible</div>`;
   }
 }
 
@@ -2259,26 +2264,37 @@ function renderThemePicker() {
 
 function startQuiz(theme, reviewWrong) {
   quizState.theme = theme || "all";
-  let pool = theme && theme !== "all"
-    ? QUIZ_QUESTIONS.filter(q => q.t === theme)
-    : [...QUIZ_QUESTIONS];
+  let pool;
 
-  // Mode révision : seulement les questions ratées
-  if (reviewWrong && quizState.wrong.length) {
-    pool = quizState.wrong;
-    showToast("Révision des " + pool.length + " questions ratées !");
+  if (reviewWrong && quizState.wrong && quizState.wrong.length) {
+    // Mode révision : uniquement les questions ratées
+    pool = [...quizState.wrong];
+    showToast("Révision de " + pool.length + " question" + (pool.length>1?"s":"") + " !");
+  } else {
+    // Nouveau quiz : exclut les questions déjà vues dans cette session
+    const allPool = theme && theme !== "all"
+      ? QUIZ_QUESTIONS.filter(q => q.t === theme)
+      : [...QUIZ_QUESTIONS];
+    const seenQs = quizState.seen || [];
+    const unseen = allPool.filter(q => !seenQs.includes(q.q));
+    // Si on a tout vu, repart de zéro
+    pool = unseen.length >= 5 ? unseen : allPool;
   }
 
   const shuffled = [...pool].sort(()=>Math.random()-.5).slice(0, Math.min(10, pool.length));
+  const newSeen = [...(quizState.seen||[]), ...shuffled.map(q=>q.q)].slice(-50);
+
   quizState = {
-    ...quizState,
+    theme: quizState.theme,
     questions: shuffled.map(q => {
       const opts = [...q.opts];
       const correct = opts[q.a];
       opts.sort(()=>Math.random()-.5);
       return { ...q, opts, a: opts.indexOf(correct) };
     }),
-    idx: 0, score: 0, answered: false, wrong: reviewWrong ? [] : quizState.wrong
+    idx: 0, score: 0, answered: false,
+    wrong: reviewWrong ? [] : (quizState.wrong||[]),
+    seen: newSeen
   };
   document.getElementById("quiz-theme-picker").style.display = "none";
   document.getElementById("quiz-content").style.display = "block";
@@ -3158,15 +3174,17 @@ function openShareMenu(text, url) {
   const copyBtn = document.getElementById("share-copy");
   if (!modal) return;
 
-  const encoded = encodeURIComponent(text);
-  preview.textContent = text;
-  // WhatsApp : api.whatsapp.com fonctionne mieux que wa.me sur certains appareils
-  wa.href = "https://api.whatsapp.com/send?text=" + encoded;
+  // Texte simple sans caractères spéciaux pour la compatibilité max
+  const cleanText = text.replace(/['']/g, "'").replace(/[""]/g, '"');
+  const encoded = encodeURIComponent(cleanText);
+  preview.textContent = cleanText;
+  // WhatsApp — wa.me est plus fiable que api.whatsapp.com
+  wa.href = "https://wa.me/?text=" + encoded;
   wa.target = "_blank";
   wa.rel = "noopener";
-  // SMS
+  // SMS — format universel
   const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-  sms.href = isIOS ? "sms:&body=" + encoded : "sms:?body=" + encoded;
+  sms.href = (isIOS ? "sms:&body=" : "sms:?body=") + encoded;
 
   copyBtn.onclick = () => {
     navigator.clipboard.writeText(text).then(() => {
