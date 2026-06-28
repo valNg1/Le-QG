@@ -581,9 +581,14 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
       <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
       <div style="font-size:16px;font-weight:700;color:var(--text);">🧠 Quiz culture</div>
-      <button onclick="backToModules()" style="margin-left:auto;background:none;border:1px solid var(--border2);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;font-family:var(--font);">Quitter</button>
+      <button id="quiz-quit-btn" style="margin-left:auto;background:none;border:1px solid var(--border2);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;font-family:var(--font);">Quitter</button>
     </div>
-    <div id="quiz-content"></div>
+    <div id="quiz-theme-picker" style="margin-bottom:16px;">
+      <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.08em;">Choisis un thème</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" id="quiz-theme-grid"></div>
+    </div>
+    <div id="quiz-content" style="display:none;"></div>
+    <div id="quiz-review" style="display:none;"></div>
   </div>
 
   <!-- CINÉ / SPECTACLES -->
@@ -2130,41 +2135,124 @@ function nextMot() {
 // ════════════════
 // QUIZ CULTURE
 // ════════════════
-const QUIZ_QUESTIONS = [
-  {q:"Qui a peint la Joconde ?",opts:["Léonard de Vinci","Michel-Ange","Raphaël","Botticelli"],a:0},
-  {q:"En quelle année a eu lieu la Révolution française ?",opts:["1789","1776","1804","1815"],a:0},
-  {q:"Quelle est la capitale de l'Australie ?",opts:["Canberra","Sydney","Melbourne","Brisbane"],a:0},
-  {q:"Qui a écrit 'Les Misérables' ?",opts:["Victor Hugo","Gustave Flaubert","Émile Zola","Honoré de Balzac"],a:0},
-  {q:"Combien de planètes dans le système solaire ?",opts:["8","9","7","10"],a:0},
-  {q:"Quelle est la monnaie du Japon ?",opts:["Yen","Won","Yuan","Baht"],a:0},
-  {q:"Qui a découvert la pénicilline ?",opts:["Alexander Fleming","Louis Pasteur","Marie Curie","Albert Einstein"],a:0},
-  {q:"Quel est le plus long fleuve du monde ?",opts:["Le Nil","L'Amazone","Le Yangtsé","Le Mississippi"],a:0},
-  {q:"En quelle année l'homme a-t-il marché sur la Lune ?",opts:["1969","1965","1972","1961"],a:0},
-  {q:"Qui a composé la Cinquième Symphonie ?",opts:["Beethoven","Mozart","Bach","Chopin"],a:0},
-  {q:"Quelle est la capitale du Brésil ?",opts:["Brasília","São Paulo","Rio de Janeiro","Salvador"],a:0},
-  {q:"Quel élément chimique a pour symbole 'Au' ?",opts:["Or","Argent","Cuivre","Aluminium"],a:0},
-  {q:"Qui a écrit 'Don Quichotte' ?",opts:["Cervantès","Lope de Vega","García Márquez","Borges"],a:0},
-  {q:"Combien de côtés a un hexagone ?",opts:["6","5","7","8"],a:0},
-  {q:"Quel pays a remporté la Coupe du Monde 2022 ?",opts:["Argentine","France","Maroc","Croatie"],a:0},
+const QUIZ_THEMES = [
+  { id:"all",     label:"🎲 Tous les thèmes",  emoji:"🎲" },
+  { id:"geo",     label:"🌍 Géographie",        emoji:"🌍" },
+  { id:"histoire",label:"🏛 Histoire",          emoji:"🏛" },
+  { id:"science", label:"🔬 Sciences",          emoji:"🔬" },
+  { id:"culture", label:"🎨 Arts & Culture",    emoji:"🎨" },
+  { id:"sport",   label:"⚽ Sport",             emoji:"⚽" },
+  { id:"cinema",  label:"🎬 Cinéma & Séries",   emoji:"🎬" },
+  { id:"nature",  label:"🌿 Nature & Animaux",  emoji:"🌿" },
 ];
 
-let quizState = { questions:[], idx:0, score:0, answered:false };
+const QUIZ_QUESTIONS = [
+  // Géographie
+  {q:"Quelle est la capitale de l'Australie ?",opts:["Canberra","Sydney","Melbourne","Brisbane"],a:0,t:"geo"},
+  {q:"Quelle est la capitale du Brésil ?",opts:["Brasília","São Paulo","Rio de Janeiro","Salvador"],a:0,t:"geo"},
+  {q:"Quel est le plus long fleuve du monde ?",opts:["Le Nil","L'Amazone","Le Yangtsé","Le Mississippi"],a:0,t:"geo"},
+  {q:"Dans quel pays se trouve le Machu Picchu ?",opts:["Pérou","Bolivie","Chili","Équateur"],a:0,t:"geo"},
+  {q:"Quelle est la plus grande île du monde ?",opts:["Groenland","Australie","Bornéo","Madagascar"],a:0,t:"geo"},
+  {q:"Quel pays a la plus longue frontière terrestre ?",opts:["Russie","Chine","Canada","États-Unis"],a:0,t:"geo"},
+  {q:"Quelle mer sépare l'Europe de l'Afrique ?",opts:["Méditerranée","Adriatique","Égée","Rouge"],a:0,t:"geo"},
+  {q:"Quelle est la capitale du Canada ?",opts:["Ottawa","Toronto","Montréal","Vancouver"],a:0,t:"geo"},
+  // Histoire
+  {q:"En quelle année a eu lieu la Révolution française ?",opts:["1789","1776","1804","1815"],a:0,t:"histoire"},
+  {q:"En quelle année l'homme a-t-il marché sur la Lune ?",opts:["1969","1965","1972","1961"],a:0,t:"histoire"},
+  {q:"Qui était le premier président des États-Unis ?",opts:["George Washington","Thomas Jefferson","Abraham Lincoln","Benjamin Franklin"],a:0,t:"histoire"},
+  {q:"En quelle année a eu lieu la chute du mur de Berlin ?",opts:["1989","1991","1987","1993"],a:0,t:"histoire"},
+  {q:"Quelle civilisation a construit les pyramides de Gizeh ?",opts:["Égyptiens","Romains","Grecs","Mésopotamiens"],a:0,t:"histoire"},
+  {q:"Qui était Napoléon Bonaparte ?",opts:["Général et Empereur français","Roi d'Espagne","Général britannique","Tsar de Russie"],a:0,t:"histoire"},
+  // Sciences
+  {q:"Combien de planètes dans le système solaire ?",opts:["8","9","7","10"],a:0,t:"science"},
+  {q:"Qui a découvert la pénicilline ?",opts:["Alexander Fleming","Louis Pasteur","Marie Curie","Albert Einstein"],a:0,t:"science"},
+  {q:"Quel élément chimique a pour symbole 'Au' ?",opts:["Or","Argent","Cuivre","Aluminium"],a:0,t:"science"},
+  {q:"À quelle vitesse voyage la lumière ?",opts:["300 000 km/s","150 000 km/s","450 000 km/s","100 000 km/s"],a:0,t:"science"},
+  {q:"Combien de chromosomes a un être humain ?",opts:["46","44","48","42"],a:0,t:"science"},
+  {q:"Quel est l'élément le plus abondant dans l'univers ?",opts:["Hydrogène","Hélium","Oxygène","Carbone"],a:0,t:"science"},
+  {q:"Combien de côtés a un hexagone ?",opts:["6","5","7","8"],a:0,t:"science"},
+  // Arts & Culture
+  {q:"Qui a peint la Joconde ?",opts:["Léonard de Vinci","Michel-Ange","Raphaël","Botticelli"],a:0,t:"culture"},
+  {q:"Qui a écrit 'Les Misérables' ?",opts:["Victor Hugo","Gustave Flaubert","Émile Zola","Balzac"],a:0,t:"culture"},
+  {q:"Qui a composé la Cinquième Symphonie ?",opts:["Beethoven","Mozart","Bach","Chopin"],a:0,t:"culture"},
+  {q:"Qui a écrit 'Don Quichotte' ?",opts:["Cervantès","Lope de Vega","García Márquez","Borges"],a:0,t:"culture"},
+  {q:"Quelle est la monnaie du Japon ?",opts:["Yen","Won","Yuan","Baht"],a:0,t:"culture"},
+  {q:"Dans quel musée est exposée la Joconde ?",opts:["Le Louvre","Le Prado","Les Offices","The Met"],a:0,t:"culture"},
+  {q:"Qui a écrit 'L'Étranger' ?",opts:["Albert Camus","Jean-Paul Sartre","Simone de Beauvoir","André Gide"],a:0,t:"culture"},
+  // Sport
+  {q:"Quel pays a remporté la Coupe du Monde 2022 ?",opts:["Argentine","France","Maroc","Croatie"],a:0,t:"sport"},
+  {q:"Combien de joueurs dans une équipe de basketball ?",opts:["5","6","7","4"],a:0,t:"sport"},
+  {q:"Quel sport se joue à Wimbledon ?",opts:["Tennis","Badminton","Squash","Padel"],a:0,t:"sport"},
+  {q:"Combien de sets pour gagner à Wimbledon (hommes) ?",opts:["3","2","4","5"],a:0,t:"sport"},
+  {q:"Qui détient le record du 100m ?",opts:["Usain Bolt","Tyson Gay","Yohan Blake","Carl Lewis"],a:0,t:"sport"},
+  {q:"Quel pays a gagné le plus de Coupes du Monde de foot ?",opts:["Brésil","Allemagne","Italie","Argentine"],a:0,t:"sport"},
+  // Cinéma
+  {q:"Qui a réalisé 'Inception' ?",opts:["Christopher Nolan","Steven Spielberg","James Cameron","Ridley Scott"],a:0,t:"cinema"},
+  {q:"Quel film a remporté l'Oscar du meilleur film en 2020 ?",opts:["Parasite","1917","Joker","Le Mans 66"],a:0,t:"cinema"},
+  {q:"Dans quelle ville se passe 'Midnight in Paris' ?",opts:["Paris","New York","Londres","Rome"],a:0,t:"cinema"},
+  {q:"Qui joue James Bond dans 'Casino Royale' (2006) ?",opts:["Daniel Craig","Pierce Brosnan","Sean Connery","Roger Moore"],a:0,t:"cinema"},
+  {q:"Quel acteur joue Tony Stark dans Marvel ?",opts:["Robert Downey Jr.","Chris Evans","Chris Hemsworth","Mark Ruffalo"],a:0,t:"cinema"},
+  // Nature
+  {q:"Quel est le plus grand animal terrestre ?",opts:["Éléphant d'Afrique","Hippopotame","Rhinocéros","Girafe"],a:0,t:"nature"},
+  {q:"Combien de pattes a une araignée ?",opts:["8","6","10","4"],a:0,t:"nature"},
+  {q:"Quel est l'animal le plus rapide du monde ?",opts:["Guépard","Faucon pèlerin","Aigle","Lion"],a:0,t:"nature"},
+  {q:"Quelle est la durée de gestation d'un éléphant ?",opts:["22 mois","12 mois","18 mois","9 mois"],a:0,t:"nature"},
+  {q:"Quel arbre produit les glands ?",opts:["Chêne","Hêtre","Châtaignier","Noyer"],a:0,t:"nature"},
+];
 
-function initQuiz() { startQuiz(); }
+let quizState = { questions:[], idx:0, score:0, answered:false, wrong:[], theme:"all" };
 
-function startQuiz() {
-  // Mélange et prend 10 questions
-  const shuffled = [...QUIZ_QUESTIONS].sort(()=>Math.random()-.5).slice(0,10);
-  // Mélange les options de chaque question
+function initQuiz() {
+  // Branche le bouton quitter
+  const qb = document.getElementById("quiz-quit-btn");
+  if (qb) qb.onclick = backToModules;
+  renderThemePicker();
+}
+
+function renderThemePicker() {
+  document.getElementById("quiz-theme-picker").style.display = "block";
+  document.getElementById("quiz-content").style.display = "none";
+  document.getElementById("quiz-review").style.display = "none";
+  const grid = document.getElementById("quiz-theme-grid");
+  if (!grid) return;
+  grid.innerHTML = QUIZ_THEMES.map(t => `
+    <button style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;font-family:var(--font);transition:all .15s;" data-theme="${t.id}">
+      <span style="font-size:22px;">${t.emoji}</span>
+      <span style="font-size:13px;font-weight:600;color:var(--text);text-align:left;">${t.label.replace(t.emoji+" ","")}</span>
+    </button>`).join("");
+  grid.querySelectorAll("[data-theme]").forEach(btn => {
+    btn.addEventListener("click", function() {
+      startQuiz(this.dataset.theme);
+    });
+  });
+}
+
+function startQuiz(theme, reviewWrong) {
+  quizState.theme = theme || "all";
+  let pool = theme && theme !== "all"
+    ? QUIZ_QUESTIONS.filter(q => q.t === theme)
+    : [...QUIZ_QUESTIONS];
+
+  // Mode révision : seulement les questions ratées
+  if (reviewWrong && quizState.wrong.length) {
+    pool = quizState.wrong;
+    showToast("Révision des " + pool.length + " questions ratées !");
+  }
+
+  const shuffled = [...pool].sort(()=>Math.random()-.5).slice(0, Math.min(10, pool.length));
   quizState = {
+    ...quizState,
     questions: shuffled.map(q => {
       const opts = [...q.opts];
       const correct = opts[q.a];
       opts.sort(()=>Math.random()-.5);
       return { ...q, opts, a: opts.indexOf(correct) };
     }),
-    idx: 0, score: 0, answered: false
+    idx: 0, score: 0, answered: false, wrong: reviewWrong ? [] : quizState.wrong
   };
+  document.getElementById("quiz-theme-picker").style.display = "none";
+  document.getElementById("quiz-content").style.display = "block";
+  document.getElementById("quiz-review").style.display = "none";
   renderQuiz();
 }
 
@@ -2175,15 +2263,23 @@ function renderQuiz() {
   if (idx >= questions.length) {
     // Score final
     const pct = Math.round(score/questions.length*100);
+    const wrongCount = quizState.wrong?.length || 0;
     el.innerHTML = `<div class="quiz-score">
       <div class="quiz-score-num">${score}/${questions.length}</div>
       <div class="quiz-score-label">${pct>=80?"🌟 Excellent !":pct>=60?"👍 Bien !":pct>=40?"😐 Passable":"📚 Révise !"}</div>
-      <div style="font-size:13px;color:var(--muted);margin-top:8px;">Score : ${pct}%</div>
-      <div style="display:flex;gap:8px;justify-content:center;margin-top:20px;">
-        <button onclick="startQuiz()" style="background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:12px 24px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">↺ Rejouer</button>
-        <button onclick="backToModules()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:var(--r-sm);padding:12px 24px;font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;">← Modules</button>
+      <div style="font-size:14px;color:var(--muted);margin-top:8px;">Score : ${pct}%</div>
+      ${wrongCount>0?`<div style="font-size:13px;color:var(--red);margin-top:6px;">❌ ${wrongCount} question${wrongCount>1?"s":""} ratée${wrongCount>1?"s":""}</div>`:""}
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:20px;">
+        ${wrongCount>0?`<button id="quiz-review-btn" style="background:rgba(232,56,79,.15);color:var(--red);border:1px solid rgba(232,56,79,.3);border-radius:var(--r-sm);padding:12px 24px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">🔁 Réviser les ${wrongCount} erreur${wrongCount>1?"s":""}</button>`:""}
+        <button id="quiz-replay-btn" style="background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:12px 24px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">↺ Nouveau quiz</button>
+        <button id="quiz-theme-btn" style="background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:var(--r-sm);padding:12px 24px;font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;">🎲 Changer de thème</button>
       </div>
     </div>`;
+    setTimeout(() => {
+      document.getElementById("quiz-review-btn")?.addEventListener("click", () => startQuiz(quizState.theme, true));
+      document.getElementById("quiz-replay-btn")?.addEventListener("click", () => startQuiz(quizState.theme, false));
+      document.getElementById("quiz-theme-btn")?.addEventListener("click", renderThemePicker);
+    }, 50);
     return;
   }
   const q = questions[idx];
@@ -2202,7 +2298,13 @@ function renderQuiz() {
         if (i===correct) b.classList.add("correct");
         else if (i===chosen && chosen!==correct) b.classList.add("wrong");
       });
-      if (chosen===correct) quizState.score++;
+      if (chosen===correct) {
+        quizState.score++;
+      } else {
+        // Mémorise la question ratée pour révision
+        if (!quizState.wrong) quizState.wrong = [];
+        if (!quizState.wrong.find(w => w.q === q.q)) quizState.wrong.push(q);
+      }
       setTimeout(() => { quizState.idx++; quizState.answered=false; renderQuiz(); }, 1200);
     });
   });
