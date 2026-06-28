@@ -2743,8 +2743,8 @@ function fetchRecos(type, prompt) {
   btn.disabled = true;
 
   const systemMsg = isFilm
-    ? "Tu es un expert en cinéma et spectacles. L'utilisateur décrit une envie. Propose exactement 4 recommandations (films, séries, pièces — pas forcément récents). Réponds UNIQUEMENT en JSON valide, sans markdown, sans texte avant ou après. Format strict: [{"titre":"","type":"Film","annee":"","realisateur":"","description":"2 phrases max","pourquoi":"1 phrase"}]"
-    : "Tu es un expert en littérature. Propose exactement 4 livres selon l'envie décrite. Réponds UNIQUEMENT en JSON valide, sans markdown, sans texte avant ou après. Format strict: [{"titre":"","auteur":"","genre":"","annee":"","description":"2 phrases max","pourquoi":"1 phrase"}]";
+    ? `Tu es un expert en cinéma et spectacles. L'utilisateur décrit une envie. Propose exactement 4 recommandations (films, séries ou pièces, pas forcément récents). Réponds UNIQUEMENT en JSON valide sans markdown. Format: [{"titre":"","type":"Film","annee":"","realisateur":"","description":"2 phrases","pourquoi":"1 phrase"}]`
+    : `Tu es un expert en littérature. Propose exactement 4 livres selon l'envie. Réponds UNIQUEMENT en JSON valide sans markdown. Format: [{"titre":"","auteur":"","genre":"","annee":"","description":"2 phrases","pourquoi":"1 phrase"}]`;
 
   fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
