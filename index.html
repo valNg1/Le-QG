@@ -2516,70 +2516,136 @@ function initScoresMod() {
 const CINE_CHIPS = ["Film feel-good","Thriller psychologique","Comédie","Film d'action","Drame","Film de culte","Années 80-90","En famille","Science-fiction","Film étranger","Pièce de théâtre","Comédie musicale","Spectacle d'humour","Série courte"];
 const LIVRE_CHIPS = ["Roman policier","Biographie","Essai","Roman historique","Science-fiction","Développement perso","Roman étranger","BD / Manga","Classique","Conte philosophique","Thriller","Romance"];
 
-async function fetchRecos(type, prompt) {
+
+// ════════════════════════════════════════════
+// BASE DE RECOMMANDATIONS LOCALE (fallback sans API)
+// ════════════════════════════════════════════
+const RECO_FILMS = [
+  {titre:"Intouchables",type:"Film",annee:"2011",realisateur:"Nakache & Toledano",description:"L'amitié improbable entre un aristocrate tétraplégique et son aide-soignant des banlieues. Drôle, émouvant, universel.",pourquoi:"Parfait feel-good, un des films français les plus vus au monde.",tags:["feel-good","comédie","famille","humour"]},
+  {titre:"Le Fabuleux Destin d'Amélie Poulain",type:"Film",annee:"2001",realisateur:"Jean-Pierre Jeunet",description:"Une jeune femme timide décide de changer la vie des autres. Paris magique, poésie visuelle.",pourquoi:"Conte moderne feel-good par excellence.",tags:["feel-good","poésie","paris","comédie"]},
+  {titre:"The Dark Knight",type:"Film",annee:"2008",realisateur:"Christopher Nolan",description:"Batman face au Joker dans un thriller sombre et philosophique. Chef-d'œuvre du film de super-héros.",pourquoi:"Thriller haletant avec une profondeur rare pour le genre.",tags:["thriller","action","super-héros","sombre"]},
+  {titre:"Parasite",type:"Film",annee:"2019",realisateur:"Bong Joon-ho",description:"Deux familles coréennes aux destins croisés. Satire sociale brillante, révélation mondiale.",pourquoi:"Film étranger qui a révolutionné le cinéma mondial.",tags:["thriller","drame","corée","satire","étranger"]},
+  {titre:"La La Land",type:"Film",annee:"2016",realisateur:"Damien Chazelle",description:"Une actrice et un pianiste rêvent de gloire à Los Angeles. Musical moderne et mélancolique.",pourquoi:"Comédie musicale moderne, visuellement sublime.",tags:["musical","romance","rêve","Los Angeles"]},
+  {titre:"Forrest Gump",type:"Film",annee:"1994",realisateur:"Robert Zemeckis",description:"La vie extraordinaire d'un homme ordinaire à travers l'histoire américaine. Émotion garantie.",pourquoi:"Classique intemporel, émotionnel et drôle à la fois.",tags:["classique","émotion","famille","feel-good","90s"]},
+  {titre:"Inception",type:"Film",annee:"2010",realisateur:"Christopher Nolan",description:"Un voleur s'infiltre dans les rêves pour y planter une idée. Science-fiction psychologique vertigineuse.",pourquoi:"Science-fiction intellectuelle qui tient en haleine de bout en bout.",tags:["science-fiction","thriller","psychologique","Nolan"]},
+  {titre:"Le Seigneur des Anneaux",type:"Film",annee:"2001",realisateur:"Peter Jackson",description:"Une quête épique pour détruire l'Anneau Unique. Trilogie monumentale de fantasy.",pourquoi:"La référence absolue du film de fantasy épique.",tags:["fantasy","épique","aventure","famille"]},
+  {titre:"Whiplash",type:"Film",annee:"2014",realisateur:"Damien Chazelle",description:"Un jeune batteur face à un chef d'orchestre tyrannique. Tension extrême, musique exceptionnelle.",pourquoi:"Thriller psychologique haletant sur l'excellence et ses limites.",tags:["thriller","musique","psychologique","tension"]},
+  {titre:"Mommy",type:"Film",annee:"2014",realisateur:"Xavier Dolan",description:"Une mère seule élève son fils turbulent au Québec. Émotion brute, mise en scène audacieuse.",pourquoi:"Film québécois bouleversant, un des meilleurs de la décennie.",tags:["drame","émotion","famille","québec","étranger"]},
+  {titre:"Everything Everywhere All at Once",type:"Film",annee:"2022",realisateur:"Daniels",description:"Une femme découvre le multivers en faisant sa déclaration d'impôts. Absurde, touchant, révolutionnaire.",pourquoi:"Science-fiction loufoque et émouvante, ovni cinématographique.",tags:["science-fiction","famille","absurde","action"]},
+  {titre:"Marriage Story",type:"Série",annee:"2019",realisateur:"Noah Baumbach",description:"Un couple traverse un divorce douloureux mais humain. Adam Driver et Scarlett Johansson bouleversants.",pourquoi:"Drame intimiste sur l'amour et la séparation, Netflix.",tags:["drame","romance","netflix","émotion"]},
+  // Théâtre
+  {titre:"Cyrano de Bergerac",type:"Pièce",annee:"1897",realisateur:"Edmond Rostand",description:"L'homme au grand nez qui parle d'amour pour un autre. Chef-d'œuvre du théâtre français.",pourquoi:"Classique incontournable, mélange amour, humour et panache.",tags:["classique","théâtre","romantique","humour"]},
+  {titre:"Le Bourgeois Gentilhomme",type:"Pièce",annee:"1670",realisateur:"Molière",description:"Monsieur Jourdain veut devenir noble à tout prix. Comédie-ballet hilarante de Molière.",pourquoi:"Molière au sommet de son art comique, accessible à tous.",tags:["classique","théâtre","comédie","famille"]},
+];
+
+const RECO_LIVRES = [
+  {titre:"Le Comte de Monte-Cristo",auteur:"Alexandre Dumas",genre:"Roman d'aventure",annee:"1844",description:"Edmond Dantès, trahi et emprisonné, prépare sa vengeance pendant des années. Épopée romanesque inoubliable.",pourquoi:"Le roman d'aventure et de vengeance absolu, impossible à lâcher."},
+  {titre:"L'Alchimiste",auteur:"Paulo Coelho",genre:"Conte philosophique",annee:"1988",description:"Un jeune berger part à la recherche d'un trésor et trouve sa légende personnelle. Parabole universelle.",pourquoi:"Court, inspirant, lu dans le monde entier — idéal pour se poser des questions sur sa vie."},
+  {titre:"Sapiens",auteur:"Yuval Noah Harari",genre:"Essai",annee:"2011",description:"L'histoire de l'humanité depuis l'homo sapiens jusqu'à aujourd'hui. Vertigineux et accessible.",pourquoi:"L'essai qui change la façon de voir le monde, recommandé par des millions de lecteurs."},
+  {titre:"Le Nom de la Rose",auteur:"Umberto Eco",genre:"Roman policier historique",annee:"1980",description:"Un moine enquête sur des meurtres mystérieux dans une abbaye médiévale. Polar intellectuel fascinant.",pourquoi:"Roman policier historique exigeant mais captivant, chef-d'œuvre littéraire."},
+  {titre:"1984",auteur:"George Orwell",genre:"Science-fiction",annee:"1949",description:"Une société totalitaire où Big Brother surveille tout. Dystopie prophétique plus actuelle que jamais.",pourquoi:"Le roman politique incontournable, plus pertinent en 2024 qu'à sa sortie."},
+  {titre:"Dune",auteur:"Frank Herbert",genre:"Science-fiction",annee:"1965",description:"Sur une planète désertique, un jeune noble devient le messie d'un peuple. SF politique et écologique.",pourquoi:"La référence absolue de la science-fiction, univers d'une richesse infinie."},
+  {titre:"Les Misérables",auteur:"Victor Hugo",genre:"Roman",annee:"1862",description:"Jean Valjean, un forçat libéré, cherche sa rédemption dans une France tourmentée. Monument de la littérature.",pourquoi:"Un des plus grands romans jamais écrits, humaniste et épique."},
+  {titre:"L'Étranger",auteur:"Albert Camus",genre:"Roman philosophique",annee:"1942",description:"Meursault tue un homme sous le soleil d'Alger et en assume l'absurdité. Court et bouleversant.",pourquoi:"Chef-d'œuvre existentialiste à lire en une soirée, qui hante longtemps."},
+  {titre:"Atomic Habits",auteur:"James Clear",genre:"Développement personnel",annee:"2018",description:"Comment construire de bonnes habitudes et éliminer les mauvaises. Méthode concrète et scientifique.",pourquoi:"Le livre de développement personnel le plus pratique et efficace du moment."},
+  {titre:"Berserk",auteur:"Kentaro Miura",genre:"Manga",annee:"1989",description:"Guts, un guerrier solitaire, affronte des démons dans un monde médiéval sombre. Chef-d'œuvre du manga.",pourquoi:"Le manga ultime pour les amateurs de fantasy sombre et de personnages complexes."},
+  {titre:"Educated",auteur:"Tara Westover",genre:"Biographie",annee:"2018",description:"Une femme élevée sans école dans une famille survivaliste Idaho, qui obtient un doctorat à Cambridge.",pourquoi:"Biographie stupéfiante sur la force de volonté et l'émancipation par l'éducation."},
+  {titre:"L'Ami retrouvé",auteur:"Fred Uhlman",genre:"Roman",annee:"1971",description:"L'amitié entre deux lycéens en Allemagne nazie. Court, déchirant, inoubliable.",pourquoi:"Roman court (100 pages) d'une puissance émotionnelle rare — à lire en une heure."},
+  {titre:"Thinking, Fast and Slow",auteur:"Daniel Kahneman",genre:"Essai",annee:"2011",description:"Comment notre cerveau prend ses décisions. Psychologie cognitive accessible et révélatrice.",pourquoi:"L'essai qui explique comment on pense vraiment — fascinant pour comprendre ses propres biais."},
+];
+
+function getRecosByPrompt(type, prompt) {
+  const p = prompt.toLowerCase();
+  const items = type === "cine" ? RECO_FILMS : RECO_LIVRES;
+  
+  // Score chaque item selon les mots-clés du prompt
+  const scored = items.map(item => {
+    let score = 0;
+    const haystack = (item.titre + " " + (item.description||"") + " " + (item.pourquoi||"") + " " + (item.tags||[]).join(" ") + " " + (item.genre||"") + " " + (item.type||"")).toLowerCase();
+    
+    // Mots-clés du prompt
+    p.split(/\s+/).forEach(word => {
+      if (word.length > 3 && haystack.includes(word)) score += 2;
+    });
+    
+    // Correspondances thématiques
+    const themes = {
+      "feel-good|famille|enfant|together": ["feel-good","famille"],
+      "thriller|suspense|haletant|polar|policier": ["thriller","policier"],
+      "science.fiction|sf|futur|espace": ["science-fiction"],
+      "classique|vieux|ancien|culte": ["classique"],
+      "émotion|triste|pleurer|bouleversant": ["émotion","drame"],
+      "comé|rire|drôle|humour": ["comédie","humour"],
+      "étranger|japonais|coréen|espagnol": ["étranger","corée","japon"],
+      "théâtre|pièce|scène": ["théâtre"],
+      "biographie|vie|vrai|réel": ["biographie"],
+      "essai|apprendre|comprendre|science": ["essai"],
+      "aventure|épique|action": ["aventure","épique","action"],
+      "manga|bd|bande dessinée": ["manga","bd"],
+      "philosophie|existentiel|sens": ["philosophique","existentialiste"],
+      "développement|habitude|productivité": ["développement"],
+      "romance|amour|romantique": ["romance","romantique"],
+      "historique|histoire|époque": ["historique"],
+    };
+    
+    Object.entries(themes).forEach(([keys, tags]) => {
+      if (new RegExp(keys).test(p)) {
+        tags.forEach(tag => {
+          if (haystack.includes(tag)) score += 3;
+        });
+      }
+    });
+    
+    return { ...item, score };
+  });
+  
+  // Retourne les 4 meilleurs
+  return scored.sort((a,b) => b.score - a.score).slice(0, 4);
+}
+
+function fetchRecos(type, prompt) {
   const isFilm = type === "cine";
   const resultEl = document.getElementById(type+"-reco-result");
   const btn = document.getElementById(type+"-reco-btn");
 
-  resultEl.innerHTML = `<div class="reco-loading">✨ Je cherche des idées<span class="reco-loading-dots"></span></div>`;
+  resultEl.innerHTML = `<div class="reco-loading">✨ Recherche en cours...</div>`;
   btn.disabled = true;
 
-  const systemPrompt = isFilm
-    ? "Tu es un expert en cinéma, théâtre et spectacles. L'utilisateur décrit une envie ou un thème. Tu proposes 4 recommandations personnalisées (films, séries, pièces ou spectacles — pas forcément récents). Réponds UNIQUEMENT en JSON valide, sans markdown, sans texte avant ou après. Format : [{\"titre\":\"\",\"type\":\"Film|Série|Pièce|Spectacle\",\"annee\":\"\",\"realisateur\":\"\",\"description\":\"2 phrases max\",\"pourquoi\":\"1 phrase sur pourquoi ça correspond à la demande\"}]"
-    : "Tu es un expert en littérature. L'utilisateur décrit une envie ou un thème de lecture. Tu proposes 4 recommandations de livres (pas forcément récents). Réponds UNIQUEMENT en JSON valide, sans markdown, sans texte avant ou après. Format : [{\"titre\":\"\",\"auteur\":\"\",\"genre\":\"\",\"annee\":\"\",\"description\":\"2 phrases max\",\"pourquoi\":\"1 phrase sur pourquoi ça correspond à la demande\"}]";
-
-  try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-          "Content-Type": "application/json",
-          "x-api-key": "",
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-allow-browser": "true"
-        },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 1000,
-        system: systemPrompt,
-        messages: [{ role: "user", content: prompt }]
-      })
-    });
-
-    const data = await response.json();
-    const text = data.content?.[0]?.text || "[]";
-    const clean = text.replace(/```json|```/g, "").trim();
-    const recos = JSON.parse(clean);
+  setTimeout(() => {
+    const recos = getRecosByPrompt(type, prompt);
+    if (!recos.length) {
+      resultEl.innerHTML = `<div class="reco-loading">Aucun résultat — essaie un autre thème</div>`;
+      btn.disabled = false;
+      return;
+    }
 
     resultEl.innerHTML = recos.map((r, i) => {
-      const icon = isFilm ? (r.type==="Livre"?"📚":r.type==="Pièce"?"🎭":r.type==="Spectacle"?"🎪":r.type==="Série"?"📺":"🎬") : "📖";
+      const icon = isFilm ? (r.type==="Pièce"?"🎭":r.type==="Spectacle"?"🎪":r.type==="Série"?"📺":"🎬") : "📖";
       const meta = isFilm
         ? `${r.type||"Film"} · ${r.realisateur||""} · ${r.annee||""}`
         : `${r.auteur||""} · ${r.genre||""} · ${r.annee||""}`;
+      const recoData = JSON.stringify({titre:r.titre,icon,type2:type,annee:r.annee,pourquoi:r.pourquoi,auteur:r.auteur||"",realisateur:r.realisateur||""});
       return `<div class="reco-card">
         <div class="reco-num">${icon} Suggestion ${i+1}</div>
         <div class="reco-title">${r.titre}</div>
         <div class="reco-meta">${meta}</div>
         <div class="reco-desc">${r.description}</div>
         <div class="reco-why">💛 ${r.pourquoi}</div>
-        <button class="reco-save-btn" data-reco='${JSON.stringify({...r,icon,type2:type})}'>🔖 Sauvegarder</button>
+        <button class="reco-save-btn" data-reco="${recoData.replace(/"/g,"&quot;")}">🔖 Sauvegarder</button>
       </div>`;
     }).join("");
 
-    // Branche les boutons save
-    resultEl.querySelectorAll(".reco-save-btn").forEach(btn => {
-      btn.addEventListener("click", function() {
-        const r = JSON.parse(this.dataset.reco);
+    resultEl.querySelectorAll(".reco-save-btn").forEach(b => {
+      b.addEventListener("click", function() {
+        const r = JSON.parse(this.dataset.reco.replace(/&quot;/g,'"'));
         saveReco(r);
         this.textContent = "✅ Sauvegardé !";
         this.disabled = true;
       });
     });
 
-  } catch(e) {
-    resultEl.innerHTML = `<div class="reco-loading" style="color:var(--red)">Erreur — réessaie dans un moment</div>`;
-    console.log(e);
-  }
-  btn.disabled = false;
+    btn.disabled = false;
+  }, 600);
 }
 
 function saveReco(r) {
