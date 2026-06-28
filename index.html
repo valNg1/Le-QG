@@ -1080,9 +1080,7 @@ function finishOnboarding() {
 function startApp() {
   updateHeader();
   // Villes météo depuis state
-  const meteoVilles = state.meteoVilles || ["paris","quiberon"];
-  renderMeteoCards(meteoVilles);
-  meteoVilles.forEach(v => fetchMeteo(v));
+  renderMeteoCards(state.meteoVilles || ["paris","quiberon"]);
   renderDiner();
   renderEvents();
   renderAnnivStrips();
@@ -1171,13 +1169,15 @@ function renderMeteoCards(villes) {
   if (!row) return;
   row.innerHTML = villes.map(v => {
     const c = CITIES_LIST.find(x=>x.id===v)||{label:v,url:"#"};
-    return `<a class="meteo-card" id="meteo-${v}" href="${c.url}" target="_blank" style="position:relative;">
+    return `<a class="meteo-card" id="meteo-${v}" href="${c.url}" target="_blank">
       <div class="meteo-city">${c.label}</div>
       <div class="skel" style="width:36px;height:36px;border-radius:8px;"></div>
       <div class="skel" style="width:60px;height:26px;margin-top:4px;"></div>
       <div class="skel" style="width:80px;height:10px;margin-top:4px;"></div>
     </a>`;
   }).join("");
+  // Lance fetchMeteo APRÈS que les éléments soient dans le DOM
+  villes.forEach(v => fetchMeteo(v));
 }
 
 async function fetchMeteo(cityKey) {
@@ -1803,7 +1803,7 @@ document.getElementById("save-perso-btn").addEventListener("click",()=>{
   saveState();
   sportsCache=null; podcastsCache=null;
   renderWidgetsZone();
-  const mv=state.meteoVilles||['paris','quiberon']; renderMeteoCards(mv); mv.forEach(v=>fetchMeteo(v));
+  renderMeteoCards(state.meteoVilles||['paris','quiberon']);
   showToast("Préférences enregistrées ✓");
 });
 
