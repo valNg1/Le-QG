@@ -380,7 +380,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
       <button class="ob-av" data-av="🌟">🌟</button>
       <button class="ob-av" data-av="💛">💛</button>
     </div>
-    <button class="ob-btn" id="ob-next-btn">Continuer →</button>
+    <button class="ob-btn" id="ob-next-btn" onclick="obNext()">Continuer →</button>
     <div id="ob-err" style="color:var(--red);font-size:12px;margin-top:8px;min-height:16px;"></div>
   </div>
 </div>
@@ -949,6 +949,15 @@ const WIDGET_DEFS = [
 // ONBOARDING
 // ════════════════════════════════════════════
 let obAvatar = "🧑";
+
+function obNext() {
+  const name = document.getElementById("ob-name").value.trim();
+  if (!name || name.length < 2) { document.getElementById("ob-err").textContent = "Prénom trop court"; return; }
+  state.name = name; state.avatar = obAvatar || "🧑";
+  saveState();
+  document.getElementById("ob-step1").classList.add("hidden");
+  document.getElementById("ob-step2").classList.remove("hidden");
+}
 
 function initOnboarding() {
   // Check URL param ?g=CODE pour invitation
