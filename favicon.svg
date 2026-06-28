@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Fond sombre -->
+  <rect width="32" height="32" rx="6" fill="#0F0F12"/>
+  <!-- Visière du képi -->
+  <ellipse cx="16" cy="23" rx="13" ry="3" fill="#1A2A1A"/>
+  <ellipse cx="16" cy="23" rx="13" ry="3" fill="none" stroke="#C9A84C" stroke-width="0.8"/>
+  <!-- Corps du képi -->
+  <path d="M5 23 Q5 12 16 11 Q27 12 27 23 Z" fill="#1A2A1A"/>
+  <!-- Bande dorée -->
+  <path d="M5.5 21 Q5.5 20 16 19.5 Q26.5 20 26.5 21" fill="none" stroke="#C9A84C" stroke-width="1.2"/>
+  <!-- Dessus plat -->
+  <ellipse cx="16" cy="11.5" rx="10.5" ry="2.5" fill="#152015"/>
+  <ellipse cx="16" cy="11.5" rx="10.5" ry="2.5" fill="none" stroke="#C9A84C" stroke-width="0.6"/>
+  <!-- Étoile centrale -->
+  <text x="16" y="17" font-size="7" text-anchor="middle" dominant-baseline="middle" fill="#C9A84C">★</text>
+  <!-- Galon doré dessus -->
+  <path d="M7 12.5 Q16 10.5 25 12.5" fill="none" stroke="#C9A84C" stroke-width="1"/>
+</svg>
