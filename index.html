@@ -2718,9 +2718,21 @@ function fetchRecos(type, prompt) {
     ? "Tu es un expert en cinéma, théâtre et spectacles. L'utilisateur décrit une envie. Propose 4 recommandations (films, séries, pièces — pas forcément récents). Réponds UNIQUEMENT en JSON valide sans markdown. Format: [{"titre":"","type":"Film","annee":"","realisateur":"","description":"2 phrases","pourquoi":"1 phrase"}]"
     : "Tu es un expert en littérature. Propose 4 livres selon l'envie décrite. Réponds UNIQUEMENT en JSON valide sans markdown. Format: [{"titre":"","auteur":"","genre":"","annee":"","description":"2 phrases","pourquoi":"1 phrase"}]";
 
-  const GEMINI_KEY = "AIzaSyAQ.Ab8RN6KaqHOu6aco8RtX7Xz3BoQv6uOIY9EOXXSt1t7NgGu2Wg";
+  const GEMINI_KEY = "REMPLACE_PAR_TA_CLE_GEMINI";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
 
+  if (!GEMINI_KEY || GEMINI_KEY.startsWith("REMPLACE")) {
+    // Fallback base locale
+    const recos = getRecosByPrompt(type, prompt);
+    resultEl.innerHTML = recos.length ? recos.map((r, i) => {
+      const icon = isFilm ? "🎬" : "📖";
+      const meta = isFilm ? `${r.type||"Film"} · ${r.realisateur||""} · ${r.annee||""}` : `${r.auteur||""} · ${r.genre||""} · ${r.annee||""}`;
+      const rd = JSON.stringify({titre:r.titre,icon,type2:type,annee:r.annee,pourquoi:r.pourquoi,auteur:r.auteur||"",realisateur:r.realisateur||""});
+      return `<div class="reco-card"><div class="reco-num">${icon} Suggestion ${i+1}</div><div class="reco-title">${r.titre}</div><div class="reco-meta">${meta}</div><div class="reco-desc">${r.description}</div><div class="reco-why">💛 ${r.pourquoi}</div></div>`;
+    }).join("") : `<div class="reco-loading">Essaie un autre thème</div>`;
+    btn.disabled = false;
+    return;
+  }
   fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
