@@ -511,6 +511,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
   <div id="teams-picker"></div>
   <div id="podcasts-picker" style="display:none;"></div>
   <div id="taches-config" style="margin-bottom:10px;"></div>
+  <p class="sec">Clé IA (recommandations)</p>
+  <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-bottom:10px;">
+    <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">Clé OpenRouter pour les recommandations films et livres par IA. Gratuit sur openrouter.ai</p>
+    <input id="or-key-input" class="modal-input" placeholder="sk-or-v1-..." type="password"
+      style="font-family:monospace;font-size:13px;">
+    <div id="or-key-status" style="font-size:12px;margin-top:6px;"></div>
+  </div>
   <button id="save-perso-btn" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:13px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;margin-top:16px;">💾 Enregistrer</button>
 </div>
 
@@ -1709,6 +1716,12 @@ function renderPerso() {
     });
   });
 
+  // Statut clé IA
+  const orKey = localStorage.getItem("qg_or_key");
+  const orStatus = document.getElementById("or-key-status");
+  if (orStatus) orStatus.innerHTML = orKey
+    ? `<span style="color:var(--green)">✅ Clé configurée</span>`
+    : `<span style="color:var(--muted)">⚠️ Pas de clé — recommandations en mode local</span>`;
   renderTachesConfig();
   // Météo picker
   const mp = document.getElementById("meteo-picker");
@@ -1765,6 +1778,12 @@ function renderPerso() {
 }
 
 document.getElementById("save-perso-btn").addEventListener("click",()=>{
+  // Sauvegarde clé IA si saisie
+  const keyInput = document.getElementById("or-key-input");
+  if (keyInput && keyInput.value.trim()) {
+    localStorage.setItem("qg_or_key", keyInput.value.trim());
+    showToast("Clé IA sauvegardée ✓");
+  }
   saveState();
   sportsCache=null; podcastsCache=null;
   renderWidgetsZone();
@@ -2714,90 +2733,74 @@ function fetchRecos(type, prompt) {
   resultEl.innerHTML = `<div class="reco-loading">✨ Je cherche des idées<span class="reco-loading-dots"></span></div>`;
   btn.disabled = true;
 
-  const systemPrompt = isFilm
-    ? "Tu es un expert en cinéma, théâtre et spectacles. L'utilisateur décrit une envie. Propose 4 recommandations (films, séries, pièces — pas forcément récents). Réponds UNIQUEMENT en JSON valide sans markdown. Format: [{"titre":"","type":"Film","annee":"","realisateur":"","description":"2 phrases","pourquoi":"1 phrase"}]"
-    : "Tu es un expert en littérature. Propose 4 livres selon l'envie décrite. Réponds UNIQUEMENT en JSON valide sans markdown. Format: [{"titre":"","auteur":"","genre":"","annee":"","description":"2 phrases","pourquoi":"1 phrase"}]";
+  const systemMsg = isFilm
+    ? "Tu es un expert en cinéma et spectacles. L'utilisateur décrit une envie. Propose exactement 4 recommandations (films, séries, pièces — pas forcément récents). Réponds UNIQUEMENT en JSON valide, sans markdown, sans texte avant ou après. Format strict: [{"titre":"","type":"Film","annee":"","realisateur":"","description":"2 phrases max","pourquoi":"1 phrase"}]"
+    : "Tu es un expert en littérature. Propose exactement 4 livres selon l'envie décrite. Réponds UNIQUEMENT en JSON valide, sans markdown, sans texte avant ou après. Format strict: [{"titre":"","auteur":"","genre":"","annee":"","description":"2 phrases max","pourquoi":"1 phrase"}]";
 
-  const GEMINI_KEY = "REMPLACE_PAR_TA_CLE_GEMINI";
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
-
-  if (!GEMINI_KEY || GEMINI_KEY.startsWith("REMPLACE")) {
-    // Fallback base locale
-    const recos = getRecosByPrompt(type, prompt);
-    resultEl.innerHTML = recos.length ? recos.map((r, i) => {
-      const icon = isFilm ? "🎬" : "📖";
-      const meta = isFilm ? `${r.type||"Film"} · ${r.realisateur||""} · ${r.annee||""}` : `${r.auteur||""} · ${r.genre||""} · ${r.annee||""}`;
-      const rd = JSON.stringify({titre:r.titre,icon,type2:type,annee:r.annee,pourquoi:r.pourquoi,auteur:r.auteur||"",realisateur:r.realisateur||""});
-      return `<div class="reco-card"><div class="reco-num">${icon} Suggestion ${i+1}</div><div class="reco-title">${r.titre}</div><div class="reco-meta">${meta}</div><div class="reco-desc">${r.description}</div><div class="reco-why">💛 ${r.pourquoi}</div></div>`;
-    }).join("") : `<div class="reco-loading">Essaie un autre thème</div>`;
-    btn.disabled = false;
-    return;
-  }
-  fetch(url, {
+  fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + (localStorage.getItem("qg_or_key")||""),
+      "HTTP-Referer": "https://legeneral.org",
+      "X-Title": "Le General"
+    },
     body: JSON.stringify({
-      contents: [{ parts: [{ text: systemPrompt + "\n\nDemande : " + prompt }] }],
-      generationConfig: { temperature: 0.7, maxOutputTokens: 1000 }
+      model: "meta-llama/llama-3.1-8b-instruct:free",
+      messages: [
+        { role: "system", content: systemMsg },
+        { role: "user", content: prompt }
+      ],
+      max_tokens: 1000,
+      temperature: 0.7
     })
   })
   .then(r => r.json())
   .then(data => {
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
-    const clean = text.replace(/```json|```/g, "").trim();
+    const text = data.choices?.[0]?.message?.content || "[]";
+    const clean = text.replace(/```json|```/g,"").trim();
     const recos = JSON.parse(clean);
-
-    resultEl.innerHTML = recos.map((r, i) => {
-      const icon = isFilm ? (r.type==="Pièce"?"🎭":r.type==="Spectacle"?"🎪":r.type==="Série"?"📺":"🎬") : "📖";
-      const meta = isFilm
-        ? `${r.type||"Film"} · ${r.realisateur||""} · ${r.annee||""}`
-        : `${r.auteur||""} · ${r.genre||""} · ${r.annee||""}`;
-      const recoData = JSON.stringify({titre:r.titre,icon,type2:type,annee:r.annee,pourquoi:r.pourquoi,auteur:r.auteur||"",realisateur:r.realisateur||""});
-      return `<div class="reco-card">
-        <div class="reco-num">${icon} Suggestion ${i+1}</div>
-        <div class="reco-title">${r.titre}</div>
-        <div class="reco-meta">${meta}</div>
-        <div class="reco-desc">${r.description}</div>
-        <div class="reco-why">💛 ${r.pourquoi}</div>
-        <button class="reco-save-btn" data-reco="${recoData.replace(/"/g,"&quot;")}">🔖 Sauvegarder</button>
-      </div>`;
-    }).join("");
-
-    resultEl.querySelectorAll(".reco-save-btn").forEach(b => {
-      b.addEventListener("click", function() {
-        const r = JSON.parse(this.dataset.reco.replace(/&quot;/g,'"'));
-        saveReco(r);
-        this.textContent = "✅ Sauvegardé !";
-        this.disabled = true;
-      });
-    });
+    renderRecoCards(recos, type, isFilm, resultEl);
   })
   .catch(e => {
-    // Fallback base locale
+    console.log("OpenRouter error, fallback local", e);
     const recos = getRecosByPrompt(type, prompt);
-    resultEl.innerHTML = recos.map((r, i) => {
-      const icon = isFilm ? "🎬" : "📖";
-      const meta = isFilm ? `${r.type||"Film"} · ${r.realisateur||""} · ${r.annee||""}` : `${r.auteur||""} · ${r.genre||""} · ${r.annee||""}`;
-      const recoData = JSON.stringify({titre:r.titre,icon,type2:type,annee:r.annee,pourquoi:r.pourquoi,auteur:r.auteur||"",realisateur:r.realisateur||""});
-      return `<div class="reco-card">
-        <div class="reco-num">${icon} Suggestion ${i+1}</div>
-        <div class="reco-title">${r.titre}</div>
-        <div class="reco-meta">${meta}</div>
-        <div class="reco-desc">${r.description}</div>
-        <div class="reco-why">💛 ${r.pourquoi}</div>
-        <button class="reco-save-btn" data-reco="${recoData.replace(/"/g,"&quot;")}">🔖 Sauvegarder</button>
-      </div>`;
-    }).join("") || `<div class="reco-loading" style="color:var(--red)">Erreur — réessaie dans un moment</div>`;
-    resultEl.querySelectorAll(".reco-save-btn").forEach(b => {
-      b.addEventListener("click", function() {
-        const r = JSON.parse(this.dataset.reco.replace(/&quot;/g,'"'));
-        saveReco(r); this.textContent="✅ Sauvegardé !"; this.disabled=true;
-      });
-    });
-    console.log("Gemini error, fallback local", e);
+    renderRecoCards(recos, type, isFilm, resultEl);
   })
   .finally(() => { btn.disabled = false; });
 }
+
+function renderRecoCards(recos, type, isFilm, resultEl) {
+  if (!recos || !recos.length) {
+    resultEl.innerHTML = `<div class="reco-loading">Aucun résultat — essaie un autre thème</div>`;
+    return;
+  }
+  resultEl.innerHTML = recos.map((r, i) => {
+    const icon = isFilm ? (r.type==="Pièce"?"🎭":r.type==="Spectacle"?"🎪":r.type==="Série"?"📺":"🎬") : "📖";
+    const meta = isFilm
+      ? [r.type||"Film", r.realisateur, r.annee].filter(Boolean).join(" · ")
+      : [r.auteur, r.genre, r.annee].filter(Boolean).join(" · ");
+    const rd = JSON.stringify({titre:r.titre,icon,type2:type,annee:r.annee||"",pourquoi:r.pourquoi||"",auteur:r.auteur||"",realisateur:r.realisateur||""});
+    return `<div class="reco-card">
+      <div class="reco-num">${icon} Suggestion ${i+1}</div>
+      <div class="reco-title">${r.titre||""}</div>
+      <div class="reco-meta">${meta}</div>
+      <div class="reco-desc">${r.description||""}</div>
+      <div class="reco-why">💛 ${r.pourquoi||""}</div>
+      <button class="reco-save-btn" data-reco="${rd.replace(/"/g,"&quot;")}">🔖 Sauvegarder</button>
+    </div>`;
+  }).join("");
+  resultEl.querySelectorAll(".reco-save-btn").forEach(b => {
+    b.addEventListener("click", function() {
+      const r = JSON.parse(this.dataset.reco.replace(/&quot;/g,'"'));
+      saveReco(r);
+      this.textContent = "✅ Sauvegardé !";
+      this.disabled = true;
+    });
+  });
+}
+
+
 function saveReco(r) {
   if (!state.recosSaved) state.recosSaved = [];
   state.recosSaved.unshift({ ...r, savedAt: Date.now() });
