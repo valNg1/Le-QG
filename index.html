@@ -1832,12 +1832,13 @@ function openModule(id) {
   // Init module
   if (id==="jeune") initJeune();
   if (id==="mot") initMot();
-  if (id==="quiz") initQuiz();
-  if (id==="cine") initCine();
-  if (id==="lecture") initLecture();
   if (id==="anniv") initAnnivMod();
   if (id==="taches_perso") initTachesPerso();
   if (id==="scores") initScoresMod();
+  // Délai court pour s'assurer que le DOM est visible avant d'initialiser
+  if (id==="quiz") { setTimeout(initQuiz, 50); return; }
+  if (id==="cine") { setTimeout(initCine, 50); return; }
+  if (id==="lecture") { setTimeout(initLecture, 50); return; }
   if (id==="tdf_mod" || id==="cdm_mod") {} // HTML statique
 }
 
@@ -2530,7 +2531,12 @@ async function fetchRecos(type, prompt) {
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+          "Content-Type": "application/json",
+          "x-api-key": "",
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-allow-browser": "true"
+        },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
         max_tokens: 1000,
