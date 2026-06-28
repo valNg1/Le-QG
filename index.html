@@ -2709,17 +2709,31 @@ function fetchRecos(type, prompt) {
   const isFilm = type === "cine";
   const resultEl = document.getElementById(type+"-reco-result");
   const btn = document.getElementById(type+"-reco-btn");
+  if (!resultEl || !btn) return;
 
-  resultEl.innerHTML = `<div class="reco-loading">✨ Recherche en cours...</div>`;
+  resultEl.innerHTML = `<div class="reco-loading">✨ Je cherche des idées<span class="reco-loading-dots"></span></div>`;
   btn.disabled = true;
 
-  setTimeout(() => {
-    const recos = getRecosByPrompt(type, prompt);
-    if (!recos.length) {
-      resultEl.innerHTML = `<div class="reco-loading">Aucun résultat — essaie un autre thème</div>`;
-      btn.disabled = false;
-      return;
-    }
+  const systemPrompt = isFilm
+    ? "Tu es un expert en cinéma, théâtre et spectacles. L'utilisateur décrit une envie. Propose 4 recommandations (films, séries, pièces — pas forcément récents). Réponds UNIQUEMENT en JSON valide sans markdown. Format: [{"titre":"","type":"Film","annee":"","realisateur":"","description":"2 phrases","pourquoi":"1 phrase"}]"
+    : "Tu es un expert en littérature. Propose 4 livres selon l'envie décrite. Réponds UNIQUEMENT en JSON valide sans markdown. Format: [{"titre":"","auteur":"","genre":"","annee":"","description":"2 phrases","pourquoi":"1 phrase"}]";
+
+  const GEMINI_KEY = "AIzaSyAQ.Ab8RN6KaqHOu6aco8RtX7Xz3BoQv6uOIY9EOXXSt1t7NgGu2Wg";
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
+
+  fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: systemPrompt + "\n\nDemande : " + prompt }] }],
+      generationConfig: { temperature: 0.7, maxOutputTokens: 1000 }
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
+    const clean = text.replace(/```json|```/g, "").trim();
+    const recos = JSON.parse(clean);
 
     resultEl.innerHTML = recos.map((r, i) => {
       const icon = isFilm ? (r.type==="Pièce"?"🎭":r.type==="Spectacle"?"🎪":r.type==="Série"?"📺":"🎬") : "📖";
@@ -2745,11 +2759,33 @@ function fetchRecos(type, prompt) {
         this.disabled = true;
       });
     });
-
-    btn.disabled = false;
-  }, 600);
+  })
+  .catch(e => {
+    // Fallback base locale
+    const recos = getRecosByPrompt(type, prompt);
+    resultEl.innerHTML = recos.map((r, i) => {
+      const icon = isFilm ? "🎬" : "📖";
+      const meta = isFilm ? `${r.type||"Film"} · ${r.realisateur||""} · ${r.annee||""}` : `${r.auteur||""} · ${r.genre||""} · ${r.annee||""}`;
+      const recoData = JSON.stringify({titre:r.titre,icon,type2:type,annee:r.annee,pourquoi:r.pourquoi,auteur:r.auteur||"",realisateur:r.realisateur||""});
+      return `<div class="reco-card">
+        <div class="reco-num">${icon} Suggestion ${i+1}</div>
+        <div class="reco-title">${r.titre}</div>
+        <div class="reco-meta">${meta}</div>
+        <div class="reco-desc">${r.description}</div>
+        <div class="reco-why">💛 ${r.pourquoi}</div>
+        <button class="reco-save-btn" data-reco="${recoData.replace(/"/g,"&quot;")}">🔖 Sauvegarder</button>
+      </div>`;
+    }).join("") || `<div class="reco-loading" style="color:var(--red)">Erreur — réessaie dans un moment</div>`;
+    resultEl.querySelectorAll(".reco-save-btn").forEach(b => {
+      b.addEventListener("click", function() {
+        const r = JSON.parse(this.dataset.reco.replace(/&quot;/g,'"'));
+        saveReco(r); this.textContent="✅ Sauvegardé !"; this.disabled=true;
+      });
+    });
+    console.log("Gemini error, fallback local", e);
+  })
+  .finally(() => { btn.disabled = false; });
 }
-
 function saveReco(r) {
   if (!state.recosSaved) state.recosSaved = [];
   state.recosSaved.unshift({ ...r, savedAt: Date.now() });
