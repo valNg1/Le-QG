@@ -1030,6 +1030,7 @@ function initOnboarding() {
 
   document.getElementById("ob-finish-btn")?.addEventListener("click", finishOnboarding);
   document.getElementById("ob-solo-btn")?.addEventListener("click", () => {
+    state.onboarded = true; saveState();
     // Mode solo : pas de groupe, on passe directement
     state.groupCode = null;
     state.groupName = null;
@@ -1056,7 +1057,7 @@ async function createGroup(name) {
   showStep3(code, name, true);
 }
 
-async function joinGroup(code) {
+async function joinGroup(code, silent) {
   code = code.toUpperCase().trim();
   if (!code) { document.getElementById("ob-err2").textContent = "Entre un code"; return; }
   if (firebaseReady) {
@@ -1071,14 +1072,16 @@ async function joinGroup(code) {
       }
       state.groupCode = code; state.groupName = data.name; state.isAdmin = (data.admin === state.name);
       saveState();
-      showStep3(code, data.name, false);
+      if (silent) { showToast("Groupe " + data.name + " rejoint !"); loadGroupData(); renderGroupe(); }
+      else showStep3(code, data.name, false);
       return;
     } catch(e) { console.log(e); }
   }
   // Mode offline
   state.groupCode = code; state.groupName = "Mon groupe"; state.isAdmin = false;
   saveState();
-  showStep3(code, "Mon groupe", false);
+  if (silent) { showToast("Groupe rejoint !"); }
+  else showStep3(code, "Mon groupe", false);
 }
 
 function showStep3(code, name, isNew) {
@@ -1104,6 +1107,8 @@ function showStep3(code, name, isNew) {
 }
 
 function finishOnboarding() {
+  state.onboarded = true;
+  saveState();
   document.getElementById("ob-step3")?.classList.add("hidden");
   startApp();
 }
@@ -3395,18 +3400,34 @@ document.addEventListener("DOMContentLoaded", function() {
   const inviteCode = urlParams.get("g");
   const inviteFrom = urlParams.get("from");
 
-  if (state.name) {
-    // Déjà inscrit
+  // Migration : les utilisateurs existants avec un nom sont considérés onboardés
+  if (state.name && state.onboarded === undefined) {
+    state.onboarded = true;
+    saveState();
+  }
+
+  if (state.name && state.onboarded) {
+    // Utilisateur complet
     document.getElementById("ob-step1")?.classList.add("hidden");
     document.getElementById("ob-step2")?.classList.add("hidden");
     document.getElementById("ob-step3")?.classList.add("hidden");
     document.getElementById("ob-invite")?.classList.add("hidden");
     if (inviteCode && state.groupCode !== inviteCode.toUpperCase()) {
-      if (confirm((inviteFrom||"Quelqu\'un") + " t\'invite à rejoindre un groupe. Rejoindre ?")) {
-        joinGroup(inviteCode);
+      if (confirm((inviteFrom ? decodeURIComponent(inviteFrom) : "Quelqu\'un") + " t\'invite à rejoindre un groupe. Rejoindre ?")) {
+        joinGroup(inviteCode, true); // silencieux — pas d'écran onboarding
       }
     }
     startApp();
+  } else if (state.name && !state.onboarded) {
+    // Onboarding interrompu — reprend à l'étape 2 (groupe)
+    document.getElementById("ob-step1")?.classList.add("hidden");
+    document.getElementById("ob-invite")?.classList.add("hidden");
+    document.getElementById("ob-step2")?.classList.remove("hidden");
+    if (inviteCode) {
+      const codeEl = document.getElementById("ob-code");
+      if (codeEl) codeEl.value = inviteCode.toUpperCase();
+    }
+    initOnboarding();
   } else if (inviteCode) {
     // Nouvel utilisateur avec lien d'invitation
     const from = inviteFrom ? decodeURIComponent(inviteFrom) : "quelqu\'un";
@@ -3429,12 +3450,10 @@ document.addEventListener("DOMContentLoaded", function() {
         initOnboarding();
       });
     } else {
-      // Fallback : si l'écran invite n'existe pas, va direct à l'onboarding
       document.getElementById("ob-step1")?.classList.remove("hidden");
       initOnboarding();
     }
   } else {
-    // Première connexion normale
     document.getElementById("ob-invite")?.classList.add("hidden");
     initOnboarding();
   }
