@@ -366,6 +366,18 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
 <body>
 
 <!-- ═══ ONBOARDING ═══ -->
+<!-- ═══ ÉCRAN D'INVITATION ═══ -->
+<div class="ob hidden" id="ob-invite">
+  <div class="ob-logo">👋</div>
+  <div class="ob-sub" id="invite-msg">Tu as reçu une invitation</div>
+  <div class="ob-card" style="text-align:center;">
+    <div style="font-size:48px;margin-bottom:12px;">🏠</div>
+    <div style="font-size:20px;font-weight:800;color:var(--text);margin-bottom:8px;">Le Général</div>
+    <div style="font-size:15px;color:var(--muted);margin-bottom:24px;line-height:1.6;" id="invite-sub">Votre aide au quotidien — météo, agenda, dîner du soir et bien plus.</div>
+    <button class="ob-btn" id="invite-join-btn">Rejoindre →</button>
+  </div>
+</div>
+
 <div class="ob" id="ob-step1">
   <div class="ob-logo">Le Général</div>
   <div class="ob-sub">Votre aide au quotidien</div>
@@ -3384,32 +3396,43 @@ document.addEventListener("DOMContentLoaded", function() {
   const inviteFrom = urlParams.get("from");
 
   if (state.name) {
-    // Déjà inscrit — si lien d'invitation, rejoint le groupe auto
+    // Déjà inscrit
     document.getElementById("ob-step1")?.classList.add("hidden");
     document.getElementById("ob-step2")?.classList.add("hidden");
     document.getElementById("ob-step3")?.classList.add("hidden");
     document.getElementById("ob-invite")?.classList.add("hidden");
     if (inviteCode && state.groupCode !== inviteCode.toUpperCase()) {
-      // Propose de rejoindre le nouveau groupe
       if (confirm((inviteFrom||"Quelqu\'un") + " t\'invite à rejoindre un groupe. Rejoindre ?")) {
         joinGroup(inviteCode);
       }
     }
     startApp();
   } else if (inviteCode) {
-    // Nouvel utilisateur avec lien d'invitation — affiche l'écran d'accueil
-    document.getElementById("ob-step1")?.classList.add("hidden");
+    // Nouvel utilisateur avec lien d'invitation
     const from = inviteFrom ? decodeURIComponent(inviteFrom) : "quelqu\'un";
-    document.getElementById("invite-msg").textContent = from + " t\'invite à rejoindre Le QG !";
-    document.getElementById("invite-sub").innerHTML = `<strong>${from}</strong> partage avec toi son QG — agenda, météo, dîner du soir, et bien plus.<br><br>Crée ton profil en 30 secondes.`;
-    document.getElementById("ob-invite")?.classList.remove("hidden");
-    // Pré-remplit le code pour l'étape 2
-    document.getElementById("ob-code").value = inviteCode.toUpperCase();
-    document.getElementById("invite-join-btn").addEventListener("click", () => {
-      document.getElementById("ob-invite")?.classList.add("hidden");
+    const inviteEl = document.getElementById("ob-invite");
+    const msgEl = document.getElementById("invite-msg");
+    const subEl = document.getElementById("invite-sub");
+    const codeEl = document.getElementById("ob-code");
+    const joinBtn = document.getElementById("invite-join-btn");
+
+    if (msgEl) msgEl.textContent = from + " t\'invite à rejoindre Le QG !";
+    if (subEl) subEl.innerHTML = `<strong>${from}</strong> partage avec toi son QG — agenda, météo, dîner du soir, et bien plus.<br><br>Crée ton profil en 30 secondes.`;
+    if (codeEl) codeEl.value = inviteCode.toUpperCase();
+
+    if (inviteEl) {
+      document.getElementById("ob-step1")?.classList.add("hidden");
+      inviteEl.classList.remove("hidden");
+      if (joinBtn) joinBtn.addEventListener("click", () => {
+        inviteEl.classList.add("hidden");
+        document.getElementById("ob-step1")?.classList.remove("hidden");
+        initOnboarding();
+      });
+    } else {
+      // Fallback : si l'écran invite n'existe pas, va direct à l'onboarding
       document.getElementById("ob-step1")?.classList.remove("hidden");
       initOnboarding();
-    });
+    }
   } else {
     // Première connexion normale
     document.getElementById("ob-invite")?.classList.add("hidden");
