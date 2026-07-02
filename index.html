@@ -3202,34 +3202,22 @@ async function saveDinerToFirebase() {
 // ════════════════════════════════════════════
 
 function openShareMenu(text, url) {
+  if (navigator.share) {
+    navigator.share({ title: "Le General", text: text, url: url })
+      .catch(e => console.log("share cancelled", e));
+    return;
+  }
+  // Fallback modal
   const modal = document.getElementById("share-modal");
-  const preview = document.getElementById("share-preview");
   const wa = document.getElementById("share-whatsapp");
   const sms = document.getElementById("share-sms");
-  const copyBtn = document.getElementById("share-copy");
+  const preview = document.getElementById("share-preview");
   if (!modal) return;
-
-  // Texte simple sans caractères spéciaux pour la compatibilité max
-  const cleanText = text.replace(/['']/g, "'").replace(/[""]/g, '"');
-  const encoded = encodeURIComponent(cleanText);
-  preview.textContent = cleanText;
-  // WhatsApp — wa.me est plus fiable que api.whatsapp.com
-  wa.href = "https://wa.me/?text=" + encoded;
-  wa.target = "_blank";
-  wa.rel = "noopener";
-  // SMS — format universel
+  const encoded = encodeURIComponent(text);
+  if (preview) preview.textContent = text;
+  if (wa) { wa.href = "https://wa.me/?text=" + encoded; wa.target = "_blank"; }
   const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-  sms.href = (isIOS ? "sms:&body=" : "sms:?body=") + encoded;
-
-  copyBtn.onclick = () => {
-    navigator.clipboard.writeText(text).then(() => {
-      copyBtn.querySelector("span:last-child").textContent = "✅ Copié !";
-      setTimeout(() => copyBtn.querySelector("span:last-child").textContent = "Copier le message", 2000);
-    });
-  };
-
-  modal.classList.remove("hidden");
-  modal.onclick = e => { if (e.target === modal) modal.classList.add("hidden"); };
+  if (sms) sms.href = (isIOS ? "sms:&body=" : "sms:?body=") + encoded;
 }
 
 function showToast(msg) {
