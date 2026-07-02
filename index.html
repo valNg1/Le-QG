@@ -864,6 +864,23 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
 <div class="toast" id="toast"></div>
 
 <script>
+// ── KILL SERVICE WORKER — force la version fraîche ──
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(reg => {
+      reg.unregister();
+      console.log("SW désinscrit:", reg.scope);
+    });
+    if (regs.length > 0) {
+      // Vide aussi les caches
+      if (window.caches) {
+        caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+      }
+      console.log("SW + caches purgés — recharge la page pour la version fraîche");
+    }
+  });
+}
+
 // ════════════════════════════════════════════
 // FIREBASE
 // ════════════════════════════════════════════
