@@ -2342,44 +2342,87 @@ function renderThemePicker() {
   });
 }
 
-function startQuiz(theme, reviewWrong) {
+async function startQuiz(theme, reviewWrong) {
   quizState.theme = theme || "all";
-  let pool;
 
+  // Mode révision : questions ratées depuis localStorage
   const lsWrong = JSON.parse(localStorage.getItem("qg_quiz_wrong") || "[]");
   const allWrong = [...(quizState.wrong||[]), ...lsWrong.filter(w => !(quizState.wrong||[]).find(x=>x.q===w.q))];
   if (reviewWrong && allWrong.length) {
-    pool = [...allWrong];
-    // Purge les ratées une fois révisées
     localStorage.setItem("qg_quiz_wrong", "[]");
-    showToast("Révision de " + pool.length + " question" + (pool.length>1?"s":"") + " !");
-  } else {
-    // Nouveau quiz : exclut les questions déjà vues dans cette session
-    const allPool = theme && theme !== "all"
-      ? QUIZ_QUESTIONS.filter(q => q.t === theme)
-      : [...QUIZ_QUESTIONS];
-    const seenQs = JSON.parse(localStorage.getItem("qg_quiz_seen") || "[]");
-    const unseen = allPool.filter(q => !seenQs.includes(q.q));
-    // Si on a tout vu, repart de zéro
-    pool = unseen.length >= 5 ? unseen : allPool;
+    launchQuizWith([...allWrong]);
+    showToast("Révision de " + allWrong.length + " question" + (allWrong.length>1?"s":"") + " !");
+    return;
   }
 
+  // Génération IA via OpenRouter
+  const orKey = localStorage.getItem("qg_or_key");
+  const themeLabel = QUIZ_THEMES.find(t=>t.id===quizState.theme)?.label?.replace(/^\S+ /,"") || "culture générale";
+
+  document.getElementById("quiz-theme-picker").style.display = "none";
+  document.getElementById("quiz-content").style.display = "block";
+  document.getElementById("quiz-review").style.display = "none";
+  document.getElementById("quiz-content").innerHTML = `<div class="loading">✨ Génération de nouvelles questions...</div>`;
+
+  if (orKey) {
+    try {
+      const sysPrompt = `Tu es un créateur de quiz de culture générale en français. Génère EXACTEMENT 10 questions de quiz variées et intéressantes sur le thème "${themeLabel}". Niveau grand public. Réponds UNIQUEMENT avec un tableau JSON valide, sans texte avant ou après, sans markdown. Format strict: [{"q":"question","opts":["bonne réponse","mauvaise 1","mauvaise 2","mauvaise 3"],"a":0}]. La bonne réponse doit TOUJOURS être en position 0 du tableau opts.`;
+      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + orKey,
+          "HTTP-Referer": "https://legeneral.org",
+          "X-Title": "Le General"
+        },
+        body: JSON.stringify({
+          model: "meta-llama/llama-3.1-8b-instruct:free",
+          messages: [
+            { role: "system", content: sysPrompt },
+            { role: "user", content: "Génère les 10 questions maintenant. Varie les sujets à chaque fois. Seed aléatoire: " + Math.random() }
+          ],
+          max_tokens: 1500,
+          temperature: 0.9
+        })
+      });
+      const data = await res.json();
+      const text = data.choices?.[0]?.message?.content || "[]";
+      const clean = text.replace(/```json|```/g,"").trim();
+      const questions = JSON.parse(clean);
+      if (Array.isArray(questions) && questions.length >= 5) {
+        launchQuizWith(questions.filter(q => q.q && Array.isArray(q.opts) && q.opts.length === 4));
+        return;
+      }
+      throw new Error("format invalide");
+    } catch(e) {
+      console.log("Quiz IA error, fallback local:", e.message);
+    }
+  }
+
+  // Fallback : banque locale avec tracking
+  const allPool = quizState.theme && quizState.theme !== "all"
+    ? QUIZ_QUESTIONS.filter(q => q.t === quizState.theme)
+    : [...QUIZ_QUESTIONS];
+  const seenQs = JSON.parse(localStorage.getItem("qg_quiz_seen") || "[]");
+  const unseen = allPool.filter(q => !seenQs.includes(q.q));
+  const pool = unseen.length >= 5 ? unseen : allPool;
   const shuffled = [...pool].sort(()=>Math.random()-.5).slice(0, Math.min(10, pool.length));
   const prevSeen = JSON.parse(localStorage.getItem("qg_quiz_seen") || "[]");
-  const newSeen = [...prevSeen, ...shuffled.map(q=>q.q)].slice(-60);
-  localStorage.setItem("qg_quiz_seen", JSON.stringify(newSeen));
+  localStorage.setItem("qg_quiz_seen", JSON.stringify([...prevSeen, ...shuffled.map(q=>q.q)].slice(-60)));
+  launchQuizWith(shuffled);
+}
 
+function launchQuizWith(questions) {
   quizState = {
     theme: quizState.theme,
-    questions: shuffled.map(q => {
+    questions: questions.map(q => {
       const opts = [...q.opts];
       const correct = opts[q.a];
       opts.sort(()=>Math.random()-.5);
       return { ...q, opts, a: opts.indexOf(correct) };
     }),
     idx: 0, score: 0, answered: false,
-    wrong: reviewWrong ? [] : (quizState.wrong||[]),
-    seen: newSeen
+    wrong: quizState.wrong || []
   };
   document.getElementById("quiz-theme-picker").style.display = "none";
   document.getElementById("quiz-content").style.display = "block";
