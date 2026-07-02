@@ -1176,7 +1176,10 @@ function renderMeteoCards(villes) {
       <div class="skel" style="width:80px;height:10px;margin-top:4px;"></div>
     </a>`;
   }).join("");
-  setTimeout(() => villes.forEach(v => fetchMeteo(v)), 150);
+  // Double requestAnimationFrame garantit que le DOM est peint avant fetchMeteo
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    villes.forEach(v => fetchMeteo(v));
+  }));
 }
 
 async function fetchMeteo(cityKey) {
@@ -1224,8 +1227,8 @@ async function fetchMeteo(cityKey) {
       </div>`;
   } catch(e) {
     const ci2 = CITIES_LIST.find(x=>x.id===cityKey)||{label:cityKey};
-    const elFb = document.getElementById("meteo-"+cityKey);
-    if (elFb) elFb.innerHTML = `<div class="meteo-city">${ci2.label}</div><div class="meteo-icon">❓</div><div class="meteo-desc" style="color:var(--muted)">Indisponible</div>`;
+    const elFb2 = document.getElementById("meteo-"+cityKey);
+    if (elFb2) elFb2.innerHTML = `<div class="meteo-city">${ci2.label}</div><div class="meteo-icon">❓</div><div class="meteo-desc" style="color:var(--muted)">Indisponible</div>`;
   }
 }
 
