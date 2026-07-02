@@ -3202,8 +3202,11 @@ async function saveDinerToFirebase() {
 // ════════════════════════════════════════════
 
 function openShareMenu(text, url) {
+  // Sur Android, WhatsApp ignore "url" si "text" est aussi présent
+  // Solution : tout mettre dans "text" = texte + lien fusionnés
+  const fullText = text + "\n" + url;
   if (navigator.share) {
-    navigator.share({ title: "Le General", text: text, url: url })
+    navigator.share({ title: "Le General", text: fullText })
       .catch(e => console.log("share cancelled", e));
     return;
   }
@@ -3213,8 +3216,8 @@ function openShareMenu(text, url) {
   const sms = document.getElementById("share-sms");
   const preview = document.getElementById("share-preview");
   if (!modal) return;
-  const encoded = encodeURIComponent(text);
-  if (preview) preview.textContent = text;
+  const encoded = encodeURIComponent(fullText);
+  if (preview) preview.textContent = fullText;
   if (wa) { wa.href = "https://wa.me/?text=" + encoded; wa.target = "_blank"; }
   const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
   if (sms) sms.href = (isIOS ? "sms:&body=" : "sms:?body=") + encoded;
