@@ -987,15 +987,15 @@ function initOnboarding() {
     document.getElementById("ob-step2").classList.remove("hidden");
   });
 
-  document.getElementById("ob-join-btn").addEventListener("click", () => joinGroup(document.getElementById("ob-code").value));
-  document.getElementById("ob-create-btn").addEventListener("click", () => {
-    const n = document.getElementById("ob-group-name").value.trim();
+  document.getElementById("ob-join-btn")?.addEventListener("click", () => joinGroup(document.getElementById("ob-code")?.value||""));
+  document.getElementById("ob-create-btn")?.addEventListener("click", () => {
+    const n = document.getElementById("ob-group-name")?.value.trim()||"";
     if (!n) { document.getElementById("ob-err2").textContent = "Entre un nom de groupe"; return; }
     createGroup(n);
   });
 
-  document.getElementById("ob-finish-btn").addEventListener("click", finishOnboarding);
-  document.getElementById("ob-solo-btn").addEventListener("click", () => {
+  document.getElementById("ob-finish-btn")?.addEventListener("click", finishOnboarding);
+  document.getElementById("ob-solo-btn")?.addEventListener("click", () => {
     // Mode solo : pas de groupe, on passe directement
     state.groupCode = null;
     state.groupName = null;
@@ -1135,7 +1135,8 @@ document.querySelectorAll(".nav-btn[data-view]").forEach(btn => {
 
 function showView(id) {
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
-  document.getElementById("view-"+id).classList.add("active");
+  const viewEl = document.getElementById("view-"+id);
+  if (viewEl) viewEl.classList.add("active");
   document.querySelectorAll(".nav-btn[data-view]").forEach(b => b.classList.toggle("active", b.dataset.view===id));
   if (id==="perso") renderPerso();
   if (id==="groupe") renderGroupe();
@@ -1188,9 +1189,13 @@ function renderMeteoCards(villes) {
 }
 
 async function fetchMeteo(cityKey) {
+  console.log("fetchMeteo start:", cityKey);
+  const elCheck = document.getElementById("meteo-"+cityKey);
+  console.log("meteo el exists:", !!elCheck, cityKey);
   try {
     const cityDef = CITIES_LIST.find(x=>x.id===cityKey) || CITIES_LIST[0];
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${cityDef.lat}&longitude=${cityDef.lon}&current=temperature_2m,weathercode,windspeed_10m,relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto&forecast_days=2`;
+    const meteoBase = `https://api.open-meteo.com/v1/forecast?latitude=${cityDef.lat}&longitude=${cityDef.lon}&current=temperature_2m,weathercode,windspeed_10m,relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto&forecast_days=2`;
+    const url = meteoBase;
     const res = await fetch(url);
     const data = await res.json();
     const cur = data.current, daily = data.daily;
@@ -1230,9 +1235,10 @@ async function fetchMeteo(cityKey) {
         </div>
       </div>`;
   } catch(e) {
+    console.log("fetchMeteo error:", cityKey, e.message);
     const ci2 = CITIES_LIST.find(x=>x.id===cityKey)||{label:cityKey};
     const elFb2 = document.getElementById("meteo-"+cityKey);
-    if (elFb2) elFb2.innerHTML = `<div class="meteo-city">${ci2.label}</div><div class="meteo-icon">❓</div><div class="meteo-desc" style="color:var(--muted)">Indisponible</div>`;
+    if (elFb2) elFb2.innerHTML = `<div class="meteo-city">${ci2.label}</div><div class="meteo-icon">⚠️</div><div class="meteo-desc" style="color:var(--muted);font-size:11px;">${e.message}</div>`;
   }
 }
 
