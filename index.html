@@ -827,6 +827,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
       <button class="tag" data-color="green">🟢 Sport</button>
       <button class="tag" data-color="purple">🟣 École</button>
     </div>
+    <div class="modal-label">Visibilité</div>
+    <div class="tag-row" id="ev-visib-tags">
+      <button class="tag sel" data-visib="groupe">👥 Groupe</button>
+      <button class="tag" data-visib="perso">🔒 Moi uniquement</button>
+    </div>
     <div class="modal-actions">
       <button class="modal-btn secondary" id="ev-cancel-btn">Annuler</button>
       <button class="modal-btn primary" id="ev-submit-btn">Ajouter</button>
@@ -1369,7 +1374,10 @@ let editingEvId = null;
 function renderEvents() {
   const now = new Date(); now.setHours(0,0,0,0);
   const in7 = new Date(now); in7.setDate(in7.getDate()+7);
-  const all = (state.events||[]).filter(e=>new Date(e.date+"T00:00:00")>=now).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const all = (state.events||[])
+    .filter(e => !e.perso || e.owner === state.name)
+    .filter(e=>new Date(e.date+"T00:00:00")>=now)
+    .sort((a,b)=>new Date(a.date)-new Date(b.date));
   const thisWeek = all.filter(e=>new Date(e.date+"T00:00:00")<=in7);
   const later = all.filter(e=>new Date(e.date+"T00:00:00")>in7);
 
@@ -1389,7 +1397,7 @@ function renderEvents() {
       </div>
       <div class="ev-divider"></div>
       <div class="ev-info">
-        <div class="ev-title">${ev.title}</div>
+        <div class="ev-title">${ev.perso?"🔒 ":""}${ev.title}</div>
         <div class="ev-meta">${ev.time?ev.time+" · ":""}${ev.who||""}</div>
         ${ev.adder?`<div class="ev-adder" style="color:var(--muted)">par ${ev.adder}</div>`:""}
       </div>
@@ -1474,16 +1482,18 @@ document.getElementById("ev-submit-btn").addEventListener("click", () => {
   const title = document.getElementById("ev-title").value.trim();
   const date  = document.getElementById("ev-date-start").value;
   if (!title||!date) { showToast("Titre et date requis !"); return; }
+  const isPerso = document.querySelector("#ev-visib-tags .tag.sel")?.dataset.visib === "perso";
   const ev = {
     id: Date.now(), title, date,
     dateEnd: document.getElementById("ev-date-end").value,
     time: document.getElementById("ev-time").value,
     who: document.getElementById("ev-who").value.trim(),
-    color: selectedEvColor, adder: state.name
+    color: selectedEvColor, adder: state.name,
+    owner: state.name, perso: isPerso
   };
   state.events.push(ev);
   saveState();
-  saveEventToFirebase(ev);
+  if (!isPerso) saveEventToFirebase(ev);
   renderEvents();
   renderAnnivStrips();
   document.getElementById("ev-modal")?.classList.add("hidden");
@@ -3309,8 +3319,11 @@ function loadGroupData() {
   db.collection("groupes").doc(state.groupCode).collection("events").orderBy("date").onSnapshot(snap=>{
     const fbEvs=[];
     snap.forEach(doc=>fbEvs.push({...doc.data(),fbId:doc.id}));
-    const localIds=(state.events||[]).map(e=>e.fbId).filter(Boolean);
-    fbEvs.forEach(e=>{ if(!localIds.includes(e.fbId)) state.events.push(e); });
+    // Firebase = source de vérité pour les events groupe.
+    // On garde uniquement les events perso + ceux pas encore syncés.
+    const persoEvs = (state.events||[]).filter(e => e.perso || !e.fbId && e.perso);
+    const pendingEvs = (state.events||[]).filter(e => !e.perso && !e.fbId);
+    state.events = [...persoEvs, ...pendingEvs, ...fbEvs];
     state.events.sort((a,b)=>new Date(a.date)-new Date(b.date));
     saveState(); renderEvents(); renderAnnivStrips();
   });
