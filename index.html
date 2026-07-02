@@ -1062,8 +1062,8 @@ function showStep3(code, name, isNew) {
     </div>
     <button class="ob-btn" id="ob-copy-btn" style="margin-bottom:8px;">📤 Partager l'invitation</button>
   `;
-  const prenom2 = state.name || "quelqu'un";
-  const obShareMsg = "\uD83D\uDC4B " + prenom2 + " t\u2019invite \u00e0 rejoindre Le G\u00e9n\u00e9ral !\n\nUn espace pour organiser le quotidien en famille ou entre amis : m\u00e9t\u00e9o, agenda partag\u00e9, qui d\u00eene ce soir, modules culture, sport et bien plus.\n\nRejoins ici : " + inviteUrl;
+  const prenom2 = state.name || "moi";
+  const obShareMsg = prenom2 + " t'invite sur Le General ! Meteo, agenda partage, qui dine ce soir et bien plus. Rejoins ici : " + inviteUrl;
   document.getElementById("ob-copy-btn").addEventListener("click", () => {
     openShareMenu(obShareMsg, inviteUrl);
   });
@@ -1176,8 +1176,7 @@ function renderMeteoCards(villes) {
       <div class="skel" style="width:80px;height:10px;margin-top:4px;"></div>
     </a>`;
   }).join("");
-  // Lance fetchMeteo APRÈS que les éléments soient dans le DOM
-  villes.forEach(v => fetchMeteo(v));
+  setTimeout(() => villes.forEach(v => fetchMeteo(v)), 150);
 }
 
 async function fetchMeteo(cityKey) {
@@ -1628,8 +1627,8 @@ function renderGroupe() {
     const sb=document.getElementById("share-invite-btn");
     const cb=document.getElementById("copy-invite-btn");
     const lb=document.getElementById("leave-group-btn");
-    const prenom = state.name || "quelqu'un";
-    const shareText = "\uD83D\uDC4B " + prenom + " t\u2019invite \u00e0 rejoindre Le G\u00e9n\u00e9ral !\n\nUn espace pour organiser le quotidien en famille ou entre amis : m\u00e9t\u00e9o, agenda partag\u00e9, qui d\u00eene ce soir, modules culture, sport et bien plus.\n\nRejoins ici : " + inviteUrl;
+    const prenom = state.name || "moi";
+    const shareText = prenom + " t'invite sur Le General ! Metro, agenda partage, qui dine ce soir et bien plus. Rejoins ici : " + inviteUrl;
     if(sb) sb.onclick=()=>openShareMenu(shareText, inviteUrl);
     if(cb) cb.onclick=()=>navigator.clipboard.writeText(inviteUrl).then(()=>showToast("Lien copié !"));
     if(lb) lb.onclick=()=>{if(confirm("Quitter le groupe ?")){state.groupCode=null;state.groupName=null;saveState();renderGroupe();}};
