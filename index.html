@@ -3088,9 +3088,22 @@ async function fetchActu(filId, force=false) {
     renderActu(actuCache[filId].articles); return;
   }
   const el = document.getElementById("actu-zone");
-  if (el) el.innerHTML = `<div class="loading">Chargement...</div>`;
   const fil = NEWS_FILS.find(f => f.id===filId);
   if (!fil) return;
+
+  // Charge le cache localStorage comme fallback immédiat
+  const lsKey = "qg_actu_" + filId;
+  const lsCached = localStorage.getItem(lsKey);
+  if (lsCached) {
+    try {
+      const parsed = JSON.parse(lsCached);
+      if (el) el.innerHTML = `<div style="font-size:11px;color:var(--muted);margin-bottom:8px;padding:0 2px;">📦 Dernière mise à jour : ${parsed.dateLabel||"—"}</div>`;
+      renderActu(parsed.articles, true);
+    } catch(e) {}
+  } else {
+    if (el) el.innerHTML = `<div class="loading">Chargement...</div>`;
+  }
+
   try {
     let url = `https://newsdata.io/api/1/latest?apikey=${NEWS_KEY}&size=8`;
     if (fil.country) url += `&country=${fil.country}`;
@@ -3099,7 +3112,7 @@ async function fetchActu(filId, force=false) {
     url += "&category=top";
     const res = await fetch(url);
     const data = await res.json();
-    if (data.status !== "success") throw new Error("API error");
+    if (data.status !== "success") throw new Error(data.message||"API error");
     const articles = (data.results||[]).map(a => ({
       title: a.title||"",
       desc: a.description ? a.description.substring(0,120)+"…" : "",
@@ -3109,10 +3122,20 @@ async function fetchActu(filId, force=false) {
       date: a.pubDate ? new Date(a.pubDate).toLocaleDateString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}) : "",
     }));
     actuCache[filId] = { ts: now, articles };
+    // Sauvegarde dans localStorage avec date
+    const dateLabel = new Date().toLocaleString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+    localStorage.setItem(lsKey, JSON.stringify({ articles, dateLabel }));
+    // Efface le bandeau "dernière mise à jour" et affiche les vrais articles
+    if (el) el.innerHTML = "";
     renderActu(articles);
   } catch(e) {
-    const el2 = document.getElementById("actu-zone");
-    if (el2) el2.innerHTML = `<div class="loading">Actualités indisponibles</div>`;
+    console.log("fetchActu error:", e.message);
+    // Si pas de cache, affiche un message
+    if (!lsCached) {
+      const el2 = document.getElementById("actu-zone");
+      if (el2) el2.innerHTML = `<div class="loading">Actualités indisponibles — réessaie dans un moment</div>`;
+    }
+    // Sinon garde le cache déjà affiché
   }
 }
 
