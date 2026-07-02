@@ -856,7 +856,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
         <span style="font-size:24px;">📋</span>
         <span style="font-size:15px;font-weight:700;color:var(--text);">Copier le message</span>
       </button>
-      <button onclick="document.getElementById('share-modal').classList.add('hidden')" style="background:none;border:none;color:var(--muted);font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;padding:8px;">Annuler</button>
+      <button onclick="document.getElementById('share-modal')?.classList.add('hidden')" style="background:none;border:none;color:var(--muted);font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;padding:8px;">Annuler</button>
     </div>
   </div>
 </div>
@@ -957,8 +957,8 @@ function obNext() {
   if (!name || name.length < 2) { document.getElementById("ob-err").textContent = "Prénom trop court"; return; }
   state.name = name; state.avatar = obAvatar || "🧑";
   saveState();
-  document.getElementById("ob-step1").classList.add("hidden");
-  document.getElementById("ob-step2").classList.remove("hidden");
+  document.getElementById("ob-step1")?.classList.add("hidden");
+  document.getElementById("ob-step2")?.classList.remove("hidden");
 }
 
 function initOnboarding() {
@@ -983,8 +983,8 @@ function initOnboarding() {
     if (!name || name.length < 2) { document.getElementById("ob-err").textContent = "Prénom trop court"; return; }
     state.name = name; state.avatar = obAvatar;
     saveState();
-    document.getElementById("ob-step1").classList.add("hidden");
-    document.getElementById("ob-step2").classList.remove("hidden");
+    document.getElementById("ob-step1")?.classList.add("hidden");
+    document.getElementById("ob-step2")?.classList.remove("hidden");
   });
 
   document.getElementById("ob-join-btn")?.addEventListener("click", () => joinGroup(document.getElementById("ob-code")?.value||""));
@@ -1000,7 +1000,7 @@ function initOnboarding() {
     state.groupCode = null;
     state.groupName = null;
     saveState();
-    document.getElementById("ob-step2").classList.add("hidden");
+    document.getElementById("ob-step2")?.classList.add("hidden");
     finishOnboarding();
     showToast("Mode solo activé — tu pourras rejoindre un groupe plus tard !");
   });
@@ -1048,8 +1048,8 @@ async function joinGroup(code) {
 }
 
 function showStep3(code, name, isNew) {
-  document.getElementById("ob-step2").classList.add("hidden");
-  document.getElementById("ob-step3").classList.remove("hidden");
+  document.getElementById("ob-step2")?.classList.add("hidden");
+  document.getElementById("ob-step3")?.classList.remove("hidden");
   document.getElementById("ob-welcome-name").textContent = "Bienvenue " + state.name + " ! 👋";
   const inviteUrl = "https://legeneral.org?g=" + code + "&from=" + encodeURIComponent(state.name||"quelqu'un");
   document.getElementById("ob-invite-content").innerHTML = `
@@ -1070,7 +1070,7 @@ function showStep3(code, name, isNew) {
 }
 
 function finishOnboarding() {
-  document.getElementById("ob-step3").classList.add("hidden");
+  document.getElementById("ob-step3")?.classList.add("hidden");
   startApp();
 }
 
@@ -1298,7 +1298,7 @@ function openDinerPicker(memberName) {
   document.getElementById("picker-choices").querySelectorAll(".picker-btn").forEach(btn => {
     btn.addEventListener("click", () => setDinerChoice(memberName, btn.dataset.choice));
   });
-  document.getElementById("diner-picker-ov").classList.remove("hidden");
+  document.getElementById("diner-picker-ov")?.classList.remove("hidden");
 }
 
 function setDinerChoice(name, choiceId) {
@@ -1308,7 +1308,7 @@ function setDinerChoice(name, choiceId) {
   if (!state.diner[key][name]) delete state.diner[key][name];
   saveState();
   saveDinerToFirebase();
-  document.getElementById("diner-picker-ov").classList.add("hidden");
+  document.getElementById("diner-picker-ov")?.classList.add("hidden");
   renderDiner();
 }
 
@@ -1318,7 +1318,7 @@ document.getElementById("diner-reset-btn").addEventListener("click", () => {
   renderDiner();
   showToast("Réponses réinitialisées");
 });
-document.getElementById("picker-cancel-btn").addEventListener("click", () => document.getElementById("diner-picker-ov").classList.add("hidden"));
+document.getElementById("picker-cancel-btn").addEventListener("click", () => document.getElementById("diner-picker-ov")?.classList.add("hidden"));
 document.getElementById("diner-picker-ov").addEventListener("click", function(e){ if(e.target===this) this.classList.add("hidden"); });
 
 // ════════════════════════════════════════════
@@ -1430,7 +1430,7 @@ document.querySelectorAll("#ev-color-tags .tag").forEach(tag => {
     selectedEvColor = this.dataset.color;
   });
 });
-document.getElementById("ev-cancel-btn").addEventListener("click", () => document.getElementById("ev-modal").classList.add("hidden"));
+document.getElementById("ev-cancel-btn").addEventListener("click", () => document.getElementById("ev-modal")?.classList.add("hidden"));
 document.getElementById("ev-submit-btn").addEventListener("click", () => {
   const title = document.getElementById("ev-title").value.trim();
   const date  = document.getElementById("ev-date-start").value;
@@ -1447,7 +1447,7 @@ document.getElementById("ev-submit-btn").addEventListener("click", () => {
   saveEventToFirebase(ev);
   renderEvents();
   renderAnnivStrips();
-  document.getElementById("ev-modal").classList.add("hidden");
+  document.getElementById("ev-modal")?.classList.add("hidden");
   showToast("Événement ajouté ✓");
 });
 
@@ -3229,10 +3229,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
   if (state.name) {
     // Déjà inscrit — si lien d'invitation, rejoint le groupe auto
-    document.getElementById("ob-step1").classList.add("hidden");
-    document.getElementById("ob-step2").classList.add("hidden");
-    document.getElementById("ob-step3").classList.add("hidden");
-    document.getElementById("ob-invite").classList.add("hidden");
+    document.getElementById("ob-step1")?.classList.add("hidden");
+    document.getElementById("ob-step2")?.classList.add("hidden");
+    document.getElementById("ob-step3")?.classList.add("hidden");
+    document.getElementById("ob-invite")?.classList.add("hidden");
     if (inviteCode && state.groupCode !== inviteCode.toUpperCase()) {
       // Propose de rejoindre le nouveau groupe
       if (confirm((inviteFrom||"Quelqu\'un") + " t\'invite à rejoindre un groupe. Rejoindre ?")) {
@@ -3242,21 +3242,21 @@ document.addEventListener("DOMContentLoaded", function() {
     startApp();
   } else if (inviteCode) {
     // Nouvel utilisateur avec lien d'invitation — affiche l'écran d'accueil
-    document.getElementById("ob-step1").classList.add("hidden");
+    document.getElementById("ob-step1")?.classList.add("hidden");
     const from = inviteFrom ? decodeURIComponent(inviteFrom) : "quelqu\'un";
     document.getElementById("invite-msg").textContent = from + " t\'invite à rejoindre Le QG !";
     document.getElementById("invite-sub").innerHTML = `<strong>${from}</strong> partage avec toi son QG — agenda, météo, dîner du soir, et bien plus.<br><br>Crée ton profil en 30 secondes.`;
-    document.getElementById("ob-invite").classList.remove("hidden");
+    document.getElementById("ob-invite")?.classList.remove("hidden");
     // Pré-remplit le code pour l'étape 2
     document.getElementById("ob-code").value = inviteCode.toUpperCase();
     document.getElementById("invite-join-btn").addEventListener("click", () => {
-      document.getElementById("ob-invite").classList.add("hidden");
-      document.getElementById("ob-step1").classList.remove("hidden");
+      document.getElementById("ob-invite")?.classList.add("hidden");
+      document.getElementById("ob-step1")?.classList.remove("hidden");
       initOnboarding();
     });
   } else {
     // Première connexion normale
-    document.getElementById("ob-invite").classList.add("hidden");
+    document.getElementById("ob-invite")?.classList.add("hidden");
     initOnboarding();
   }
 });
