@@ -842,21 +842,21 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
 <div class="modal-ov hidden" id="share-modal">
   <div class="modal" style="padding-bottom:24px;">
     <div class="modal-title">Partager l'invitation</div>
-    <div id="share-preview" style="background:var(--surface2);border-radius:var(--r-sm);padding:12px;font-size:13px;color:var(--text);line-height:1.6;margin-bottom:16px;white-space:pre-line;"></div>
+    <div id="share-preview" style="background:var(--surface2);border-radius:var(--r-sm);padding:12px;font-size:14px;color:var(--text);line-height:1.6;margin-bottom:16px;white-space:pre-line;word-break:break-all;"></div>
     <div style="display:flex;flex-direction:column;gap:8px;">
-      <a id="share-whatsapp" href="#" style="display:flex;align-items:center;gap:12px;background:#25D366;border-radius:var(--r-sm);padding:13px 16px;text-decoration:none;">
+      <a id="share-whatsapp" href="#" target="_blank" style="display:flex;align-items:center;gap:12px;background:#25D366;border-radius:var(--r-sm);padding:14px 16px;text-decoration:none;">
         <span style="font-size:24px;">💬</span>
-        <span style="font-size:15px;font-weight:700;color:white;">WhatsApp</span>
+        <span style="font-size:16px;font-weight:700;color:white;">Envoyer sur WhatsApp</span>
       </a>
-      <a id="share-sms" href="#" style="display:flex;align-items:center;gap:12px;background:#4A90E2;border-radius:var(--r-sm);padding:13px 16px;text-decoration:none;">
+      <a id="share-sms" href="#" style="display:flex;align-items:center;gap:12px;background:#4A90E2;border-radius:var(--r-sm);padding:14px 16px;text-decoration:none;">
         <span style="font-size:24px;">✉️</span>
-        <span style="font-size:15px;font-weight:700;color:white;">SMS</span>
+        <span style="font-size:16px;font-weight:700;color:white;">Envoyer par SMS</span>
       </a>
-      <button id="share-copy" style="display:flex;align-items:center;gap:12px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r-sm);padding:13px 16px;font-family:var(--font);cursor:pointer;width:100%;">
+      <button id="share-copy" style="display:flex;align-items:center;gap:12px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r-sm);padding:14px 16px;font-family:var(--font);cursor:pointer;width:100%;">
         <span style="font-size:24px;">📋</span>
-        <span style="font-size:15px;font-weight:700;color:var(--text);">Copier le message</span>
+        <span style="font-size:16px;font-weight:700;color:var(--text);">Copier le texte</span>
       </button>
-      <button onclick="document.getElementById('share-modal')?.classList.add('hidden')" style="background:none;border:none;color:var(--muted);font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;padding:8px;">Annuler</button>
+      <button onclick="document.getElementById('share-modal')?.classList.add('hidden')" style="background:none;border:none;color:var(--muted);font-family:var(--font);font-size:15px;font-weight:600;cursor:pointer;padding:10px;">Annuler</button>
     </div>
   </div>
 </div>
@@ -3202,25 +3202,39 @@ async function saveDinerToFirebase() {
 // ════════════════════════════════════════════
 
 function openShareMenu(text, url) {
-  // Sur Android, WhatsApp ignore "url" si "text" est aussi présent
-  // Solution : tout mettre dans "text" = texte + lien fusionnés
-  const fullText = text + "\n" + url;
-  if (navigator.share) {
-    navigator.share({ title: "Le General", text: fullText })
-      .catch(e => console.log("share cancelled", e));
-    return;
-  }
-  // Fallback modal
+  const fullMsg = text + "\n" + url;
+  const encoded = encodeURIComponent(fullMsg);
   const modal = document.getElementById("share-modal");
   const wa = document.getElementById("share-whatsapp");
   const sms = document.getElementById("share-sms");
+  const copyBtn = document.getElementById("share-copy");
   const preview = document.getElementById("share-preview");
   if (!modal) return;
-  const encoded = encodeURIComponent(fullText);
-  if (preview) preview.textContent = fullText;
-  if (wa) { wa.href = "https://wa.me/?text=" + encoded; wa.target = "_blank"; }
+
+  if (preview) preview.textContent = fullMsg;
+
+  // WhatsApp : lien direct avec texte complet encodé
+  if (wa) {
+    wa.href = "https://wa.me/?text=" + encoded;
+    wa.onclick = null;
+  }
+
+  // SMS
   const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
   if (sms) sms.href = (isIOS ? "sms:&body=" : "sms:?body=") + encoded;
+
+  // Copier
+  if (copyBtn) {
+    copyBtn.onclick = () => {
+      navigator.clipboard.writeText(fullMsg).then(() => {
+        const span = copyBtn.querySelector("span:last-child");
+        if (span) { span.textContent = "✅ Copié !"; setTimeout(()=>span.textContent="Copier le texte",2000); }
+      });
+    };
+  }
+
+  modal.classList.remove("hidden");
+  modal.onclick = e => { if (e.target === modal) modal.classList.add("hidden"); };
 }
 
 function showToast(msg) {
