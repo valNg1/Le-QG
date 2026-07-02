@@ -1080,7 +1080,12 @@ function finishOnboarding() {
 function startApp() {
   updateHeader();
   // Villes météo depuis state
-  renderMeteoCards(state.meteoVilles || ["paris","quiberon"]);
+  // Fetch météo directement — les éléments sont dans le HTML statique
+  fetchMeteo("paris");
+  fetchMeteo("quiberon");
+  // renderMeteoCards pour les villes perso si différentes des défauts
+  const mv = state.meteoVilles || ["paris","quiberon"];
+  if (mv[0] !== "paris" || mv[1] !== "quiberon") renderMeteoCards(mv);
   renderDiner();
   renderEvents();
   renderAnnivStrips();
@@ -1183,7 +1188,6 @@ function renderMeteoCards(villes) {
 }
 
 async function fetchMeteo(cityKey) {
-  const c = CITIES[cityKey];
   try {
     const cityDef = CITIES_LIST.find(x=>x.id===cityKey) || CITIES_LIST[0];
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${cityDef.lat}&longitude=${cityDef.lon}&current=temperature_2m,weathercode,windspeed_10m,relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto&forecast_days=2`;
