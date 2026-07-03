@@ -536,7 +536,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
       style="font-family:monospace;font-size:13px;">
     <div id="or-key-status" style="font-size:12px;margin-top:6px;"></div>
   </div>
-  <div style="text-align:center;font-size:11px;color:var(--muted2);margin:16px 0 8px;">Le Général v3.2.0</div>
+  <button id="reset-app-btn" style="width:100%;background:rgba(232,56,79,.08);border:1px solid rgba(232,56,79,.25);color:var(--red);border-radius:var(--r-sm);padding:12px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;margin:20px 0 4px;">🗑 Réinitialiser l'application</button>
+<p style="font-size:11px;color:var(--muted2);text-align:center;margin-bottom:8px;">Efface toutes les données locales de cet appareil (profil, tâches, réglages)</p>
+<div style="text-align:center;font-size:11px;color:var(--muted2);margin:16px 0 8px;">Le Général v3.2.0</div>
   <button id="save-perso-btn" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:13px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;margin-top:16px;">💾 Enregistrer</button>
 </div>
 
@@ -995,6 +997,15 @@ let obAvatar = "🧑";
 function obNext() {
   const name = document.getElementById("ob-name").value.trim();
   if (!name || name.length < 2) { document.getElementById("ob-err").textContent = "Prénom trop court"; return; }
+  // Nouveau profil (prénom différent) = repart de données vierges
+  // pour ne pas hériter des tâches/events d'un ancien utilisateur de cet appareil
+  if (state.name && state.name !== name) {
+    const freshState = {};
+    Object.keys(state).forEach(k => delete state[k]);
+    Object.assign(state, freshState);
+    // Purge aussi les caches annexes
+    ["qg_quiz_seen","qg_quiz_wrong"].forEach(k => localStorage.removeItem(k));
+  }
   state.name = name; state.avatar = obAvatar || "🧑";
   saveState();
   document.getElementById("ob-step1")?.classList.add("hidden");
@@ -3359,12 +3370,21 @@ function loadGroupData() {
 }
 
 async function saveEventToFirebase(ev) {
-  if(!firebaseReady||!state.groupCode) return;
+  if (!firebaseReady || !state.groupCode) return;
+  if (ev.perso) return; // les events perso ne partent JAMAIS sur le serveur
   try {
-    const ref=await db.collection("groupes").doc(state.groupCode).collection("events").add(ev);
-    ev.fbId=ref.id; saveState();
-  } catch(e){console.log(e);}
+    const clean = {
+      title: String(ev.title||""), date: String(ev.date||""),
+      dateEnd: String(ev.dateEnd||""), time: String(ev.time||""),
+      who: String(ev.who||""), color: String(ev.color||"blue"),
+      adder: String(ev.adder||""), owner: String(ev.owner||ev.adder||""),
+      localId: String(ev.id||Date.now())
+    };
+    const ref = await db.collection("groupes").doc(state.groupCode).collection("events").add(clean);
+    ev.fbId = ref.id; saveState();
+  } catch(e) { console.log("saveEvent error:", e); }
 }
+
 async function saveMsgToFirebase(msg) {
   if(!firebaseReady||!state.groupCode) return;
   try { await db.collection("groupes").doc(state.groupCode).collection("mur").add({...msg,ts:firebase.firestore.FieldValue.serverTimestamp()}); } catch(e){console.log(e);}
@@ -3454,6 +3474,16 @@ document.addEventListener("change", function(e) {
       state.tachesPeople[+e.target.dataset.personIdx].name = e.target.value.trim();
       state.tachesAttrib = null;
       saveState();
+    }
+  }
+});
+
+
+document.addEventListener("click", function(e) {
+  if (e.target.closest && e.target.closest("#reset-app-btn")) {
+    if (confirm("Tout effacer sur cet appareil ? Profil, tâches et réglages locaux seront perdus. Les données du groupe (agenda partagé, mur) restent sur le serveur.")) {
+      localStorage.clear();
+      location.reload();
     }
   }
 });
