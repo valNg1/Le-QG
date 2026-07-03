@@ -3109,8 +3109,11 @@ function getWeekKey() {
 function renderTaches() {
   const el = document.getElementById("taches-zone");
   if (!el) return;
-  const members = getGroupMembers();
-  if (members.length < 1) { el.innerHTML=`<div class="loading">Rejoins un groupe d'abord !</div>`; return; }
+  // Participants personnalisés (prioritaire) ou membres du groupe
+  const members = (state.tachesPeople && state.tachesPeople.length)
+    ? state.tachesPeople
+    : getGroupMembers();
+  if (members.length < 1) { el.innerHTML=`<div class="loading">Ajoute des participants dans Mon QG → Tâches !</div>`; return; }
   const taches = state.tachesDef || ["Vaisselle","Poubelles","Repas","Ménage"];
   const wk = getWeekKey();
   // Génère attribution si nouvelle semaine ou manquante
@@ -3176,8 +3179,20 @@ function renderTachesConfig() {
   const el = document.getElementById("taches-config");
   if (!el) return;
   const taches = state.tachesDef || ["Vaisselle","Poubelles","Repas","Ménage"];
+  const people = state.tachesPeople || [];
+  const AVATARS = ["🧑","👦","👧","👨","👩","🧒","👶","🦁","🐺","⚡"];
   el.innerHTML = `
-    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Définis les tâches à distribuer entre les membres</p>
+    <p style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;">👥 Qui participe aux tâches ?</p>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Ajoute librement les personnes concernées (avec ou sans l'app). Si vide, les membres du groupe sont utilisés.</p>
+    <div id="taches-people-list">
+      ${people.map((p,i) => `<div style="display:flex;gap:8px;margin-bottom:6px;align-items:center;">
+        <span style="font-size:20px;">${p.avatar||"🧑"}</span>
+        <input value="${p.name}" data-person-idx="${i}" style="flex:1;padding:8px 12px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-sm);font-family:var(--font);font-size:14px;color:var(--text);">
+        <button data-person-del="${i}" style="background:rgba(232,56,79,.1);border:1px solid rgba(232,56,79,.2);color:var(--red);border-radius:var(--r-sm);padding:8px 12px;cursor:pointer;font-family:var(--font);">✕</button>
+      </div>`).join("")}
+    </div>
+    <button id="add-person-btn" style="width:100%;background:none;border:1px dashed var(--border2);color:var(--muted);border-radius:var(--r-sm);padding:9px;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;margin:4px 0 18px;">+ Ajouter une personne</button>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Définis les tâches à distribuer entre les participants</p>
     ${taches.map((t,i) => `<div style="display:flex;gap:8px;margin-bottom:6px;">
       <input value="${t}" data-tache-idx="${i}" style="flex:1;padding:8px 12px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-sm);font-family:var(--font);font-size:13px;color:var(--text);">
       <button data-del-idx="${i}" style="background:rgba(232,56,79,.1);border:1px solid rgba(232,56,79,.2);color:var(--red);border-radius:var(--r-sm);padding:8px 12px;cursor:pointer;font-size:14px;">✕</button>
