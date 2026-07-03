@@ -3219,32 +3219,8 @@ function renderTachesConfig() {
     saveState(); renderTachesConfig();
   });
 
-  // ── Participants aux tâches ──
-  document.querySelectorAll("[data-person-idx]").forEach(inp => {
-    inp.addEventListener("change", function() {
-      if (!state.tachesPeople) state.tachesPeople = [];
-      if (state.tachesPeople[+this.dataset.personIdx]) {
-        state.tachesPeople[+this.dataset.personIdx].name = this.value.trim();
-        state.tachesAttrib = null;
-        saveState();
-      }
-    });
-  });
-  document.querySelectorAll("[data-person-del]").forEach(btn => {
-    btn.addEventListener("click", function() {
-      if (!state.tachesPeople) return;
-      state.tachesPeople.splice(+this.dataset.personDel, 1);
-      state.tachesAttrib = null;
-      saveState(); renderTachesConfig();
-    });
-  });
-  document.getElementById("add-person-btn")?.addEventListener("click", function() {
-    if (!state.tachesPeople) state.tachesPeople = [];
-    const AVS = ["🧑","👦","👧","👨","👩","🧒"];
-    state.tachesPeople.push({ name: "Prénom " + (state.tachesPeople.length+1), avatar: AVS[state.tachesPeople.length % AVS.length] });
-    state.tachesAttrib = null;
-    saveState(); renderTachesConfig();
-  });
+  // Participants gérés par délégation globale
+
 }
 
 // ════════════════════════════════════════════
@@ -3446,6 +3422,41 @@ function showToast(msg) {
 // ════════════════════════════════════════════
 // INIT
 // ════════════════════════════════════════════
+
+// ── Délégation robuste pour la config tâches (survit aux re-renders) ──
+document.addEventListener("click", function(e) {
+  if (e.target.closest && e.target.closest("#add-person-btn")) {
+    if (!state.tachesPeople) state.tachesPeople = [];
+    const AVS = ["🧑","👦","👧","👨","👩","🧒"];
+    state.tachesPeople.push({ name: "", avatar: AVS[state.tachesPeople.length % AVS.length] });
+    state.tachesAttrib = null;
+    saveState(); renderTachesConfig();
+    // Focus sur le nouveau champ
+    setTimeout(() => {
+      const inputs = document.querySelectorAll("[data-person-idx]");
+      const last = inputs[inputs.length-1];
+      if (last) { last.focus(); last.placeholder = "Prénom..."; }
+    }, 50);
+  }
+  const delBtn = e.target.closest && e.target.closest("[data-person-del]");
+  if (delBtn) {
+    if (!state.tachesPeople) return;
+    state.tachesPeople.splice(+delBtn.dataset.personDel, 1);
+    state.tachesAttrib = null;
+    saveState(); renderTachesConfig();
+  }
+});
+document.addEventListener("change", function(e) {
+  if (e.target.matches && e.target.matches("[data-person-idx]")) {
+    if (!state.tachesPeople) state.tachesPeople = [];
+    if (state.tachesPeople[+e.target.dataset.personIdx]) {
+      state.tachesPeople[+e.target.dataset.personIdx].name = e.target.value.trim();
+      state.tachesAttrib = null;
+      saveState();
+    }
+  }
+});
+
 document.addEventListener("DOMContentLoaded", function() {
   initFirebase();
   updateHeader();
