@@ -3218,6 +3218,33 @@ function renderTachesConfig() {
     state.tachesDef.push("Nouvelle tâche");
     saveState(); renderTachesConfig();
   });
+
+  // ── Participants aux tâches ──
+  document.querySelectorAll("[data-person-idx]").forEach(inp => {
+    inp.addEventListener("change", function() {
+      if (!state.tachesPeople) state.tachesPeople = [];
+      if (state.tachesPeople[+this.dataset.personIdx]) {
+        state.tachesPeople[+this.dataset.personIdx].name = this.value.trim();
+        state.tachesAttrib = null;
+        saveState();
+      }
+    });
+  });
+  document.querySelectorAll("[data-person-del]").forEach(btn => {
+    btn.addEventListener("click", function() {
+      if (!state.tachesPeople) return;
+      state.tachesPeople.splice(+this.dataset.personDel, 1);
+      state.tachesAttrib = null;
+      saveState(); renderTachesConfig();
+    });
+  });
+  document.getElementById("add-person-btn")?.addEventListener("click", function() {
+    if (!state.tachesPeople) state.tachesPeople = [];
+    const AVS = ["🧑","👦","👧","👨","👩","🧒"];
+    state.tachesPeople.push({ name: "Prénom " + (state.tachesPeople.length+1), avatar: AVS[state.tachesPeople.length % AVS.length] });
+    state.tachesAttrib = null;
+    saveState(); renderTachesConfig();
+  });
 }
 
 // ════════════════════════════════════════════
