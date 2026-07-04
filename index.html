@@ -3373,28 +3373,32 @@ function getWeekKey() {
 function renderTaches() {
   const el = document.getElementById("taches-zone");
   if (!el) return;
-  // Participants personnalisés (prioritaire) ou membres du groupe
   const members = (state.tachesPeople && state.tachesPeople.length)
     ? state.tachesPeople
     : getGroupMembers();
   if (members.length < 1) { el.innerHTML=`<div class="loading">Ajoute des participants dans Mon QG → Tâches !</div>`; return; }
   const taches = state.tachesDef || ["Vaisselle","Poubelles","Repas","Ménage"];
   const wk = getWeekKey();
-  // Génère attribution si nouvelle semaine ou manquante
-  if (!state.tachesAttrib || state.tachesAttrib.week !== wk) {
-    state.tachesAttrib = { week: wk, attrib: shuffleTaches(taches, members), done: {} };
+
+  // Attribution FIGÉE : générée une seule fois, jamais recréée automatiquement.
+  // Seul un tap sur "Redistribuer" ou "Assigner" change qui fait quoi.
+  if (!state.tachesAttrib) {
+    state.tachesAttrib = { week: wk, attrib: shuffleTaches(taches, members), done: {}, locked: false };
     saveState();
   }
-  const { attrib, done } = state.tachesAttrib;
+  const { attrib, done, locked } = state.tachesAttrib;
   const total = Object.values(attrib).flat().length;
   const doneCount = Object.values(done).filter(Boolean).length;
   const pct = total ? Math.round(doneCount/total*100) : 0;
 
   el.innerHTML = `
     <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <div style="font-size:12px;font-weight:700;color:var(--text);">Semaine ${wk.split("-W")[1]}</div>
-        <button id="taches-shuffle-btn" style="background:none;border:1px solid var(--border2);color:var(--muted);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font);">🔀 Redistribuer</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;">
+        <div style="font-size:12px;font-weight:700;color:var(--text);">${locked ? "🔒 Répartition fixe" : "Semaine " + wk.split("-W")[1]}</div>
+        <div style="display:flex;gap:6px;">
+          <button id="taches-assign-btn" style="background:var(--yellow-light);border:1px solid var(--yellow);color:var(--yellow);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font);">✎ Assigner</button>
+          <button id="taches-shuffle-btn" style="background:none;border:1px solid var(--border2);color:var(--muted);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font);">🔀 Tirage random</button>
+        </div>
       </div>
       ${members.map(m => {
         const mTaches = attrib[m.name] || [];
@@ -3403,7 +3407,7 @@ function renderTaches() {
           <div style="flex:1;">
             <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:5px;">${m.name}</div>
             <div style="display:flex;gap:5px;flex-wrap:wrap;">
-              ${mTaches.map(t => `<span style="font-size:11px;font-weight:600;padding:4px 9px;border-radius:20px;cursor:pointer;border:1px solid ${done[m.name+"_"+t]?"var(--green)":"var(--border2)"};background:${done[m.name+"_"+t]?"rgba(52,199,123,.15)":"none"};color:${done[m.name+"_"+t]?"var(--green)":"var(--muted)"};text-decoration:${done[m.name+"_"+t]?"line-through":"none"};" data-tache="${m.name}_${t}">${t}</span>`).join("")}
+              ${mTaches.length ? mTaches.map(t => `<span style="font-size:11px;font-weight:600;padding:4px 9px;border-radius:20px;cursor:pointer;border:1px solid ${done[m.name+"_"+t]?"var(--green)":"var(--border2)"};background:${done[m.name+"_"+t]?"rgba(52,199,123,.15)":"none"};color:${done[m.name+"_"+t]?"var(--green)":"var(--muted)"};text-decoration:${done[m.name+"_"+t]?"line-through":"none"};" data-tache="${m.name}_${t}">${t}</span>`).join("") : `<span style="font-size:11px;color:var(--muted2);font-style:italic;">Aucune tâche assignée</span>`}
             </div>
           </div>
         </div>`;
@@ -3414,7 +3418,21 @@ function renderTaches() {
         </div>
         <div style="font-size:11px;color:var(--muted);white-space:nowrap;">${doneCount}/${total} faites</div>
       </div>
-    </div>`;
+    </div>
+    <div id="taches-assign-modal" style="display:none;background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-top:10px;">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">Qui fait quoi ?</div>
+      ${taches.map(t => `<div style="margin-bottom:10px;">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:5px;">${t}</div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;">
+          ${members.map(m => {
+            const assigned = (attrib[m.name]||[]).includes(t);
+            return `<button data-assign-tache="${t}" data-assign-person="${m.name}" style="font-size:11px;font-weight:600;padding:5px 10px;border-radius:20px;border:1px solid ${assigned?"var(--yellow)":"var(--border2)"};background:${assigned?"var(--yellow-light)":"none"};color:${assigned?"var(--yellow)":"var(--muted)"};cursor:pointer;font-family:var(--font);">${m.avatar} ${m.name}</button>`;
+          }).join("")}
+        </div>
+      </div>`).join("")}
+      <button id="taches-assign-close" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:10px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;margin-top:8px;">Terminé</button>
+    </div>
+  `;
 
   el.querySelectorAll("[data-tache]").forEach(btn => {
     btn.addEventListener("click", function() {
@@ -3424,11 +3442,50 @@ function renderTaches() {
       saveState(); renderTaches();
     });
   });
+
   document.getElementById("taches-shuffle-btn")?.addEventListener("click", () => {
-    state.tachesAttrib = { week: wk, attrib: shuffleTaches(taches, members), done: {} };
+    state.tachesAttrib = { week: wk, attrib: shuffleTaches(taches, members), done: {}, locked: false };
     saveState(); renderTaches(); showToast("🔀 Nouvelles tâches redistribuées !");
   });
+
+  document.getElementById("taches-assign-btn")?.addEventListener("click", () => {
+    const modal = document.getElementById("taches-assign-modal");
+    if (modal) modal.style.display = modal.style.display === "none" ? "block" : "none";
+  });
+
+  document.getElementById("taches-assign-close")?.addEventListener("click", () => {
+    const modal = document.getElementById("taches-assign-modal");
+    if (modal) modal.style.display = "none";
+  });
+
+  el.querySelectorAll("[data-assign-tache]").forEach(btn => {
+    btn.addEventListener("click", function() {
+      const t = this.dataset.assignTache;
+      const person = this.dataset.assignPerson;
+      if (!state.tachesAttrib.attrib[person]) state.tachesAttrib.attrib[person] = [];
+      const idx = state.tachesAttrib.attrib[person].indexOf(t);
+      if (idx > -1) {
+        state.tachesAttrib.attrib[person].splice(idx, 1);
+      } else {
+        // Retire cette tâche des autres (une tâche = une personne)
+        members.forEach(m => {
+          if (state.tachesAttrib.attrib[m.name]) {
+            state.tachesAttrib.attrib[m.name] = state.tachesAttrib.attrib[m.name].filter(x => x !== t);
+          }
+        });
+        state.tachesAttrib.attrib[person].push(t);
+      }
+      state.tachesAttrib.locked = true;
+      saveState(); renderTaches();
+      // Réouvre le modal après le re-render
+      setTimeout(() => {
+        const m2 = document.getElementById("taches-assign-modal");
+        if (m2) m2.style.display = "block";
+      }, 10);
+    });
+  });
 }
+
 
 function shuffleTaches(taches, members) {
   const shuffled = [...taches].sort(() => Math.random()-0.5);
