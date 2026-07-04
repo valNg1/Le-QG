@@ -367,6 +367,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
 #diner-notif-badge { display:none; align-items:center; justify-content:center; background:var(--red); color:#fff; font-size:12px; font-weight:800; min-width:20px; height:20px; border-radius:10px; padding:0 6px; margin-left:8px; vertical-align:middle; }
 </style>
 </head>
+
+<!-- BANDEAU MISE À JOUR DISPONIBLE -->
+<div id="update-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:var(--yellow);color:#1A1916;padding:12px 16px;text-align:center;font-family:var(--font);font-size:14px;font-weight:700;">
+  ✨ Nouvelle version disponible
+  <button id="update-reload-btn" style="margin-left:10px;background:#1A1916;color:var(--yellow);border:none;border-radius:20px;padding:6px 16px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;">Recharger</button>
+</div>
+
 <body>
 
 <!-- ═══ ONBOARDING ═══ -->
@@ -3759,6 +3766,28 @@ document.addEventListener("click", function(e) {
   if (e.target.closest && e.target.closest("#meteo-edit-btn")) openMeteoPicker();
   if (e.target.closest && e.target.closest("#meteo-save-btn")) saveMeteoCities();
 });
+
+
+// ── AUTO-UPDATE DETECTION (sans service worker) ──
+const APP_VERSION = "3.2.1";
+async function checkForUpdate() {
+  try {
+    const res = await fetch("version.json?t=" + Date.now(), { cache: "no-store" });
+    const data = await res.json();
+    if (data.version && data.version !== APP_VERSION) {
+      const banner = document.getElementById("update-banner");
+      if (banner) banner.style.display = "block";
+    }
+  } catch(e) { /* silencieux */ }
+}
+document.getElementById("update-reload-btn")?.addEventListener("click", () => {
+  // Force un rechargement réseau complet, en cassant tout cache
+  window.location.href = window.location.pathname + "?fresh=" + Date.now();
+});
+// Vérifie au chargement, puis toutes les 2 minutes si l'app reste ouverte
+setTimeout(checkForUpdate, 3000);
+setInterval(checkForUpdate, 120000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) checkForUpdate(); });
 
 document.addEventListener("DOMContentLoaded", function() {
   initFirebase();
