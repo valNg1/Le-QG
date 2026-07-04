@@ -3191,13 +3191,16 @@ function fetchRecos(type, prompt) {
   })
   .then(r => r.json())
   .then(data => {
-    const text = data.choices?.[0]?.message?.content || "[]";
+    if (data.error) throw new Error(data.error.message || "API error");
+    const text = data.choices?.[0]?.message?.content;
+    if (!text) throw new Error("Réponse vide");
     const clean = text.replace(/```json|```/g,"").trim();
     const recos = JSON.parse(clean);
+    if (!Array.isArray(recos) || recos.length === 0) throw new Error("Aucune reco générée");
     renderRecoCards(recos, type, isFilm, resultEl);
   })
   .catch(e => {
-    console.log("OpenRouter error, fallback local", e);
+    console.log("OpenRouter error, fallback local:", e.message);
     const recos = getRecosByPrompt(type, prompt);
     renderRecoCards(recos, type, isFilm, resultEl);
   })
