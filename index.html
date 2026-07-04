@@ -896,8 +896,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
 <div class="modal-ov hidden" id="meteo-modal">
   <div class="modal">
     <div class="modal-title">Choisis tes 2 villes météo</div>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Sélectionne exactement 2 villes à afficher sur l'accueil.</p>
-    <div id="meteo-city-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:50vh;overflow-y:auto;margin-bottom:16px;"></div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Recherche n'importe quelle ville dans le monde.</p>
+    <div id="meteo-selected-chips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;min-height:32px;"></div>
+    <input id="meteo-search-input" class="modal-input" placeholder="Rechercher une ville..." type="text" style="margin-bottom:10px;">
+    <div id="meteo-search-results" style="max-height:38vh;overflow-y:auto;margin-bottom:16px;"></div>
     <button id="meteo-save-btn" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:13px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;">Enregistrer</button>
     <button onclick="document.getElementById('meteo-modal')?.classList.add('hidden')" style="width:100%;background:none;border:none;color:var(--muted);font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;padding:10px;margin-top:4px;">Annuler</button>
   </div>
@@ -1156,11 +1158,14 @@ function startApp() {
   updateHeader();
   // Villes météo depuis state
   // Fetch météo directement — les éléments sont dans le HTML statique
-  fetchMeteo("paris");
-  fetchMeteo("quiberon");
-  // renderMeteoCards pour les villes perso si différentes des défauts
-  const mv = state.meteoVilles || ["paris","quiberon"];
-  if (mv[0] !== "paris" || mv[1] !== "quiberon") renderMeteoCards(mv);
+  if (state.meteoVillesCustom && state.meteoVillesCustom.length === 2) {
+    renderMeteoCardsCustom(state.meteoVillesCustom);
+  } else {
+    fetchMeteo("paris");
+    fetchMeteo("quiberon");
+    const mv = state.meteoVilles || ["paris","quiberon"];
+    if (mv[0] !== "paris" || mv[1] !== "quiberon") renderMeteoCards(mv);
+  }
   renderDiner();
   renderEvents();
   renderAnnivStrips();
@@ -1284,49 +1289,100 @@ const WMO_DESC = {0:"Ciel dégagé",1:"Peu nuageux",2:"Partiellement nuageux",3:
 
 
 
-// ── SÉLECTEUR DE VILLES MÉTÉO ──
-let meteoPickerSel = [];
+// ── SÉLECTEUR DE VILLES MÉTÉO (recherche mondiale) ──
+let meteoPickerSel = []; // [{id, label, lat, lon, url}]
+let meteoSearchTimer = null;
 
 function openMeteoPicker() {
   const modal = document.getElementById("meteo-modal");
-  const grid = document.getElementById("meteo-city-grid");
-  if (!modal || !grid) return;
-  meteoPickerSel = [...(state.meteoVilles || ["paris","quiberon"])];
+  if (!modal) return;
 
-  grid.innerHTML = CITIES_LIST.map(c => {
-    const sel = meteoPickerSel.includes(c.id);
-    return `<button class="meteo-city-opt${sel?" sel":""}" data-city="${c.id}" style="background:${sel?'var(--yellow-light)':'var(--surface)'};border:1.5px solid ${sel?'var(--yellow)':'var(--border)'};border-radius:var(--r-sm);padding:12px 8px;font-family:var(--font);font-size:14px;font-weight:600;color:${sel?'var(--yellow)':'var(--text)'};cursor:pointer;transition:all .15s;">${c.label}</button>`;
-  }).join("");
+  // Initialise depuis les villes actuelles (custom ou prédéfinies)
+  const currentVilles = state.meteoVillesCustom || (state.meteoVilles||["paris","quiberon"]).map(id => {
+    const c = CITIES_LIST.find(x=>x.id===id);
+    return c ? { id: c.id, label: c.label, lat: c.lat, lon: c.lon, url: c.url } : null;
+  }).filter(Boolean);
+  meteoPickerSel = [...currentVilles];
 
-  grid.querySelectorAll(".meteo-city-opt").forEach(btn => {
-    btn.addEventListener("click", function() {
-      const city = this.dataset.city;
-      if (meteoPickerSel.includes(city)) {
-        meteoPickerSel = meteoPickerSel.filter(c => c !== city);
-      } else {
-        if (meteoPickerSel.length >= 2) {
-          // Remplace la première ville
-          meteoPickerSel.shift();
-        }
-        meteoPickerSel.push(city);
-      }
-      // Re-render l'état visuel
-      openMeteoPicker.refresh();
-    });
-  });
-
-  openMeteoPicker.refresh = () => {
-    grid.querySelectorAll(".meteo-city-opt").forEach(btn => {
-      const sel = meteoPickerSel.includes(btn.dataset.city);
-      btn.style.background = sel ? "var(--yellow-light)" : "var(--surface)";
-      btn.style.borderColor = sel ? "var(--yellow)" : "var(--border)";
-      btn.style.color = sel ? "var(--yellow)" : "var(--text)";
-      btn.classList.toggle("sel", sel);
-    });
-  };
+  renderMeteoChips();
+  document.getElementById("meteo-search-results").innerHTML = "";
+  document.getElementById("meteo-search-input").value = "";
 
   modal.classList.remove("hidden");
   modal.onclick = e => { if (e.target === modal) modal.classList.add("hidden"); };
+
+  const input = document.getElementById("meteo-search-input");
+  input.oninput = function() {
+    clearTimeout(meteoSearchTimer);
+    const q = this.value.trim();
+    if (q.length < 2) { document.getElementById("meteo-search-results").innerHTML = ""; return; }
+    meteoSearchTimer = setTimeout(() => searchCities(q), 350);
+  };
+}
+
+async function searchCities(query) {
+  const resultsEl = document.getElementById("meteo-search-results");
+  resultsEl.innerHTML = `<div style="padding:12px;color:var(--muted);font-size:13px;">Recherche...</div>`;
+  try {
+    const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=8&language=fr`);
+    const data = await res.json();
+    const cities = data.results || [];
+    if (!cities.length) {
+      resultsEl.innerHTML = `<div style="padding:12px;color:var(--muted);font-size:13px;">Aucun résultat</div>`;
+      return;
+    }
+    resultsEl.innerHTML = cities.map(c => {
+      const region = [c.admin1, c.country].filter(Boolean).join(", ");
+      const cityId = "custom_" + c.latitude.toFixed(2) + "_" + c.longitude.toFixed(2);
+      return `<button class="meteo-search-item" data-lat="${c.latitude}" data-lon="${c.longitude}" data-label="${c.name}" data-id="${cityId}"
+        style="display:flex;flex-direction:column;align-items:flex-start;width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:6px;font-family:var(--font);cursor:pointer;">
+        <span style="font-size:14px;font-weight:700;color:var(--text);">${c.name}</span>
+        <span style="font-size:12px;color:var(--muted);">${region}</span>
+      </button>`;
+    }).join("");
+
+    resultsEl.querySelectorAll(".meteo-search-item").forEach(btn => {
+      btn.addEventListener("click", function() {
+        const city = {
+          id: this.dataset.id,
+          label: this.dataset.label,
+          lat: parseFloat(this.dataset.lat),
+          lon: parseFloat(this.dataset.lon),
+          url: `https://www.google.com/search?q=meteo+${encodeURIComponent(this.dataset.label)}`
+        };
+        addMeteoCity(city);
+        document.getElementById("meteo-search-input").value = "";
+        resultsEl.innerHTML = "";
+      });
+    });
+  } catch(e) {
+    resultsEl.innerHTML = `<div style="padding:12px;color:var(--red);font-size:13px;">Erreur de recherche</div>`;
+    console.log("searchCities error:", e);
+  }
+}
+
+function addMeteoCity(city) {
+  if (meteoPickerSel.find(c => c.id === city.id)) return;
+  if (meteoPickerSel.length >= 2) meteoPickerSel.shift(); // remplace la plus ancienne
+  meteoPickerSel.push(city);
+  renderMeteoChips();
+}
+
+function renderMeteoChips() {
+  const el = document.getElementById("meteo-selected-chips");
+  if (!el) return;
+  el.innerHTML = meteoPickerSel.map(c => `
+    <span style="display:inline-flex;align-items:center;gap:6px;background:var(--yellow-light);border:1px solid var(--yellow);border-radius:20px;padding:6px 10px 6px 14px;font-size:13px;font-weight:600;color:var(--yellow);">
+      ${c.label}
+      <button data-remove-city="${c.id}" style="background:none;border:none;color:var(--yellow);font-size:15px;cursor:pointer;padding:0;line-height:1;">✕</button>
+    </span>`).join("") || `<span style="font-size:13px;color:var(--muted);">Aucune ville sélectionnée</span>`;
+
+  el.querySelectorAll("[data-remove-city]").forEach(btn => {
+    btn.addEventListener("click", function() {
+      meteoPickerSel = meteoPickerSel.filter(c => c.id !== this.dataset.removeCity);
+      renderMeteoChips();
+    });
+  });
 }
 
 function saveMeteoCities() {
@@ -1334,11 +1390,68 @@ function saveMeteoCities() {
     showToast("Choisis exactement 2 villes !");
     return;
   }
-  state.meteoVilles = [...meteoPickerSel];
+  // Sauvegarde les villes custom complètes (avec coords)
+  state.meteoVillesCustom = [...meteoPickerSel];
+  state.meteoVilles = meteoPickerSel.map(c => c.id);
   saveState();
-  renderMeteoCards(state.meteoVilles);
+  renderMeteoCardsCustom(meteoPickerSel);
   document.getElementById("meteo-modal")?.classList.add("hidden");
   showToast("Villes météo mises à jour ✓");
+}
+
+function renderMeteoCardsCustom(cities) {
+  const row = document.querySelector(".meteo-row");
+  if (!row) return;
+  row.innerHTML = cities.map(c => `<a class="meteo-card" id="meteo-${c.id}" href="${c.url}" target="_blank">
+      <div class="meteo-city">${c.label}</div>
+      <div class="skel" style="width:36px;height:36px;border-radius:8px;"></div>
+      <div class="skel" style="width:60px;height:26px;margin-top:4px;"></div>
+      <div class="skel" style="width:80px;height:10px;margin-top:4px;"></div>
+    </a>`).join("");
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    cities.forEach(c => fetchMeteoCustom(c));
+  }));
+}
+
+async function fetchMeteoCustom(city) {
+  const el = document.getElementById("meteo-"+city.id);
+  if (!el) return;
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&current=temperature_2m,weathercode,windspeed_10m,relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto&forecast_days=2`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const cur = data.current, daily = data.daily;
+    const code = cur.weathercode, code1 = daily.weathercode[1];
+    const tmax0 = Math.round(daily.temperature_2m_max[0]), tmin0 = Math.round(daily.temperature_2m_min[0]);
+    const tmax1 = Math.round(daily.temperature_2m_max[1]), tmin1 = Math.round(daily.temperature_2m_min[1]);
+    const tmrDate = new Date(); tmrDate.setDate(tmrDate.getDate()+1);
+    const tmrLabel = tmrDate.toLocaleDateString("fr-FR",{weekday:"short"});
+    el.innerHTML = `
+      <div class="meteo-city">${city.label}</div>
+      <div style="display:flex;gap:10px;align-items:flex-start;margin-top:4px;">
+        <div style="flex:1;">
+          <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;">Aujourd'hui</div>
+          <div class="meteo-icon">${WMO_ICONS[code]||"🌡"}</div>
+          <div class="meteo-temp">${Math.round(cur.temperature_2m)}<sup>°C</sup></div>
+          <div class="meteo-mm">↑${tmax0}° ↓${tmin0}°</div>
+          <div class="meteo-extra" style="margin-top:4px;">
+            <span class="meteo-ei">💨${Math.round(cur.windspeed_10m)}</span>
+            <span class="meteo-ei">💧${cur.relative_humidity_2m}%</span>
+          </div>
+        </div>
+        <div style="width:1px;background:var(--border);align-self:stretch;flex-shrink:0;margin-top:4px;"></div>
+        <div style="flex:1;">
+          <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;">${tmrLabel.charAt(0).toUpperCase()+tmrLabel.slice(1)}</div>
+          <div style="font-size:22px;line-height:1;margin-bottom:4px;">${WMO_ICONS[code1]||"🌡"}</div>
+          <div style="font-size:18px;font-weight:800;color:var(--muted);">↑${tmax1}°</div>
+          <div class="meteo-mm">↓${tmin1}°</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">${WMO_DESC[code1]||""}</div>
+        </div>
+      </div>`;
+  } catch(e) {
+    console.log("fetchMeteoCustom error:", city.id, e.message);
+    el.innerHTML = `<div class="meteo-city">${city.label}</div><div class="meteo-icon">⚠️</div><div class="meteo-desc" style="color:var(--muted);font-size:11px;">Indisponible</div>`;
+  }
 }
 
 function renderMeteoCards(villes) {
