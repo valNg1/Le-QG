@@ -2650,7 +2650,7 @@ async function startQuiz(theme, reviewWrong) {
           "X-Title": "Le General"
         },
         body: JSON.stringify({
-          model: "openrouter/free",
+          model: "meta-llama/llama-3.3-70b-instruct:free",
           messages: [
             { role: "system", content: sysPrompt },
             { role: "user", content: "Génère les 10 questions maintenant. Varie les sujets à chaque fois. Seed aléatoire: " + Math.random() }
@@ -3182,7 +3182,7 @@ function fetchRecos(type, prompt) {
       "X-Title": "Le General"
     },
     body: JSON.stringify({
-      model: "openrouter/free",
+      model: "meta-llama/llama-3.3-70b-instruct:free",
       messages: [
         { role: "system", content: systemMsg },
         { role: "user", content: prompt }
