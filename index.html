@@ -452,7 +452,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
 <div id="view-accueil" class="view active">
 
   <!-- BLOC 1 : MÉTÉO -->
-  <p class="sec">Météo</p>
+  <div style="display:flex;align-items:center;justify-content:space-between;">
+    <p class="sec" style="margin-bottom:0;">Météo</p>
+    <button id="meteo-edit-btn" style="background:none;border:none;color:var(--yellow);font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;padding:4px 8px;">✎ Villes</button>
+  </div>
   <div class="meteo-row">
     <a class="meteo-card" id="meteo-paris" href="https://meteofrance.com/previsions-meteo-france/paris/75000" target="_blank">
       <div class="meteo-city">Paris</div>
@@ -888,6 +891,18 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
   </div>
 </div>
 
+
+<!-- MÉTÉO CITY PICKER -->
+<div class="modal-ov hidden" id="meteo-modal">
+  <div class="modal">
+    <div class="modal-title">Choisis tes 2 villes météo</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Sélectionne exactement 2 villes à afficher sur l'accueil.</p>
+    <div id="meteo-city-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:50vh;overflow-y:auto;margin-bottom:16px;"></div>
+    <button id="meteo-save-btn" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:13px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;">Enregistrer</button>
+    <button onclick="document.getElementById('meteo-modal')?.classList.add('hidden')" style="width:100%;background:none;border:none;color:var(--muted);font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;padding:10px;margin-top:4px;">Annuler</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1267,6 +1282,64 @@ const CITIES = {}; // dynamique, rempli au démarrage
 const WMO_ICONS = {0:"☀️",1:"🌤",2:"⛅",3:"☁️",45:"🌫",48:"🌫",51:"🌦",53:"🌦",55:"🌧",61:"🌧",63:"🌧",65:"🌧",71:"🌨",73:"🌨",75:"❄️",80:"🌦",81:"🌧",82:"⛈",95:"⛈",96:"⛈",99:"⛈"};
 const WMO_DESC = {0:"Ciel dégagé",1:"Peu nuageux",2:"Partiellement nuageux",3:"Couvert",45:"Brouillard",51:"Bruine légère",61:"Pluie légère",63:"Pluie",71:"Neige légère",80:"Averses",95:"Orage"};
 
+
+
+// ── SÉLECTEUR DE VILLES MÉTÉO ──
+let meteoPickerSel = [];
+
+function openMeteoPicker() {
+  const modal = document.getElementById("meteo-modal");
+  const grid = document.getElementById("meteo-city-grid");
+  if (!modal || !grid) return;
+  meteoPickerSel = [...(state.meteoVilles || ["paris","quiberon"])];
+
+  grid.innerHTML = CITIES_LIST.map(c => {
+    const sel = meteoPickerSel.includes(c.id);
+    return `<button class="meteo-city-opt${sel?" sel":""}" data-city="${c.id}" style="background:${sel?'var(--yellow-light)':'var(--surface)'};border:1.5px solid ${sel?'var(--yellow)':'var(--border)'};border-radius:var(--r-sm);padding:12px 8px;font-family:var(--font);font-size:14px;font-weight:600;color:${sel?'var(--yellow)':'var(--text)'};cursor:pointer;transition:all .15s;">${c.label}</button>`;
+  }).join("");
+
+  grid.querySelectorAll(".meteo-city-opt").forEach(btn => {
+    btn.addEventListener("click", function() {
+      const city = this.dataset.city;
+      if (meteoPickerSel.includes(city)) {
+        meteoPickerSel = meteoPickerSel.filter(c => c !== city);
+      } else {
+        if (meteoPickerSel.length >= 2) {
+          // Remplace la première ville
+          meteoPickerSel.shift();
+        }
+        meteoPickerSel.push(city);
+      }
+      // Re-render l'état visuel
+      openMeteoPicker.refresh();
+    });
+  });
+
+  openMeteoPicker.refresh = () => {
+    grid.querySelectorAll(".meteo-city-opt").forEach(btn => {
+      const sel = meteoPickerSel.includes(btn.dataset.city);
+      btn.style.background = sel ? "var(--yellow-light)" : "var(--surface)";
+      btn.style.borderColor = sel ? "var(--yellow)" : "var(--border)";
+      btn.style.color = sel ? "var(--yellow)" : "var(--text)";
+      btn.classList.toggle("sel", sel);
+    });
+  };
+
+  modal.classList.remove("hidden");
+  modal.onclick = e => { if (e.target === modal) modal.classList.add("hidden"); };
+}
+
+function saveMeteoCities() {
+  if (meteoPickerSel.length !== 2) {
+    showToast("Choisis exactement 2 villes !");
+    return;
+  }
+  state.meteoVilles = [...meteoPickerSel];
+  saveState();
+  renderMeteoCards(state.meteoVilles);
+  document.getElementById("meteo-modal")?.classList.add("hidden");
+  showToast("Villes météo mises à jour ✓");
+}
 
 function renderMeteoCards(villes) {
   const row = document.querySelector(".meteo-row");
@@ -3549,6 +3622,12 @@ document.addEventListener("click", function(e) {
       location.reload();
     }
   }
+});
+
+
+document.addEventListener("click", function(e) {
+  if (e.target.closest && e.target.closest("#meteo-edit-btn")) openMeteoPicker();
+  if (e.target.closest && e.target.closest("#meteo-save-btn")) saveMeteoCities();
 });
 
 document.addEventListener("DOMContentLoaded", function() {
