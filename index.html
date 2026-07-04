@@ -362,6 +362,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
 .reco-saved-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
 .reco-saved-meta { font-size: 13px; color: var(--muted); }
 .reco-saved-del { background: none; border: none; color: var(--muted2); font-size: 16px; cursor: pointer; flex-shrink: 0; padding: 4px; }
+
+.nav-badge { position:absolute; top:2px; right:calc(50% - 22px); background:var(--red); color:#fff; font-size:10px; font-weight:800; min-width:16px; height:16px; border-radius:8px; display:flex; align-items:center; justify-content:center; padding:0 4px; line-height:1; }
+#diner-notif-badge { display:none; align-items:center; justify-content:center; background:var(--red); color:#fff; font-size:12px; font-weight:800; min-width:20px; height:20px; border-radius:10px; padding:0 6px; margin-left:8px; vertical-align:middle; }
 </style>
 </head>
 <body>
@@ -471,7 +474,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     <div class="diner-hdr">
       <div class="diner-icon">🍽</div>
       <div>
-        <div class="diner-title">Qui est là ce soir ?</div>
+        <div class="diner-title">Qui est là ce soir ?<span id="diner-notif-badge">0</span></div>
         <div class="diner-date" id="diner-date">—</div>
       </div>
       <button class="diner-reset" id="diner-reset-btn">↺</button>
@@ -1134,6 +1137,7 @@ function finishOnboarding() {
 // APP START
 // ════════════════════════════════════════════
 function startApp() {
+  setTimeout(() => { if(typeof updateDinerBadge==="function") updateDinerBadge(); }, 500);
   updateHeader();
   // Villes météo depuis state
   // Fetch météo directement — les éléments sont dans le HTML statique
@@ -1180,6 +1184,43 @@ document.getElementById("member-chip").addEventListener("click", () => {
   }
 });
 
+
+function updateDinerBadge() {
+  const count = state.dinerNotif || 0;
+  // Pastille sur l'onglet Accueil
+  const accueilBtn = document.querySelector('.nav-btn[data-view="accueil"]');
+  if (accueilBtn) {
+    let dot = accueilBtn.querySelector(".nav-badge");
+    if (count > 0) {
+      if (!dot) {
+        dot = document.createElement("span");
+        dot.className = "nav-badge";
+        accueilBtn.style.position = "relative";
+        accueilBtn.appendChild(dot);
+      }
+      dot.textContent = count > 9 ? "9+" : count;
+    } else if (dot) {
+      dot.remove();
+    }
+  }
+  // Pastille sur le bloc dîner
+  const dinerTitle = document.getElementById("diner-notif-badge");
+  if (dinerTitle) {
+    dinerTitle.style.display = count > 0 ? "inline-flex" : "none";
+    dinerTitle.textContent = count;
+  }
+}
+
+function clearDinerNotif() {
+  state.dinerNotif = 0;
+  // Mémorise l'état vu
+  const seen = JSON.parse(localStorage.getItem("qg_diner_seen")||"{}");
+  seen[getDinerKey()] = state.diner[getDinerKey()] || {};
+  localStorage.setItem("qg_diner_seen", JSON.stringify(seen));
+  saveState();
+  updateDinerBadge();
+}
+
 // ════════════════════════════════════════════
 // NAVIGATION
 // ════════════════════════════════════════════
@@ -1190,6 +1231,7 @@ document.querySelectorAll(".nav-btn[data-view]").forEach(btn => {
 });
 
 function showView(id) {
+  if (id === "accueil") { setTimeout(clearDinerNotif, 1500); }
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
   const viewEl = document.getElementById("view-"+id);
   if (viewEl) viewEl.classList.add("active");
@@ -3365,7 +3407,28 @@ function loadGroupData() {
   });
   // Diner
   db.collection("groupes").doc(state.groupCode).collection("diner").doc(getDinerKey()).onSnapshot(doc=>{
-    if(doc.exists){ const d=doc.data();if(!state.diner)state.diner={};state.diner[getDinerKey()]=d.choices||{};saveState();renderDiner();}
+    if(doc.exists){
+      const d=doc.data();
+      if(!state.diner)state.diner={};
+      const newChoices = d.choices||{};
+      // Détecte les réponses des AUTRES membres (pas moi)
+      const seen = JSON.parse(localStorage.getItem("qg_diner_seen")||"{}");
+      const seenKey = getDinerKey();
+      const prevSeen = seen[seenKey] || {};
+      let newResponders = [];
+      Object.keys(newChoices).forEach(person => {
+        if (person !== state.name && newChoices[person] && prevSeen[person] !== newChoices[person]) {
+          newResponders.push(person);
+        }
+      });
+      if (newResponders.length > 0) {
+        state.dinerNotif = (state.dinerNotif||0) + newResponders.length;
+      }
+      state.diner[seenKey]=newChoices;
+      saveState();
+      renderDiner();
+      updateDinerBadge();
+    }
   });
 }
 
