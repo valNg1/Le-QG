@@ -632,7 +632,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
       <div style="font-size:17px;font-weight:700;color:var(--text);">🎬 Ciné & Spectacles</div>
     </div>
     <div class="reco-form">
-      <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:8px;">Qu'est-ce que tu as envie de voir ?</div>
+      <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">Qu'est-ce que tu as envie de voir ?</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Tape librement (acteur, thème, ambiance...) et complète avec les suggestions ⬇</div>
       <textarea class="reco-input" id="cine-prompt" placeholder="Ex : un film feel-good à regarder en famille, une comédie des années 90, un thriller psychologique..."></textarea>
       <div class="reco-chips" id="cine-chips"></div>
       <button class="reco-btn" id="cine-reco-btn">✨ Trouver des idées</button>
@@ -763,7 +764,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
       <div style="font-size:17px;font-weight:700;color:var(--text);">📚 Lectures & Livres</div>
     </div>
     <div class="reco-form">
-      <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:8px;">Quel genre de lecture tu cherches ?</div>
+      <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">Quel genre de lecture tu cherches ?</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Tape librement (auteur, thème, personnage...) et complète avec les suggestions ⬇</div>
       <textarea class="reco-input" id="livre-prompt" placeholder="Ex : un roman policier qui se passe au Japon, une biographie inspirante, un essai sur l'intelligence artificielle..."></textarea>
       <div class="reco-chips" id="livre-chips"></div>
       <button class="reco-btn" id="livre-reco-btn">✨ Trouver des idées</button>
@@ -3168,8 +3170,8 @@ function fetchRecos(type, prompt) {
   btn.disabled = true;
 
   const systemMsg = isFilm
-    ? `Tu es un expert en cinéma et spectacles. L'utilisateur décrit une envie. Propose exactement 4 recommandations (films, séries ou pièces, pas forcément récents). Réponds UNIQUEMENT en JSON valide sans markdown. Format: [{"titre":"","type":"Film","annee":"","realisateur":"","description":"2 phrases","pourquoi":"1 phrase"}]`
-    : `Tu es un expert en littérature. Propose exactement 4 livres selon l'envie. Réponds UNIQUEMENT en JSON valide sans markdown. Format: [{"titre":"","auteur":"","genre":"","annee":"","description":"2 phrases","pourquoi":"1 phrase"}]`;
+    ? `Tu es un expert en cinéma et spectacles, rigoureux et factuel. L'utilisateur décrit une envie. Propose exactement 4 œuvres RÉELLES et EXISTANTES (films, séries ou pièces, pas forcément récentes) qui correspondent vraiment à la demande. RÈGLES STRICTES : n'invente jamais un titre, un réalisateur, une année ou un genre — si tu n'es pas sûr à 100% d'une information, choisis une autre œuvre que tu connais avec certitude. Le champ "type" doit refléter la nature réelle de l'œuvre (Film/Série/Pièce/Spectacle), jamais un genre littéraire. Réponds UNIQUEMENT en JSON valide sans markdown. Format: [{"titre":"","type":"Film","annee":"","realisateur":"","description":"2 phrases","pourquoi":"1 phrase"}]`
+    : `Tu es un expert en littérature, rigoureux et factuel. L'utilisateur décrit une envie de lecture. Propose exactement 4 livres RÉELS et EXISTANTS qui correspondent vraiment à la demande. RÈGLES STRICTES : n'invente jamais un titre, un auteur, une année ou un genre — si tu n'es pas sûr à 100% d'une information exacte sur un livre, choisis un autre livre réel que tu connais avec certitude plutôt que d'inventer. Le "genre" doit être le vrai genre littéraire de l'œuvre (roman, essai, biographie, etc.), cohérent avec son contenu réel. Réponds UNIQUEMENT en JSON valide sans markdown. Format: [{"titre":"","auteur":"","genre":"","annee":"","description":"2 phrases","pourquoi":"1 phrase"}]`;
 
   fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
@@ -3186,7 +3188,7 @@ function fetchRecos(type, prompt) {
         { role: "user", content: prompt }
       ],
       max_tokens: 1000,
-      temperature: 0.7
+      temperature: 0.3
     })
   })
   .then(r => r.json())
@@ -3277,7 +3279,12 @@ function initCine() {
   chips?.querySelectorAll(".reco-chip").forEach(b => {
     b.addEventListener("click", function() {
       const inp = document.getElementById("cine-prompt");
-      if (inp) inp.value = this.dataset.chip;
+      if (!inp) return;
+      const current = inp.value.trim();
+      const chip = this.dataset.chip;
+      if (!current) { inp.value = chip; }
+      else if (!current.toLowerCase().includes(chip.toLowerCase())) { inp.value = current + ", " + chip; }
+      inp.focus();
     });
   });
   document.getElementById("cine-reco-btn")?.addEventListener("click", () => {
@@ -3294,7 +3301,12 @@ function initLecture() {
   chips?.querySelectorAll(".reco-chip").forEach(b => {
     b.addEventListener("click", function() {
       const inp = document.getElementById("livre-prompt");
-      if (inp) inp.value = this.dataset.chip;
+      if (!inp) return;
+      const current = inp.value.trim();
+      const chip = this.dataset.chip;
+      if (!current) { inp.value = chip; }
+      else if (!current.toLowerCase().includes(chip.toLowerCase())) { inp.value = current + ", " + chip; }
+      inp.focus();
     });
   });
   document.getElementById("livre-reco-btn")?.addEventListener("click", () => {
