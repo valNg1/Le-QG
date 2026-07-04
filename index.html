@@ -544,7 +544,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
   </div>
   <button id="reset-app-btn" style="width:100%;background:rgba(232,56,79,.08);border:1px solid rgba(232,56,79,.25);color:var(--red);border-radius:var(--r-sm);padding:12px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;margin:20px 0 4px;">🗑 Réinitialiser l'application</button>
 <p style="font-size:11px;color:var(--muted2);text-align:center;margin-bottom:8px;">Efface toutes les données locales de cet appareil (profil, tâches, réglages)</p>
-<div style="text-align:center;font-size:11px;color:var(--muted2);margin:16px 0 8px;">Le Général v3.2.0</div>
+<div style="text-align:center;font-size:11px;color:var(--muted2);margin:16px 0 8px;">Le Général v3.2.1</div>
   <button id="save-perso-btn" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:13px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;margin-top:16px;">💾 Enregistrer</button>
 </div>
 
@@ -946,7 +946,7 @@ function initFirebase() {
     db = firebase.firestore();
     firebaseReady = true;
     console.log("✅ Firebase OK");
-    console.log("📦 Le Général v3.2.0");
+    console.log("📦 Le Général v3.2.1");
     renderBandeau();
   // Sync anniversaires → événements
   (state.annivs||[]).forEach(a => addAnnivToEvents(a));
@@ -3193,11 +3193,13 @@ function fetchRecos(type, prompt) {
   })
   .then(r => r.json())
   .then(data => {
+    console.log("IA model utilisé:", data.model || "inconnu");
     if (data.error) throw new Error(data.error.message || "API error");
     const text = data.choices?.[0]?.message?.content;
     if (!text) throw new Error("Réponse vide");
     const clean = text.replace(/```json|```/g,"").trim();
     const recos = JSON.parse(clean);
+    console.log("Recos brutes IA:", JSON.stringify(recos).substring(0,300));
     if (!Array.isArray(recos) || recos.length === 0) throw new Error("Aucune reco générée");
     renderRecoCards(recos, type, isFilm, resultEl);
   })
