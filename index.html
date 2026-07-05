@@ -1771,6 +1771,12 @@ document.querySelectorAll("#ev-color-tags .tag").forEach(tag => {
     selectedEvColor = this.dataset.color;
   });
 });
+document.querySelectorAll("#ev-visib-tags .tag").forEach(tag => {
+  tag.addEventListener("click", function() {
+    document.querySelectorAll("#ev-visib-tags .tag").forEach(t=>t.classList.remove("sel"));
+    this.classList.add("sel");
+  });
+});
 document.getElementById("ev-cancel-btn").addEventListener("click", () => document.getElementById("ev-modal")?.classList.add("hidden"));
 document.getElementById("ev-submit-btn").addEventListener("click", () => {
   const title = document.getElementById("ev-title").value.trim();
