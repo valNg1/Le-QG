@@ -18,25 +18,6 @@
 body{font-family:var(--font);background:var(--gray-50);color:var(--gray-900);max-width:430px;margin:0 auto;min-height:100vh;padding-bottom:72px}
 
 /* ONBOARDING */
-.onboard-overlay{position:fixed;inset:0;background:var(--gray-900);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px}
-.onboard-overlay.hidden{display:none}
-.onboard-logo{display:flex;gap:4px;margin-bottom:24px}
-.onboard-band{width:6px;height:36px;border-radius:3px}
-.onboard-title{font-size:28px;font-weight:800;color:white;text-align:center;line-height:1.2;margin-bottom:6px}
-.onboard-title span{color:var(--yellow)}
-.onboard-sub{font-size:14px;color:var(--gray-400);text-align:center;margin-bottom:36px;line-height:1.5}
-.onboard-card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius);padding:24px;width:100%;max-width:340px}
-.onboard-label{font-size:12px;font-weight:600;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;display:block}
-.onboard-input{width:100%;padding:12px 14px;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.15);border-radius:var(--radius-sm);font-family:var(--font);font-size:16px;color:white;margin-bottom:16px;transition:border-color 0.15s}
-.onboard-input::placeholder{color:var(--gray-600)}
-.onboard-input:focus{outline:none;border-color:var(--yellow)}
-.avatar-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px}
-.avatar-opt{width:100%;aspect-ratio:1;border-radius:50%;border:2px solid transparent;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;background:rgba(255,255,255,0.05)}
-.avatar-opt.selected{border-color:var(--yellow);background:rgba(247,193,4,0.15)}
-.onboard-btn{width:100%;background:var(--yellow);color:var(--gray-900);border:none;border-radius:var(--radius-sm);padding:14px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;transition:opacity 0.15s}
-.onboard-btn:hover{opacity:0.85}
-.onboard-error{font-size:13px;color:var(--polka);text-align:center;margin-top:8px;min-height:20px}
-
 /* HEADER */
 .header{background:var(--gray-900);padding:16px 16px 0;position:sticky;top:0;z-index:100}
 .header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
@@ -45,9 +26,6 @@ body{font-family:var(--font);background:var(--gray-50);color:var(--gray-900);max
 .logo-band{width:5px;height:20px;border-radius:2px}
 .logo-title{font-size:15px;font-weight:700;color:var(--white);letter-spacing:0.02em}
 .logo-title span{color:var(--yellow)}
-.player-chip{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:4px 10px 4px 6px;cursor:pointer}
-.player-chip-avatar{font-size:16px;line-height:1}
-.player-chip-name{font-size:12px;font-weight:600;color:white;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .nav-tabs{display:flex;gap:0;overflow-x:auto;scrollbar-width:none}
 .nav-tabs::-webkit-scrollbar{display:none}
 .tab-btn{background:none;border:none;color:var(--gray-400);font-size:13px;font-weight:500;padding:10px 14px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.15s;font-family:var(--font)}
