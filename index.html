@@ -1801,22 +1801,20 @@ function renderWidgetsZone() {
     html += `<div style="display:flex;align-items:center;justify-content:space-between;margin:20px 0 10px;"><p class="sec" style="margin:0;">Actualités</p><div id="actu-fil-btns" style="display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;"></div></div><div id="actu-zone"><div class="loading">Chargement...</div></div>`;
   }
   const sportApps = [
-    {id:"tdf",   emoji:"🚴", nom:"Tour de France",    sub:"4–26 juillet",      url:"tdf2026.html",   color:"#ED2939"},
-    {id:"cdm",   emoji:"🏆", nom:"Coupe du Monde",    sub:"8es de finale",     url:"cdm2026.html",   color:"#34C77B"},
-    {id:"rugby", emoji:"🏉", nom:"Top 14",            sub:"Dès le 5 sept.",    url:"rugby2026.html", color:"#C9A84C"},
-  ].filter(a => state.widgets[a.id]);
-  if (sportApps.length) {
-    html += `<p class="sec" style="margin-top:16px;">Apps sportives</p><div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;">`;
-    html += sportApps.map((a,i) => `<a href="https://legeneral.org/${a.url}" target="_blank" style="display:flex;align-items:center;gap:12px;padding:13px 14px;text-decoration:none;${i<sportApps.length-1?'border-bottom:1px solid var(--border);':''}">
-      <span style="font-size:22px;flex-shrink:0;">${a.emoji}</span>
+    {id:"tdf",   emoji:"🚴", nom:"Tour de France 2026",    sub:"4–26 juillet",      url:"tdf2026.html",   color:"#ED2939"},
+    {id:"cdm",   emoji:"🏆", nom:"Coupe du Monde 2026",    sub:"8es de finale",     url:"cdm2026.html",   color:"#34C77B"},
+    {id:"rugby", emoji:"🏉", nom:"Top 14 2026-2027",       sub:"Dès le 5 sept.",    url:"rugby2026.html", color:"#C9A84C"},
+  ];
+  sportApps.forEach(a => {
+    if (!state.widgets[a.id]) return;
+    html += `<p class="sec" style="margin-top:16px;">${a.nom}</p><a href="https://legeneral.org/${a.url}" target="_blank" style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--surface);border-radius:var(--r);border:1px solid var(--border);text-decoration:none;">
+      <span style="font-size:24px;flex-shrink:0;">${a.emoji}</span>
       <div style="flex:1;min-width:0;">
-        <div style="font-size:14px;font-weight:700;color:var(--text);">${a.nom}</div>
-        <div style="font-size:11px;color:var(--muted);">${a.sub}</div>
+        <div style="font-size:14px;font-weight:700;color:var(--text);">${a.sub}</div>
       </div>
       <span style="font-size:18px;color:${a.color};flex-shrink:0;">→</span>
-    </a>`).join("");
-    html += `</div>`;
-  }
+    </a>`;
+  });
   if(state.widgets.taches) html += `<p class="sec" style="margin-top:16px;">Tâches ménagères</p><div id="taches-zone"></div>`;
   zone.innerHTML = html;
   if(state.widgets.taches) renderTaches();
