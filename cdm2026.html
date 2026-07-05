@@ -158,14 +158,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     </div>
   </div>
 
-  <p class="sec">Tenant du titre</p>
-  <div style="background:var(--surface);border-radius:var(--r);border:1px solid rgba(201,168,76,.2);padding:16px;display:flex;align-items:center;gap:14px;">
-    <div style="font-size:48px">🇦🇷</div>
-    <div>
-      <div style="font-size:20px;font-weight:800;color:var(--text);">Argentine</div>
-      <div style="font-size:13px;color:var(--muted);">Champion du Monde 2022 — 3 étoiles ⭐⭐⭐<br>Qualifiée pour les 8es (3-2 a.p. vs Cap-Vert)<br><span style="color:#34C77B;font-weight:600;">🔜 8e de finale vs Égypte</span></div>
-    </div>
-  </div>
+  <p class="sec">⚽ Meilleurs buteurs</p>
+  <div id="buteurs-list"></div>
 </div>
 
 <!-- GROUPES -->
@@ -397,6 +391,36 @@ const R16_MATCHES = [
   {date:"À venir",ville:"—",eq1:"?",eq2:"?",score:"",done:false,note:"Dernière affiche à confirmer"},
 ];
 
+
+// Classement des buteurs (après les 2 premiers 8es)
+const BUTEURS = [
+  {p:1,nom:"Lionel Messi",pays:"🇦🇷",buts:7,note:"4 matchs joués"},
+  {p:2,nom:"Kylian Mbappé",pays:"🇫🇷",buts:7,note:"Pénalty vs Paraguay (71')"},
+  {p:3,nom:"Harry Kane",pays:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",buts:5,note:""},
+  {p:3,nom:"Erling Haaland",pays:"🇳🇴",buts:5,note:""},
+  {p:5,nom:"Ousmane Dembélé",pays:"🇫🇷",buts:4,note:""},
+  {p:5,nom:"Mikel Oyarzabal",pays:"🇪🇸",buts:4,note:""},
+  {p:5,nom:"Vinícius Júnior",pays:"🇧🇷",buts:4,note:""},
+  {p:5,nom:"Ismaïla Sarr",pays:"🇸🇳",buts:4,note:""},
+];
+
+function renderButeurs() {
+  const el = document.getElementById("buteurs-list");
+  if (!el) return;
+  el.innerHTML = `<div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;">
+    ${BUTEURS.map(b => `<div style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border);${b.p===1?'background:rgba(201,168,76,.06);':''}">
+      <div style="width:20px;font-size:13px;font-weight:800;color:${b.p<=3?'var(--gold)':'var(--muted)'};flex-shrink:0;">${b.p}</div>
+      <div style="font-size:17px;flex-shrink:0;">${b.pays}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:700;color:var(--text);">${b.nom}</div>
+        ${b.note?`<div style="font-size:11px;color:var(--muted);margin-top:1px;">${b.note}</div>`:""}
+      </div>
+      <div style="font-size:15px;font-weight:800;color:var(--text);flex-shrink:0;">⚽ ${b.buts}</div>
+    </div>`).join("")}
+  </div>
+  <div style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center;">Messi et Mbappé à égalité en tête après les 8es</div>`;
+}
+
 function renderR16Schedule() {
   const el = document.getElementById("r16-schedule");
   if (!el) return;
@@ -451,6 +475,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   renderTeams();
   renderPronos();
   renderR16Schedule();
+  renderButeurs();
 });
 </script>
 </body>
