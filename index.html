@@ -1015,6 +1015,7 @@ const WIDGET_DEFS = [
   { id:"actu",     name:"Actualités",          desc:"Fils d'infos à la carte",             emoji:"📰" },
   { id:"tdf",      name:"Tour de France 2026", desc:"App complète",                        emoji:"🚴" },
   { id:"cdm",      name:"Coupe du Monde 2026", desc:"App complète USA/Canada/Mexique",     emoji:"🏆" },
+  { id:"rugby",    name:"Top 14 2026-2027",    desc:"Saison à venir — clubs, dates, format", emoji:"🏉" },
   { id:"taches",   name:"Tâches ménagères",   desc:"Répartition aléatoire entre membres",  emoji:"🧹" },
 ];
 
@@ -1802,6 +1803,7 @@ function renderWidgetsZone() {
   if(state.widgets.tdf) html += `<p class="sec" style="margin-top:16px;">Tour de France 2026</p><div class="tdf-card"><div class="tdf-hdr"><div class="tdf-logo"><div class="tdf-bands"><div class="tdf-band" style="background:#002395"></div><div class="tdf-band" style="background:#FFF"></div><div class="tdf-band" style="background:#ED2939"></div></div><div class="tdf-label">Tour de France <span>2026</span></div></div><div class="tdf-badge">4–26 JUIL</div></div><a href="https://legeneral.org/tdf2026.html" target="_blank" class="tdf-open">🚴 Ouvrir l'app Tour de France</a></div>`;
   if(state.widgets.taches) html += `<p class="sec" style="margin-top:16px;">Tâches ménagères</p><div id="taches-zone"></div>`;
   if(state.widgets.cdm) html += `<p class="sec" style="margin-top:16px;">Coupe du Monde 2026</p><div class="tdf-card" style="border-color:rgba(34,199,123,.2);"><div class="tdf-hdr"><div class="tdf-logo"><div class="tdf-bands"><div class="tdf-band" style="background:#002395"></div><div class="tdf-band" style="background:#fff"></div><div class="tdf-band" style="background:#ED2939"></div></div><div class="tdf-label">Coupe du Monde <span>2026</span></div></div><div class="tdf-badge" style="background:var(--green);">14 JUI–19 JUL</div></div><a href="https://legeneral.org/cdm2026.html" target="_blank" class="tdf-open" style="color:var(--green);border-color:rgba(52,199,123,.3);background:rgba(52,199,123,.1);">🏆 Ouvrir l'app Coupe du Monde</a></div>`;
+  if(state.widgets.rugby) html += `<p class="sec" style="margin-top:16px;">Top 14 2026-2027</p><div class="tdf-card" style="border-color:rgba(201,168,76,.25);"><div class="tdf-hdr"><div class="tdf-logo"><div style="font-size:20px;">🏉</div></div><div class="tdf-label">Top 14 <span>2026-27</span></div></div><div class="tdf-badge" style="background:var(--gold);color:#1A1916;">DÈS 5 SEPT</div></div><a href="https://legeneral.org/rugby2026.html" target="_blank" class="tdf-open" style="color:var(--gold);border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.1);">🏉 Ouvrir l'app Top 14</a></div>`;
   zone.innerHTML = html;
   if(state.widgets.taches) renderTaches();
   if(state.widgets.env) fetchAirQuality();
