@@ -522,21 +522,20 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
 </div>
 
 <!-- ═══ VIEW GROUPE ═══ -->
-<div id="view-groupe" class="view">
-  <p class="sec" style="margin-top:8px;">Mon groupe</p>
-  <div id="groupe-panel"></div>
-  <p class="sec">Comment ça marche</p>
-  <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:16px;font-size:13px;color:var(--text);line-height:1.9;">
-    1️⃣ <strong>Crée un groupe</strong> lors de ton inscription<br>
-    2️⃣ <strong>Partage le lien</strong> à tes proches<br>
-    3️⃣ Ils rejoignent et <strong>apparaissent ce soir</strong><br>
-    4️⃣ Agenda, dîner, mur sont <strong>partagés en live</strong>
-  </div>
-</div>
-
 <!-- ═══ VIEW MON QG (perso) ═══ -->
 <div id="view-perso" class="view">
-  <p class="sec" style="margin-top:8px;">Mes widgets</p>
+  <p class="sec" style="margin-top:8px;">Mon groupe</p>
+  <div id="groupe-panel"></div>
+  <details style="margin-bottom:16px;">
+    <summary style="font-size:12px;color:var(--muted);cursor:pointer;padding:4px 0;">Comment ça marche ?</summary>
+    <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:16px;font-size:13px;color:var(--text);line-height:1.9;margin-top:8px;">
+      1️⃣ <strong>Crée un groupe</strong> lors de ton inscription<br>
+      2️⃣ <strong>Partage le lien</strong> à tes proches<br>
+      3️⃣ Ils rejoignent et <strong>apparaissent ce soir</strong><br>
+      4️⃣ Agenda, dîner, mur sont <strong>partagés en live</strong>
+    </div>
+  </details>
+  <p class="sec">Mes widgets</p>
   <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Choisis ce que tu veux voir sur ton accueil</p>
   <div class="widget-list" id="widget-list"></div>
   <p class="sec">Tâches ménagères</p>
@@ -559,23 +558,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
 </div>
 
 
-<!-- ═══ VIEW MODULES ═══ -->
-<div id="view-modules" class="view">
-
-  <!-- SÉLECTEUR MODULES -->
-  <div id="modules-home">
-    <div class="mod-tabs" style="margin-top:8px;">
-      <button class="mod-tab active" data-theme="all">Tous</button>
-      <button class="mod-tab" data-theme="sante">🏃 Santé</button>
-      <button class="mod-tab" data-theme="culture">🎭 Culture</button>
-      <button class="mod-tab" data-theme="sport">⚽ Sport</button>
+<!-- ═══ VIEW SANTÉ ═══ -->
+<div id="view-sante" class="view">
+  <p class="sec" style="margin-top:8px;">🏃 Santé</p>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
+      <div style="font-size:16px;font-weight:700;color:var(--text);">⏱ Jeûne intermittent</div>
     </div>
-    <div class="module-grid" id="module-grid"></div>
-
-  </div>
-
-  <!-- JEÛNE INTERMITTENT -->
-  <div id="module-jeune" style="display:none;">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
       <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
       <div style="font-size:16px;font-weight:700;color:var(--text);">⏱ Jeûne intermittent</div>
@@ -607,55 +595,18 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
       <div id="jeune-next-meal" style="font-size:15px;font-weight:700;color:var(--green);">—</div>
       <div id="jeune-history" style="margin-top:10px;font-size:12px;color:var(--muted);"></div>
     </div>
+</div>
+
+<!-- ═══ VIEW POST-IT ═══ -->
+<div id="view-postit" class="view">
+  <div id="postit-home">
+    <p class="sec" style="margin-top:8px;">📌 Post-it</p>
+    <div class="module-grid" id="postit-grid"></div>
   </div>
 
-  <!-- MOT DU JOUR -->
-  <div id="module-mot" style="display:none;">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
-      <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
-      <div style="font-size:16px;font-weight:700;color:var(--text);">🗣 Phrase du jour</div>
-    </div>
-    <div class="lang-row" id="lang-row"></div>
-    <div id="mot-content"><div class="loading">Chargement...</div></div>
-    <button onclick="nextMot()" style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r-sm);padding:11px;font-family:var(--font);font-size:13px;font-weight:600;color:var(--text);cursor:pointer;margin-top:10px;">→ Phrase suivante</button>
-  </div>
-
-  <!-- QUIZ -->
-  <div id="module-quiz" style="display:none;">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
-      <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
-      <div style="font-size:16px;font-weight:700;color:var(--text);">🧠 Quiz culture</div>
-      <button id="quiz-quit-btn" style="margin-left:auto;background:none;border:1px solid var(--border2);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;font-family:var(--font);">Quitter</button>
-    </div>
-    <div id="quiz-theme-picker" style="margin-bottom:16px;">
-      <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.08em;">Choisis un thème</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" id="quiz-theme-grid"></div>
-    </div>
-    <div id="quiz-content" style="display:none;"></div>
-    <div id="quiz-review" style="display:none;"></div>
-  </div>
-
-  <!-- CINÉ / SPECTACLES -->
-  <div id="module-cine" style="display:none;">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
-      <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
-      <div style="font-size:17px;font-weight:700;color:var(--text);">🎬 Ciné & Spectacles</div>
-    </div>
-    <div class="reco-form">
-      <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">Qu'est-ce que tu as envie de voir ?</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Tape librement (acteur, thème, ambiance...) et complète avec les suggestions ⬇</div>
-      <textarea class="reco-input" id="cine-prompt" placeholder="Ex : un film feel-good à regarder en famille, une comédie des années 90, un thriller psychologique..."></textarea>
-      <div class="reco-chips" id="cine-chips"></div>
-      <button class="reco-btn" id="cine-reco-btn">✨ Trouver des idées</button>
-    </div>
-    <div id="cine-reco-result"></div>
-    <div id="cine-saved-section" class="reco-saved-section"></div>
-  </div>
-
-  <!-- ANNIVERSAIRES -->
   <div id="module-anniv" style="display:none;">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
-      <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
+      <button onclick="backToPostit()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
       <div style="font-size:16px;font-weight:700;color:var(--text);">🎂 Anniversaires</div>
     </div>
     <div class="tache-add-form">
@@ -716,10 +667,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     <div id="anniv-mod-list"></div>
   </div>
 
-  <!-- TÂCHES PERSO -->
+
   <div id="module-taches_perso" style="display:none;">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
-      <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
+      <button onclick="backToPostit()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
       <div style="font-size:16px;font-weight:700;color:var(--text);">✅ Mes tâches</div>
     </div>
     <div class="tache-add-form">
@@ -733,6 +684,83 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     <div id="tp-list"></div>
   </div>
 
+
+  <!-- POST-ITS NOTES -->
+  <div id="module-postit_notes" style="display:none;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
+      <button onclick="backToPostit()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
+      <div style="font-size:16px;font-weight:700;color:var(--text);">📌 Mes Post-it</div>
+    </div>
+    <div id="postit-form" style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-bottom:14px;">
+      <input class="modal-input" id="postit-title" placeholder="Nom du post-it (ex: Idée cadeau)" type="text">
+      <textarea class="modal-input" id="postit-text" placeholder="Ta pensée..." style="min-height:80px;resize:vertical;"></textarea>
+      <div class="reco-chips" id="postit-color-picker" style="margin:8px 0;"></div>
+      <button id="postit-save-btn" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:12px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">📌 Épingler</button>
+    </div>
+    <div id="postit-list" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"></div>
+  </div>
+</div>
+
+<!-- ═══ VIEW MODULES ═══ -->
+<div id="view-modules" class="view">
+
+  <!-- SÉLECTEUR MODULES -->
+  <div id="modules-home">
+    <div class="mod-tabs" style="margin-top:8px;">
+      <button class="mod-tab active" data-theme="all">Tous</button>
+      <button class="mod-tab" data-theme="culture">🎭 Culture</button>
+      <button class="mod-tab" data-theme="sport">⚽ Sport</button>
+    </div>
+    <div class="module-grid" id="module-grid"></div>
+
+  </div>
+
+  <!-- JEÛNE INTERMITTENT -->
+  <!-- MOT DU JOUR -->
+  <div id="module-mot" style="display:none;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
+      <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
+      <div style="font-size:16px;font-weight:700;color:var(--text);">🗣 Phrase du jour</div>
+    </div>
+    <div class="lang-row" id="lang-row"></div>
+    <div id="mot-content"><div class="loading">Chargement...</div></div>
+    <button onclick="nextMot()" style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r-sm);padding:11px;font-family:var(--font);font-size:13px;font-weight:600;color:var(--text);cursor:pointer;margin-top:10px;">→ Phrase suivante</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="module-quiz" style="display:none;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
+      <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
+      <div style="font-size:16px;font-weight:700;color:var(--text);">🧠 Quiz culture</div>
+      <button id="quiz-quit-btn" style="margin-left:auto;background:none;border:1px solid var(--border2);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;font-family:var(--font);">Quitter</button>
+    </div>
+    <div id="quiz-theme-picker" style="margin-bottom:16px;">
+      <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.08em;">Choisis un thème</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" id="quiz-theme-grid"></div>
+    </div>
+    <div id="quiz-content" style="display:none;"></div>
+    <div id="quiz-review" style="display:none;"></div>
+  </div>
+
+  <!-- CINÉ / SPECTACLES -->
+  <div id="module-cine" style="display:none;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
+      <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
+      <div style="font-size:17px;font-weight:700;color:var(--text);">🎬 Ciné & Spectacles</div>
+    </div>
+    <div class="reco-form">
+      <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">Qu'est-ce que tu as envie de voir ?</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Tape librement (acteur, thème, ambiance...) et complète avec les suggestions ⬇</div>
+      <textarea class="reco-input" id="cine-prompt" placeholder="Ex : un film feel-good à regarder en famille, une comédie des années 90, un thriller psychologique..."></textarea>
+      <div class="reco-chips" id="cine-chips"></div>
+      <button class="reco-btn" id="cine-reco-btn">✨ Trouver des idées</button>
+    </div>
+    <div id="cine-reco-result"></div>
+    <div id="cine-saved-section" class="reco-saved-section"></div>
+  </div>
+
+  <!-- ANNIVERSAIRES -->
+  <!-- TÂCHES PERSO -->
   <!-- SCORES LIVE -->
   <div id="module-scores" style="display:none;">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
@@ -816,13 +844,17 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
     <span>Accueil</span>
   </button>
-  <button class="nav-btn" id="nav-groupe" data-view="groupe">
-    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-    <span>Groupe</span>
-  </button>
   <button class="nav-btn" id="nav-modules" data-view="modules">
     <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
     <span>Play</span>
+  </button>
+  <button class="nav-btn" id="nav-postit" data-view="postit">
+    <svg viewBox="0 0 24 24"><path d="M21 3H3v18h18V3z"/><path d="M3 15l6-6 4 4 8-8"/></svg>
+    <span>Post-it</span>
+  </button>
+  <button class="nav-btn" id="nav-sante" data-view="sante">
+    <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+    <span>Santé</span>
   </button>
   <button class="nav-btn" id="nav-mur" data-view="mur">
     <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
@@ -1273,10 +1305,11 @@ function showView(id) {
   const viewEl = document.getElementById("view-"+id);
   if (viewEl) viewEl.classList.add("active");
   document.querySelectorAll(".nav-btn[data-view]").forEach(b => b.classList.toggle("active", b.dataset.view===id));
-  if (id==="perso") renderPerso();
-  if (id==="groupe") renderGroupe();
+  if (id==="perso") { renderPerso(); renderGroupe(); }
   if (id==="mur") renderMurList();
   if (id==="modules") renderModulesHome();
+  if (id==="postit") { backToPostit(); renderPostitHome(); }
+  if (id==="sante") { setTimeout(initJeune, 50); }
 }
 
 // ════════════════════════════════════════════
@@ -2145,9 +2178,6 @@ document.getElementById("save-perso-btn").addEventListener("click",()=>{
 // MODULES
 // ════════════════════════════════════════════
 const ALL_MODULES = [
-  { id:"anniv",   name:"Anniversaires",       desc:"Rappels automatiques",          emoji:"🎂", color:"#E8384F", theme:"sante"   },
-  { id:"taches_perso", name:"Mes tâches",      desc:"Liste perso avec priorités",    emoji:"✅", color:"#4A90E2", theme:"sante"   },
-  { id:"jeune",   name:"Jeûne intermittent", desc:"Timer + prochain repas",       emoji:"⏱", color:"#F7C104", theme:"sante"   },
   { id:"mot",     name:"Phrase du jour",      desc:"Small talk en 5 langues",      emoji:"🗣", color:"#4A90E2", theme:"culture" },
   { id:"quiz",    name:"Quiz culture",       desc:"10 questions par session",     emoji:"🧠", color:"#9B6BFF", theme:"culture" },
   { id:"cine",    name:"Ciné & Spectacles",  desc:"Avis du groupe",               emoji:"🎬", color:"#E8384F", theme:"culture" },
@@ -2196,6 +2226,111 @@ function renderModulesHome() {
   });
 }
 
+
+// ════════════════════════════════════════════
+// POST-IT (Anniversaires, Mes tâches, Post-it Notes)
+// ════════════════════════════════════════════
+const POSTIT_MODULES = [
+  { id:"anniv",         name:"Anniversaires", desc:"Rappels automatiques",       emoji:"🎂", color:"#E8384F" },
+  { id:"taches_perso",  name:"Mes tâches",    desc:"Liste perso avec priorités", emoji:"✅", color:"#4A90E2" },
+  { id:"postit_notes",  name:"Mes Post-it",   desc:"Petites pensées épinglées",  emoji:"📌", color:"#F7C104" },
+];
+
+function renderPostitHome() {
+  const el = document.getElementById("postit-grid");
+  if (!el) return;
+  el.innerHTML = POSTIT_MODULES.map(m => `<div class="module-card" data-postit-mod="${m.id}" style="display:block;min-height:110px;">
+    <div class="module-icon" style="font-size:32px;margin-bottom:8px;">${m.emoji}</div>
+    <div class="module-name" style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;">${m.name}</div>
+    <div class="module-desc" style="font-size:12px;color:var(--muted);">${m.desc}</div>
+  </div>`).join("");
+  el.querySelectorAll("[data-postit-mod]").forEach(card => {
+    card.addEventListener("click", function(e) {
+      e.stopPropagation();
+      openPostitModule(this.dataset.postitMod);
+    });
+  });
+}
+
+function openPostitModule(id) {
+  document.getElementById("postit-home").style.display = "none";
+  document.querySelectorAll("#view-postit [id^='module-']").forEach(el => el.style.display = "none");
+  const el = document.getElementById("module-"+id);
+  if (el) el.style.display = "block";
+  if (id==="anniv") initAnnivMod();
+  if (id==="taches_perso") initTachesPerso();
+  if (id==="postit_notes") initPostitNotes();
+}
+
+function backToPostit() {
+  document.querySelectorAll("#view-postit [id^='module-']").forEach(el => el.style.display = "none");
+  const home = document.getElementById("postit-home");
+  if (home) home.style.display = "block";
+}
+
+// ── POST-IT NOTES ──
+const POSTIT_COLORS = [
+  { id:"yellow", bg:"#3A3420", border:"#F7C104" },
+  { id:"pink",   bg:"#3A2028", border:"#E8384F" },
+  { id:"blue",   bg:"#1E2A38", border:"#4A90E2" },
+  { id:"green",  bg:"#1E3324", border:"#34C77B" },
+];
+let selectedPostitColor = "yellow";
+
+function initPostitNotes() {
+  const picker = document.getElementById("postit-color-picker");
+  if (picker) {
+    picker.innerHTML = POSTIT_COLORS.map(c => `<button class="reco-chip postit-color-opt${c.id===selectedPostitColor?" sel":""}" data-color="${c.id}" style="width:28px;height:28px;border-radius:50%;background:${c.border};border:2px solid ${c.id===selectedPostitColor?"#fff":"transparent"};padding:0;"></button>`).join("");
+    picker.querySelectorAll(".postit-color-opt").forEach(btn => {
+      btn.addEventListener("click", function() {
+        selectedPostitColor = this.dataset.color;
+        initPostitNotes();
+      });
+    });
+  }
+  document.getElementById("postit-save-btn")?.addEventListener("click", savePostit, { once: true });
+  renderPostitList();
+}
+
+function savePostit() {
+  const title = document.getElementById("postit-title")?.value.trim();
+  const text = document.getElementById("postit-text")?.value.trim();
+  if (!title) { showToast("Donne un nom à ton post-it !"); return; }
+  if (!state.postits) state.postits = [];
+  state.postits.unshift({ id: Date.now(), title, text, color: selectedPostitColor, ts: Date.now() });
+  saveState();
+  document.getElementById("postit-title").value = "";
+  document.getElementById("postit-text").value = "";
+  showToast("📌 Post-it épinglé !");
+  renderPostitList();
+  document.getElementById("postit-save-btn")?.addEventListener("click", savePostit, { once: true });
+}
+
+function renderPostitList() {
+  const el = document.getElementById("postit-list");
+  if (!el) return;
+  const postits = state.postits || [];
+  if (!postits.length) {
+    el.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:13px;padding:20px 0;">Aucun post-it pour l'instant</div>`;
+    return;
+  }
+  el.innerHTML = postits.map(p => {
+    const c = POSTIT_COLORS.find(x => x.id === p.color) || POSTIT_COLORS[0];
+    return `<div style="background:${c.bg};border:1px solid ${c.border};border-radius:var(--r-sm);padding:12px;position:relative;min-height:90px;">
+      <button data-del-postit="${p.id}" style="position:absolute;top:6px;right:6px;background:none;border:none;color:rgba(255,255,255,.4);font-size:14px;cursor:pointer;padding:2px 6px;">✕</button>
+      <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:4px;padding-right:16px;">${p.title}</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.75);line-height:1.4;white-space:pre-wrap;">${p.text||""}</div>
+    </div>`;
+  }).join("");
+  el.querySelectorAll("[data-del-postit]").forEach(btn => {
+    btn.addEventListener("click", function() {
+      state.postits = state.postits.filter(p => p.id !== +this.dataset.delPostit);
+      saveState();
+      renderPostitList();
+    });
+  });
+}
+
 function openModule(id) {
   document.getElementById("modules-home").style.display = "none";
   document.querySelectorAll("[id^='module-']").forEach(el => el.style.display = "none");
@@ -2232,6 +2367,7 @@ const PROTOCOLES = [
 let jeuneInterval = null;
 
 function initJeune() {
+  if (jeuneInterval) { clearInterval(jeuneInterval); jeuneInterval = null; }
   const proto = state.jeuneProto || "16_8";
   const row = document.getElementById("proto-row");
   row.innerHTML = PROTOCOLES.map(p => `<button class="proto-btn${p.id===proto?" sel":""}" data-proto="${p.id}">${p.label}</button>`).join("");
