@@ -108,13 +108,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     </div>
     <div class="badge" style="background:#34C77B;animation:blink 2s infinite;">🔴 EN COURS</div>
   </div>
-  <nav class="nav-tabs">
-    <button class="tab active" onclick="showView('accueil',0)">Accueil</button>
-    <button class="tab" onclick="showView('groupes',1)">Groupes</button>
-    <button class="tab" onclick="showView('matchs',2)">Matchs</button>
-    <button class="tab" onclick="showView('equipes',3)">Équipes</button>
-    <button class="tab" onclick="showView('pronos',4)">Pronos</button>
-  </nav>
+  
 </header>
 
 <!-- ACCUEIL -->
@@ -162,109 +156,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
   <div id="buteurs-list"></div>
 </div>
 
-<!-- GROUPES -->
-<div id="view-groupes" class="view">
-  <div id="groupes-list"></div>
-</div>
 
-<!-- MATCHS -->
-<div id="view-matchs" class="view">
-  <div style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:8px;margin-bottom:8px;">
-    <button class="tab active" style="padding:6px 14px;border-radius:20px;background:var(--gold);color:#1A1916;border:none;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;" id="phase-btn-group" onclick="filterMatchs('group')">Phase de groupes</button>
-    <button class="tab" style="padding:6px 14px;border-radius:20px;background:var(--surface2);color:var(--muted);border:1px solid var(--border2);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;" onclick="filterMatchs('r32')">1/32</button>
-    <button class="tab" style="padding:6px 14px;border-radius:20px;background:var(--surface2);color:var(--muted);border:1px solid var(--border2);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;" onclick="filterMatchs('r16')">1/16</button>
-    <button class="tab" style="padding:6px 14px;border-radius:20px;background:var(--surface2);color:var(--muted);border:1px solid var(--border2);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;" onclick="filterMatchs('qf')">QF</button>
-    <button class="tab" style="padding:6px 14px;border-radius:20px;background:var(--surface2);color:var(--muted);border:1px solid var(--border2);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;" onclick="filterMatchs('sf')">SF</button>
-    <button class="tab" style="padding:6px 14px;border-radius:20px;background:var(--surface2);color:var(--muted);border:1px solid var(--border2);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;" onclick="filterMatchs('final')">Finale</button>
-  </div>
-  <div id="matchs-list"></div>
-</div>
-
-<!-- ÉQUIPES -->
-<div id="view-equipes" class="view">
-  <input type="text" id="search-team" placeholder="Rechercher une équipe..." oninput="filterTeams(this.value)"
-    style="width:100%;padding:10px 14px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-sm);font-family:var(--font);font-size:14px;color:var(--text);margin-bottom:12px;">
-  <div id="equipes-list"></div>
-</div>
-
-<!-- PRONOS -->
-<div id="view-pronos" class="view">
-  <div class="prono-card">
-    <div class="prono-title">🏆 Vainqueur</div>
-    <div class="prono-sub">Qui remportera la Coupe du Monde 2026 ?</div>
-    <select class="prono-select" id="prono-vainqueur">
-      <option value="">— Choisir une équipe —</option>
-      <option>🇫🇷 France</option><option>🇧🇷 Brésil</option><option>🇦🇷 Argentine</option>
-      <option>🇦🇪 Angleterre</option><option>🇪🇸 Espagne</option><option>🇩🇪 Allemagne</option>
-      <option>🇵🇹 Portugal</option><option>🇳🇱 Pays-Bas</option><option>🇧🇪 Belgique</option>
-      <option>🇺🇸 États-Unis</option><option>Autre</option>
-    </select>
-    <button class="prono-btn" onclick="saveProno('vainqueur')">Valider →</button>
-  </div>
-  <div class="prono-card">
-    <div class="prono-title">🥇 Finaliste</div>
-    <div class="prono-sub">Quelle équipe perdra en finale ?</div>
-    <select class="prono-select" id="prono-finaliste">
-      <option value="">— Choisir une équipe —</option>
-      <option>🇫🇷 France</option><option>🇧🇷 Brésil</option><option>🇦🇷 Argentine</option>
-      <option>🇦🇪 Angleterre</option><option>🇪🇸 Espagne</option><option>🇩🇪 Allemagne</option>
-      <option>🇵🇹 Portugal</option><option>🇺🇸 États-Unis</option><option>Autre</option>
-    </select>
-    <button class="prono-btn" onclick="saveProno('finaliste')">Valider →</button>
-  </div>
-  <div class="prono-card">
-    <div class="prono-title">⚽ Meilleur buteur</div>
-    <div class="prono-sub">Qui finira meilleur buteur du tournoi ?</div>
-    <select class="prono-select" id="prono-buteur">
-      <option value="">— Choisir un joueur —</option>
-      <option>Kylian Mbappé (France)</option><option>Erling Haaland (Norvège)</option>
-      <option>Vinicius Jr (Brésil)</option><option>Harry Kane (Angleterre)</option>
-      <option>Lamine Yamal (Espagne)</option><option>Cristiano Ronaldo (Portugal)</option>
-      <option>Lionel Messi (Argentine)</option><option>Bukayo Saka (Angleterre)</option>
-      <option>Autre</option>
-    </select>
-    <button class="prono-btn" onclick="saveProno('buteur')">Valider →</button>
-  </div>
-  <div class="prono-card">
-    <div class="prono-title">🌟 Révélation</div>
-    <div class="prono-sub">Quelle équipe surprise ira loin ?</div>
-    <select class="prono-select" id="prono-surprise">
-      <option value="">— Choisir une équipe —</option>
-      <option>🇺🇸 États-Unis (pays hôte)</option><option>🇲🇦 Maroc</option>
-      <option>🇯🇵 Japon</option><option>🇰🇷 Corée du Sud</option>
-      <option>🇸🇳 Sénégal</option><option>🇲🇽 Mexique</option>
-      <option>🇨🇦 Canada</option><option>Autre</option>
-    </select>
-    <button class="prono-btn" onclick="saveProno('surprise')">Valider →</button>
-  </div>
-  <div id="pronos-saved" style="display:none;">
-    <p class="sec">Mes pronostics</p>
-    <div class="prono-saved" id="pronos-saved-content"></div>
-  </div>
-</div>
-
-<nav class="bottom-nav">
-  <button class="nav-btn active" id="nav-0" onclick="showView('accueil',0)">
-    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    <span>Accueil</span>
-  </button>
-  <button class="nav-btn" id="nav-1" onclick="showView('groupes',1)">
-    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-    <span>Groupes</span>
-  </button>
-  <button class="nav-btn" id="nav-2" onclick="showView('matchs',2)">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
-    <span>Matchs</span>
-  </button>
-  <button class="nav-btn" id="nav-3" onclick="showView('equipes',3)">
-    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-    <span>Équipes</span>
-  </button>
-  <button class="nav-btn" id="nav-4" onclick="showView('pronos',4)">
-    <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-    <span>Pronos</span>
-  </button>
-</nav>
 
 <div class="toast" id="toast"></div>
 
@@ -278,108 +170,6 @@ function showView(id, idx) {
 }
 
 // Données
-const GROUPES = [
-  {nom:"A", equipes:[{f:"🇲🇽",n:"Mexique"},{f:"🇿🇦",n:"Afrique du Sud"},{f:"🇰🇷",n:"Corée du Sud"},{f:"🇨🇿",n:"Tchéquie"}]},
-  {nom:"B", equipes:[{f:"🇨🇦",n:"Canada"},{f:"🇧🇦",n:"Bosnie"},{f:"🇶🇦",n:"Qatar"},{f:"🇨🇭",n:"Suisse"}]},
-  {nom:"C", equipes:[{f:"🇧🇷",n:"Brésil"},{f:"🇲🇦",n:"Maroc"},{f:"🇭🇹",n:"Haïti"},{f:"🏴󠁧󠁢󠁳󠁣󠁴󠁿",n:"Écosse"}]},
-  {nom:"D", equipes:[{f:"🇺🇸",n:"États-Unis"},{f:"🇵🇾",n:"Paraguay"},{f:"🇦🇺",n:"Australie"},{f:"🇹🇷",n:"Turquie"}]},
-  {nom:"E", equipes:[{f:"🇩🇪",n:"Allemagne"},{f:"🇨🇼",n:"Curaçao"},{f:"🇨🇮",n:"Côte d'Ivoire"},{f:"🇪🇨",n:"Équateur"}]},
-  {nom:"F", equipes:[{f:"🇳🇱",n:"Pays-Bas"},{f:"🇯🇵",n:"Japon"},{f:"🇸🇪",n:"Suède"},{f:"🇹🇳",n:"Tunisie"}]},
-  {nom:"G", equipes:[{f:"🇧🇪",n:"Belgique"},{f:"🇪🇬",n:"Égypte"},{f:"🇮🇷",n:"Iran"},{f:"🇳🇿",n:"Nouvelle-Zélande"}]},
-  {nom:"H", equipes:[{f:"🇪🇸",n:"Espagne"},{f:"🇨🇻",n:"Cap-Vert"},{f:"🇸🇦",n:"Arabie Saoudite"},{f:"🇺🇾",n:"Uruguay"}]},
-  {nom:"I", equipes:[{f:"🇫🇷",n:"France ★★"},{f:"🇸🇳",n:"Sénégal"},{f:"🇮🇶",n:"Irak"},{f:"🇳🇴",n:"Norvège"}]},
-  {nom:"J", equipes:[{f:"🇦🇷",n:"Argentine ★★★"},{f:"🇩🇿",n:"Algérie"},{f:"🇦🇹",n:"Autriche"},{f:"🇯🇴",n:"Jordanie"}]},
-  {nom:"K", equipes:[{f:"🇵🇹",n:"Portugal"},{f:"🇨🇩",n:"RD Congo"},{f:"🇺🇿",n:"Ouzbékistan"},{f:"🇨🇴",n:"Colombie"}]},
-  {nom:"L", equipes:[{f:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",n:"Angleterre"},{f:"🇭🇷",n:"Croatie"},{f:"🇬🇭",n:"Ghana"},{f:"🇵🇦",n:"Panama"}]},
-];
-
-const MATCHS_PHARES = [
-  // Matchs d'ouverture joués
-  {phase:"group",date:"11 juin",heure:"21h00",h:{f:"🇲🇽",n:"Mexique"},a:{f:"🇿🇦",n:"Afrique du Sud"},stade:"Estadio Azteca, Mexico",score:"2 - 0"},
-  // France (résultats réels)
-  {phase:"group",date:"17 juin",heure:"21h00 (FR)",h:{f:"🇫🇷",n:"France"},a:{f:"🇮🇶",n:"Irak"},stade:"Lincoln Financial Field, Philadelphie",score:"3 - 0"},
-  {phase:"group",date:"23 juin",heure:"02h00 (FR)",h:{f:"🇫🇷",n:"France"},a:{f:"🇸🇳",n:"Sénégal"},stade:"MetLife Stadium, New York",score:"3 - 2"},
-  {phase:"group",date:"26 juin",heure:"21h00 (FR)",h:{f:"🇳🇴",n:"Norvège"},a:{f:"🇫🇷",n:"France"},stade:"Lincoln Financial Field, Boston",score:null},
-  // Allemagne
-  {phase:"group",date:"14 juin",heure:"20h00 (FR)",h:{f:"🇩🇪",n:"Allemagne"},a:{f:"🇯🇵",n:"Japon"},stade:"AT&T Stadium, Dallas",score:"2 - 2"},
-  // Argentine
-  {phase:"group",date:"15 juin",heure:"21h00 (FR)",h:{f:"🇦🇷",n:"Argentine"},a:{f:"🇩🇿",n:"Algérie"},stade:"Rose Bowl, Los Angeles",score:null},
-  // 16es de finale
-  {phase:"r16",date:"28 juin",heure:"21h00 (FR)",h:{f:"🇿🇦",n:"Afrique du Sud"},a:{f:"🇨🇦",n:"Canada"},stade:"Rose Bowl, Los Angeles",score:null},
-  {phase:"r16",date:"29 juin",heure:"19h00 (FR)",h:{f:"🇧🇷",n:"Brésil"},a:{f:"🇯🇵",n:"Japon"},stade:"NRG Stadium, Houston",score:null},
-  {phase:"r16",date:"30 juin",heure:"19h00 (FR)",h:{f:"🇨🇮",n:"Côte d'Ivoire"},a:{f:"2e gr.I",n:"2e Gr.I"},stade:"AT&T Stadium, Dallas",score:null},
-  // Finale
-  {phase:"final",date:"19 juillet",heure:"21h00 (FR)",h:{f:"🏆",n:"Finaliste 1"},a:{f:"🏆",n:"Finaliste 2"},stade:"MetLife Stadium, New York",score:null},
-];
-
-const EQUIPES = [
-  {f:"🇫🇷",n:"France",conf:"UEFA",groupe:"B",stars:2,desc:"Tenant du titre de vice-champion. Équipe de référence avec Mbappé."},
-  {f:"🇧🇷",n:"Brésil",conf:"CONMEBOL",groupe:"D",stars:5,desc:"Record de titres (5). Perpétuel favori."},
-  {f:"🇦🇷",n:"Argentine",conf:"CONMEBOL",groupe:"A",stars:3,desc:"Tenant du titre 2022. Messi à la retraite?"},
-  {f:"🇪🇸",n:"Espagne",conf:"UEFA",groupe:"C",stars:1,desc:"Champion d'Europe 2024. Génération Yamal."},
-  {f:"🇩🇪",n:"Allemagne",conf:"UEFA",groupe:"C",stars:4,desc:"4 fois champions du monde."},
-  {f:"🇵🇹",n:"Portugal",conf:"UEFA",groupe:"B",stars:1,desc:"Ronaldo? Leao et la nouvelle génération."},
-  {f:"🇳🇱",n:"Pays-Bas",conf:"UEFA",groupe:"E",stars:0,desc:"Vice-champion 2022. Gakpo, van Dijk."},
-  {f:"🇦🇪",n:"Angleterre",conf:"UEFA",groupe:"E",stars:1,desc:"Champion d'Europe 2024. Kane, Bellingham."},
-  {f:"🇺🇸",n:"États-Unis",conf:"CONCACAF",groupe:"E",stars:0,desc:"Pays co-hôte. Génération montante."},
-  {f:"🇲🇽",n:"Mexique",conf:"CONCACAF",groupe:"D",stars:0,desc:"Co-hôte. Toujours présent en 1/8."},
-  {f:"🇨🇦",n:"Canada",conf:"CONCACAF",groupe:"A",stars:0,desc:"Co-hôte. Première CdM depuis 1986."},
-  {f:"🇲🇦",n:"Maroc",conf:"CAF",groupe:"B",stars:0,desc:"Demi-finaliste surprise 2022."},
-  {f:"🇯🇵",n:"Japon",conf:"AFC",groupe:"C",stars:0,desc:"Régulièrement surprenant."},
-  {f:"🇸🇳",n:"Sénégal",conf:"CAF",groupe:"D",stars:0,desc:"Tenant du titre CAN. Mané."},
-  {f:"🇧🇪",n:"Belgique",conf:"UEFA",groupe:"F",stars:0,desc:"Nouvelle génération après la génération dorée."},
-  {f:"🇭🇷",n:"Croatie",conf:"UEFA",groupe:"F",stars:0,desc:"Finaliste 2018, 3e en 2022. Modrić?"},
-];
-
-function renderGroupes() {
-  document.getElementById("groupes-list").innerHTML = GROUPES.map(g=>`
-    <div class="group-card">
-      <div class="group-title">Groupe ${g.nom}</div>
-      ${g.equipes.map((e,i)=>`<div class="team-row">
-        <div class="team-flag">${e.f}</div>
-        <div class="team-name">${e.n}</div>
-        <div class="team-pts ${i===0?"leader":""}">— pts</div>
-      </div>`).join("")}
-    </div>`).join("");
-}
-
-let currentPhase = "group";
-function filterMatchs(phase) {
-  currentPhase = phase;
-  const filtered = MATCHS_PHARES.filter(m=>m.phase===phase);
-  const phaseLabel = {group:"Phase de groupes",r32:"32e de finale",r16:"16e de finale",qf:"Quart de finale",sf:"Demi-finale",final:"Finale"};
-  const el = document.getElementById("matchs-list");
-  if(!filtered.length) { el.innerHTML=`<div class="loading">Matchs ${phaseLabel[phase]||""} à venir</div>`; return; }
-  el.innerHTML = filtered.map(m=>`
-    <div class="match-card">
-      <div class="match-phase">${phaseLabel[m.phase]||""} · ${m.stade}</div>
-      <div class="match-teams">
-        <div class="match-team"><div class="match-flag">${m.h.f}</div><div class="match-tname">${m.h.n}</div></div>
-        <div class="match-score${m.score?"":" up"}">${m.score||m.date+"<br>"+m.heure}</div>
-        <div class="match-team"><div class="match-flag">${m.a.f}</div><div class="match-tname">${m.a.n}</div></div>
-      </div>
-      <div class="match-meta">${m.stade}</div>
-    </div>`).join("");
-}
-
-function filterTeams(q) {
-  const filtered = EQUIPES.filter(e=>e.n.toLowerCase().includes(q.toLowerCase())||e.conf.toLowerCase().includes(q.toLowerCase()));
-  renderTeams(filtered);
-}
-
-function renderTeams(teams) {
-  document.getElementById("equipes-list").innerHTML = (teams||EQUIPES).map(e=>`
-    <div style="background:var(--surface);border-radius:var(--r-sm);border:1px solid var(--border);padding:14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;">
-      <div style="font-size:40px;line-height:1;flex-shrink:0">${e.f}</div>
-      <div>
-        <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:2px">${e.n}</div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">${e.conf} · Groupe ${e.groupe||"?"}${e.stars>0?" · "+"⭐".repeat(e.stars):""}</div>
-        <div style="font-size:12px;color:var(--muted);line-height:1.5">${e.desc}</div>
-      </div>
-    </div>`).join("");
-}
-
-// Huitièmes de finale — résultats réels + programme
 const R16_MATCHES = [
   {date:"4 juil",ville:"Houston",eq1:"🇨🇦 Canada",eq2:"🇲🇦 Maroc",score:"0-3",done:true,note:"Le Maroc file en quarts"},
   {date:"4 juil",ville:"Philadelphie",eq1:"🇫🇷 France",eq2:"🇵🇾 Paraguay",score:"1-0",done:true,note:"Mbappé (pen. 71')"},
@@ -438,31 +228,6 @@ function renderR16Schedule() {
   </div>`;
 }
 
-// Pronos
-const pronos = JSON.parse(localStorage.getItem("cdm26_pronos")||"{}");
-const pronoLabels = {vainqueur:"🏆 Vainqueur",finaliste:"🥇 Finaliste",buteur:"⚽ Meilleur buteur",surprise:"🌟 Révélation"};
-
-function saveProno(type) {
-  const sel = document.getElementById("prono-"+type);
-  if(!sel.value){showToast("Choisis une option !");return;}
-  pronos[type]=sel.value;
-  localStorage.setItem("cdm26_pronos",JSON.stringify(pronos));
-  renderPronos();
-  showToast("Pronostic enregistré ✓");
-}
-
-function renderPronos() {
-  const keys=Object.keys(pronos);
-  const sec=document.getElementById("pronos-saved");
-  if(!keys.length){sec.style.display="none";return;}
-  sec.style.display="block";
-  document.getElementById("pronos-saved-content").innerHTML=keys.map(k=>`
-    <div class="prono-row">
-      <div><div class="prono-cat">${pronoLabels[k]||k}</div><div class="prono-choice">${pronos[k]}</div></div>
-      <span style="font-size:11px;padding:2px 8px;border-radius:20px;background:rgba(201,168,76,.1);color:var(--gold);font-weight:600;">En attente</span>
-    </div>`).join("");
-}
-
 function showToast(msg) {
   const t=document.getElementById("toast");
   t.textContent=msg; t.classList.add("show");
@@ -470,10 +235,6 @@ function showToast(msg) {
 }
 
 document.addEventListener("DOMContentLoaded",()=>{
-  renderGroupes();
-  filterMatchs("group");
-  renderTeams();
-  renderPronos();
   renderR16Schedule();
   renderButeurs();
 });
