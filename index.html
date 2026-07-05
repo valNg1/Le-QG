@@ -560,12 +560,15 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
 
 <!-- ═══ VIEW SANTÉ ═══ -->
 <div id="view-sante" class="view">
-  <p class="sec" style="margin-top:8px;">🏃 Santé</p>
+  <div id="sante-home">
+    <p class="sec" style="margin-top:8px;">🏃 Santé</p>
+    <div class="module-grid" id="sante-grid"></div>
+  </div>
+
+  <!-- JEÛNE INTERMITTENT -->
+  <div id="module-jeune" style="display:none;">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
-      <div style="font-size:16px;font-weight:700;color:var(--text);">⏱ Jeûne intermittent</div>
-    </div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
-      <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
+      <button onclick="backToSante()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
       <div style="font-size:16px;font-weight:700;color:var(--text);">⏱ Jeûne intermittent</div>
     </div>
     <div class="proto-row" id="proto-row"></div>
@@ -595,6 +598,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
       <div id="jeune-next-meal" style="font-size:15px;font-weight:700;color:var(--green);">—</div>
       <div id="jeune-history" style="margin-top:10px;font-size:12px;color:var(--muted);"></div>
     </div>
+  </div>
 </div>
 
 <!-- ═══ VIEW POST-IT ═══ -->
@@ -1309,7 +1313,7 @@ function showView(id) {
   if (id==="mur") renderMurList();
   if (id==="modules") renderModulesHome();
   if (id==="postit") { backToPostit(); renderPostitHome(); }
-  if (id==="sante") { setTimeout(initJeune, 50); }
+  if (id==="sante") { backToSante(); renderSanteHome(); }
 }
 
 // ════════════════════════════════════════════
@@ -2072,6 +2076,7 @@ document.getElementById("mur-send-btn").addEventListener("click",()=>{
   saveState();
   saveMsgToFirebase(msg);
   input.value="";
+  input.blur(); // Ferme le clavier mobile pour libérer la nav du bas
   renderMurList();
 });
 
@@ -2329,6 +2334,45 @@ function renderPostitList() {
       renderPostitList();
     });
   });
+}
+
+
+// ════════════════════════════════════════════
+// SANTÉ (grille de modules — Jeûne + futurs)
+// ════════════════════════════════════════════
+const SANTE_MODULES = [
+  { id:"jeune", name:"Jeûne intermittent", desc:"Timer + prochain repas", emoji:"⏱", color:"#F7C104" },
+];
+
+function renderSanteHome() {
+  const el = document.getElementById("sante-grid");
+  if (!el) return;
+  el.innerHTML = SANTE_MODULES.map(m => `<div class="module-card" data-sante-mod="${m.id}" style="display:block;min-height:110px;">
+    <div class="module-icon" style="font-size:32px;margin-bottom:8px;">${m.emoji}</div>
+    <div class="module-name" style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;">${m.name}</div>
+    <div class="module-desc" style="font-size:12px;color:var(--muted);">${m.desc}</div>
+  </div>`).join("");
+  el.querySelectorAll("[data-sante-mod]").forEach(card => {
+    card.addEventListener("click", function(e) {
+      e.stopPropagation();
+      openSanteModule(this.dataset.santeMod);
+    });
+  });
+}
+
+function openSanteModule(id) {
+  document.getElementById("sante-home").style.display = "none";
+  document.querySelectorAll("#view-sante [id^='module-']").forEach(el => el.style.display = "none");
+  const el = document.getElementById("module-"+id);
+  if (el) el.style.display = "block";
+  if (id==="jeune") initJeune();
+}
+
+function backToSante() {
+  document.querySelectorAll("#view-sante [id^='module-']").forEach(el => el.style.display = "none");
+  const home = document.getElementById("sante-home");
+  if (home) home.style.display = "block";
+  if (jeuneInterval) { clearInterval(jeuneInterval); jeuneInterval = null; }
 }
 
 function openModule(id) {
