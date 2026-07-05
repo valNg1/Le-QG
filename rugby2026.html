@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Top 14 2026-2027 — Le Général</title>
+<style>
+  :root {
+    --bg:#0A0F0A; --surface:#141914; --surface2:#1C231C; --border:rgba(255,255,255,.08); --border2:rgba(255,255,255,.14);
+    --text:#F2F2F0; --muted:#8A8F85; --muted2:#5A5F55;
+    --gold:#C9A84C; --green:#2E7D32; --red:#B3261E;
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    --r:16px; --r-sm:10px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  body { background:var(--bg); color:var(--text); font-family:var(--font); padding-bottom:90px; }
+  .back-to-qg { color:var(--muted); text-decoration:none; font-size:12px; font-weight:600; }
+  .header { background:linear-gradient(135deg,#0A2010 0%,#0A0F0A 100%); padding:52px 16px 20px; position:sticky; top:0; z-index:100; }
+  .header-inner { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .title-block { display:flex; align-items:center; gap:10px; }
+  .trophy { font-size:28px; }
+  .title { font-size:20px; font-weight:800; }
+  .title span { color:var(--gold); }
+  .badge { background:var(--gold); color:#1A1916; font-size:10px; font-weight:800; padding:4px 10px; border-radius:20px; letter-spacing:.04em; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.5} }
+  .nav-tabs { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; }
+  .tab { background:none; border:none; color:var(--muted); font-family:var(--font); font-size:13px; font-weight:600; padding:8px 4px; white-space:nowrap; cursor:pointer; border-bottom:2px solid transparent; }
+  .tab.active { color:var(--gold); border-bottom-color:var(--gold); font-weight:700; }
+  .view { display:none; padding:16px; }
+  .view.active { display:block; }
+  .sec { font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin:18px 0 8px; }
+  .sec:first-child { margin-top:0; }
+  .hero { background:linear-gradient(135deg,#0A2010,#1A3020); border-radius:var(--r); padding:20px; margin-bottom:6px; border:1px solid rgba(201,168,76,.2); }
+  .hero-label { font-size:11px; color:var(--gold); font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px; }
+  .hero-title { font-size:22px; font-weight:800; margin-bottom:6px; }
+  .hero-sub { font-size:13px; color:rgba(255,255,255,.65); margin-bottom:14px; }
+  .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .stat-box { background:rgba(255,255,255,.05); border-radius:var(--r-sm); padding:10px 6px; text-align:center; }
+  .stat-val { font-size:18px; font-weight:800; }
+  .stat-lbl { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; margin-top:2px; }
+  .card { background:var(--surface); border-radius:var(--r); border:1px solid var(--border); padding:16px; margin-bottom:12px; }
+  .club-row { display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--border); }
+  .club-row:last-child { border-bottom:none; }
+  .club-flag { width:34px; height:34px; border-radius:8px; background:var(--surface2); display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:800; flex-shrink:0; }
+  .club-name { font-size:14px; font-weight:700; }
+  .club-meta { font-size:11px; color:var(--muted); margin-top:1px; }
+  .pill { font-size:10px; font-weight:700; padding:3px 9px; border-radius:20px; flex-shrink:0; }
+  .pill-champ { background:rgba(201,168,76,.15); color:var(--gold); border:1px solid rgba(201,168,76,.3); }
+  .pill-promu { background:rgba(52,199,123,.15); color:#34C77B; border:1px solid rgba(52,199,123,.3); }
+  .pill-tbd { background:rgba(255,255,255,.06); color:var(--muted); border:1px solid var(--border2); }
+  .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:#0A0F0A; border-top:1px solid var(--border); display:flex; padding:8px 4px 20px; z-index:100; }
+  .nav-btn { flex:1; background:none; border:none; color:var(--muted); font-family:var(--font); font-size:10px; font-weight:600; display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; padding:4px; }
+  .nav-btn.active { color:var(--gold); }
+  .nav-btn svg { width:20px; height:20px; }
+</style>
+</head>
+<body>
+
+<div style="background:#0A0F0A;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.07);">
+  <a href="https://legeneral.org" class="back-to-qg">← Le Général</a>
+  <div style="font-size:11px;color:#7A7A85;">Top 14 2026-2027</div>
+</div>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="title-block">
+      <div class="trophy">🏉</div>
+      <div>
+        <div class="title">Top 14 <span>2026-27</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Championnat de France de rugby</div>
+      </div>
+    </div>
+    <div class="badge">⏳ SAISON À VENIR</div>
+  </div>
+  <nav class="nav-tabs">
+    <button class="tab active" onclick="showView('accueil',0)">Accueil</button>
+    <button class="tab" onclick="showView('clubs',1)">Clubs</button>
+    <button class="tab" onclick="showView('format',2)">Format</button>
+    <button class="tab" onclick="showView('dates',3)">Dates clés</button>
+  </nav>
+</header>
+
+<!-- ACCUEIL -->
+<div id="view-accueil" class="view active">
+  <div class="hero">
+    <div class="hero-label">🏟 Coup d'envoi</div>
+    <div class="hero-title">Week-end du 5 septembre 2026</div>
+    <div class="hero-sub">127ᵉ édition · 14 clubs · Bouclier de Brennus</div>
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-val">14</div><div class="stat-lbl">Clubs</div></div>
+      <div class="stat-box"><div class="stat-val">26</div><div class="stat-lbl">Journées</div></div>
+      <div class="stat-box"><div class="stat-val">4</div><div class="stat-lbl">Titres Toulouse</div></div>
+      <div class="stat-box"><div class="stat-val">26 juin</div><div class="stat-lbl">Finale 2027</div></div>
+    </div>
+  </div>
+
+  <p class="sec">🏆 Champion en titre</p>
+  <div class="card" style="display:flex;align-items:center;gap:14px;border-color:rgba(201,168,76,.25);">
+    <div style="font-size:40px;">🔴⚫</div>
+    <div>
+      <div style="font-size:18px;font-weight:800;">Stade Toulousain</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:2px;">4ᵉ titre consécutif — record historique<br>Vainqueur face à l'UBB en finale (27 juin 2026)</div>
+    </div>
+  </div>
+
+  <p class="sec">📈 Le mouvement de l'intersaison</p>
+  <div class="card">
+    <div class="club-row">
+      <div class="club-flag">⬆️</div>
+      <div style="flex:1;">
+        <div class="club-name">RC Vannes</div>
+        <div class="club-meta">Champion de Pro D2 2025-26 — promu en Top 14</div>
+      </div>
+      <span class="pill pill-promu">PROMU</span>
+    </div>
+    <div class="club-row">
+      <div class="club-flag">🥈</div>
+      <div style="flex:1;">
+        <div class="club-name">Union Bordeaux-Bègles</div>
+        <div class="club-meta">Finaliste 2026 — devra confirmer</div>
+      </div>
+      <span class="pill pill-tbd">Finaliste</span>
+    </div>
+    <div class="club-row">
+      <div class="club-flag">🔁</div>
+      <div style="flex:1;">
+        <div class="club-name">14ᵉ place à confirmer</div>
+        <div class="club-meta">Barrage d'accession vs finaliste Pro D2</div>
+      </div>
+      <span class="pill pill-tbd">En attente</span>
+    </div>
+  </div>
+
+  <p class="sec">📅 Le calendrier n'est pas encore public</p>
+  <div class="card">
+    <div style="font-size:13px;color:var(--muted);line-height:1.7;">La <strong style="color:var(--text);">Ligue Nationale de Rugby</strong> a officialisé les grandes dates de la saison, mais le détail des 26 journées (affiches précises) sera communiqué en <strong style="color:var(--text);">juillet 2026</strong>, quelques semaines avant la reprise.</div>
+    <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);">On mettra à jour cette app dès que le calendrier détaillé sort ! 🏉</div>
+  </div>
+</div>
+
+<!-- CLUBS -->
+<div id="view-clubs" class="view">
+  <p class="sec">Les 14 clubs (2026-2027)</p>
+  <div class="card" style="padding:0;">
+    <div id="clubs-list"></div>
+  </div>
+  <div style="font-size:11px;color:var(--muted);margin-top:10px;text-align:center;line-height:1.6;">12 clubs quasi-certains (maintenus sportivement) + Vannes (promu).<br>La 14ᵉ place dépend du barrage d'accession, pas encore joué.</div>
+</div>
+
+<!-- FORMAT -->
+<div id="view-format" class="view">
+  <p class="sec">Comment ça marche ?</p>
+  <div class="card">
+    <div style="font-size:13px;font-weight:700;margin-bottom:6px;">🗓 Saison régulière</div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.7;">14 clubs, matchs aller-retour, <strong style="color:var(--text);">26 journées</strong> au total. Victoire = 4 pts, nul = 2 pts, défaite = 0 pt.<br><br>Bonus offensif : +1 pt si 3 essais de plus que l'adversaire.<br>Bonus défensif : +1 pt en cas de défaite par 5 pts ou moins.</div>
+  </div>
+  <div class="card">
+    <div style="font-size:13px;font-weight:700;margin-bottom:6px;">🏆 Phase finale</div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.7;">
+      <strong style="color:var(--text);">1er et 2e</strong> → qualifiés directs pour les demi-finales<br>
+      <strong style="color:var(--text);">3e à 6e</strong> → barrages pour rejoindre le dernier carré<br>
+      <strong style="color:var(--text);">Finale</strong> → Stade de France, 26 juin 2027
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:13px;font-weight:700;margin-bottom:6px;">⬇️ Maintien & accession</div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.7;">
+      <strong style="color:var(--text);">14e (dernier)</strong> → relégué directement en Pro D2<br>
+      <strong style="color:var(--text);">13e</strong> → barrage d'accession face au finaliste de Pro D2<br>
+      Le vainqueur du barrage évolue en Top 14 la saison suivante.
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:13px;font-weight:700;margin-bottom:6px;">🌍 Qualifications européennes</div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.7;">Les meilleurs clubs français se qualifient pour la <strong style="color:var(--text);">Champions Cup</strong> (compétition reine européenne) ou la <strong style="color:var(--text);">Challenge Cup</strong>, selon leur classement en Top 14.</div>
+  </div>
+</div>
+
+<!-- DATES CLÉS -->
+<div id="view-dates" class="view">
+  <p class="sec">Dates officielles 2026-2027</p>
+  <div class="card" style="padding:0;">
+    <div id="dates-list"></div>
+  </div>
+  <div style="font-size:11px;color:var(--muted);margin-top:10px;text-align:center;">Source : Ligue Nationale de Rugby (LNR)</div>
+</div>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" onclick="showView('accueil',0)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+    Accueil
+  </button>
+  <button class="nav-btn" onclick="showView('clubs',1)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 000 18M3 12h18"/></svg>
+    Clubs
+  </button>
+  <button class="nav-btn" onclick="showView('format',2)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 4v3M16 4v3"/></svg>
+    Format
+  </button>
+  <button class="nav-btn" onclick="showView('dates',3)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+    Dates
+  </button>
+</nav>
+
+<script>
+function showView(id, idx) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
+  document.querySelectorAll('.nav-tabs .tab').forEach((b,i) => b.classList.toggle('active', i===idx));
+}
+
+// Clubs quasi-certains pour 2026-2027 (12 maintenus + Vannes promu)
+// La 14e place dépend du barrage d'accession (pas encore joué)
+const CLUBS = [
+  {nom:"Stade Toulousain", statut:"champ", note:"Champion en titre — 4 sacres d'affilée"},
+  {nom:"Union Bordeaux-Bègles", statut:"", note:"Finaliste 2026"},
+  {nom:"RC Toulon", statut:"", note:""},
+  {nom:"Stade Rochelais", statut:"", note:""},
+  {nom:"ASM Clermont Auvergne", statut:"", note:"Jamais relégué depuis 1998"},
+  {nom:"Racing 92", statut:"", note:""},
+  {nom:"Stade Français Paris", statut:"", note:"Jamais relégué depuis 1998"},
+  {nom:"Castres Olympique", statut:"", note:"Jamais relégué depuis 1998"},
+  {nom:"Section Paloise", statut:"", note:""},
+  {nom:"Montpellier Hérault Rugby", statut:"", note:"Ever-present depuis 2005"},
+  {nom:"Aviron Bayonnais", statut:"", note:""},
+  {nom:"USA Perpignan", statut:"", note:"Promu en 2025"},
+  {nom:"RC Vannes", statut:"promu", note:"Champion Pro D2 2025-26"},
+  {nom:"13e/14e à confirmer", statut:"tbd", note:"Barrage d'accession vs Pro D2"},
+];
+
+function renderClubs() {
+  const el = document.getElementById("clubs-list");
+  if (!el) return;
+  el.innerHTML = CLUBS.map(c => {
+    const pill = c.statut === "champ" ? '<span class="pill pill-champ">Champion</span>'
+      : c.statut === "promu" ? '<span class="pill pill-promu">Promu</span>'
+      : c.statut === "tbd" ? '<span class="pill pill-tbd">À confirmer</span>'
+      : '';
+    return `<div class="club-row" style="padding:12px 16px;">
+      <div class="club-flag">🏉</div>
+      <div style="flex:1;">
+        <div class="club-name">${c.nom}</div>
+        ${c.note?`<div class="club-meta">${c.note}</div>`:''}
+      </div>
+      ${pill}
+    </div>`;
+  }).join("");
+}
+
+const DATES = [
+  {date:"22 & 29 août 2026", label:"IN EXTENSO SUPERSEVENS — étapes qualificatives"},
+  {date:"28 août 2026", label:"Coup d'envoi de la saison Pro D2"},
+  {date:"5 septembre 2026", label:"🏉 Coup d'envoi du Top 14 — J1"},
+  {date:"7 novembre 2026", label:"J9 en parallèle de France - Fidji"},
+  {date:"21 février 2027", label:"J17 en parallèle de France - Écosse (6 Nations)"},
+  {date:"6 février 2027", label:"Finale du Supersevens"},
+  {date:"5 juin 2027", label:"Fin de la saison régulière — J26"},
+  {date:"12 juin 2027", label:"Barrages (3e-6e place)"},
+  {date:"19 juin 2027", label:"Demi-finales"},
+  {date:"26 juin 2027", label:"🏆 Finale — Stade de France"},
+];
+
+function renderDates() {
+  const el = document.getElementById("dates-list");
+  if (!el) return;
+  el.innerHTML = DATES.map(d => `<div style="display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);align-items:center;">
+    <div style="font-size:11px;color:var(--gold);font-weight:700;min-width:96px;flex-shrink:0;">${d.date}</div>
+    <div style="font-size:13px;color:var(--text);">${d.label}</div>
+  </div>`).join("");
+}
+
+renderClubs();
+renderDates();
+</script>
+</body>
+</html>
