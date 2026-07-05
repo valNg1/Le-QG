@@ -286,27 +286,35 @@ body{font-family:var(--font);background:var(--gray-50);color:var(--gray-900);max
       🥉 Tadej Pogačar (UAE) +12"
     </div>
   </div>
-  <p class="section-title">Maillots distinctifs</p>
-  <div class="maillots-grid">
-    <div class="maillot-card"><div class="maillot-header"><div class="maillot-icon" style="background:#FFF8DC">🟡</div><div class="maillot-name">Général</div></div><div class="maillot-coureur">Jonas Vingegaard</div><div class="maillot-equipe">Visma-Lease a Bike</div></div>
-    <div class="maillot-card"><div class="maillot-header"><div class="maillot-icon" style="background:#E8F4FD">🟢</div><div class="maillot-name">Points</div></div><div class="maillot-coureur">Egan Bernal</div><div class="maillot-equipe">Netcompany Ineos</div></div>
-    <div class="maillot-card"><div class="maillot-header"><div class="maillot-icon" style="background:#FCE4EC">🔴</div><div class="maillot-name">Montagne</div></div><div class="maillot-coureur">Tadej Pogačar</div><div class="maillot-equipe">UAE Emirates-XRG</div></div>
-    <div class="maillot-card"><div class="maillot-header"><div class="maillot-icon" style="background:#E8F5E9">⬜</div><div class="maillot-name">Meilleur jeune</div></div><div class="maillot-coureur">Juan Ayuso</div><div class="maillot-equipe">Lidl-Trek</div></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+    <p class="section-title" style="margin:0;">Classement général</p>
+    <button onclick="showView('classement',2)" style="background:none;border:none;color:#1565C0;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;">Tout voir →</button>
   </div>
-  <p class="section-title">La course en chiffres</p>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
-    <div style="background:var(--white);border-radius:var(--radius-sm);padding:14px;border:1px solid var(--gray-100);text-align:center;"><div style="font-size:26px;font-weight:800">21</div><div style="font-size:11px;color:var(--gray-400);margin-top:2px;text-transform:uppercase;letter-spacing:0.05em">Étapes</div></div>
-    <div style="background:var(--white);border-radius:var(--radius-sm);padding:14px;border:1px solid var(--gray-100);text-align:center;"><div style="font-size:26px;font-weight:800">3 333</div><div style="font-size:11px;color:var(--gray-400);margin-top:2px;text-transform:uppercase;letter-spacing:0.05em">km totaux</div></div>
-    <div style="background:var(--white);border-radius:var(--radius-sm);padding:14px;border:1px solid var(--gray-100);text-align:center;"><div style="font-size:26px;font-weight:800">54 450</div><div style="font-size:11px;color:var(--gray-400);margin-top:2px;text-transform:uppercase;letter-spacing:0.05em">m dénivelé</div></div>
-    <div style="background:var(--white);border-radius:var(--radius-sm);padding:14px;border:1px solid var(--gray-100);text-align:center;"><div style="font-size:26px;font-weight:800">176</div><div style="font-size:11px;color:var(--gray-400);margin-top:2px;text-transform:uppercase;letter-spacing:0.05em">Coureurs</div></div>
-  </div>
+  <div id="home-classement-top10"></div>
+  <p class="section-title">L'étape du jour</p>
   <div style="background:var(--white);border-radius:var(--radius);padding:16px;border:1px solid var(--gray-100);margin-bottom:16px;">
-    <div style="font-size:14px;font-weight:700;margin-bottom:8px;">🗺 Le grand tour 2026</div>
-    <div style="font-size:13px;color:var(--gray-600);line-height:1.6;">Départ de <strong>Barcelone</strong> · Pyrénées · Massif Central · Vosges · Jura · <strong>Alpes</strong> (double Alpe d'Huez) · Arrivée à <strong>Paris</strong> via Montmartre.</div>
-    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--gray-100);">
-      <div style="font-size:12px;color:var(--gray-400);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Temps forts</div>
-      <div style="font-size:13px;color:var(--gray-600);line-height:1.8;">⛰ Double Alpe d'Huez (étape reine)<br>🏔 Galibier (2 642 m, toit du Tour)<br>⏱ CLM Évian–Thonon (26 km, Léman)<br>🌆 Final Montmartre × 3 passages</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+      <div style="width:36px;height:36px;border-radius:50%;background:#E8F4FD;color:#1565C0;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0;">2</div>
+      <div>
+        <div style="font-size:15px;font-weight:800;color:var(--gray-900);">Tarragone → Barcelone</div>
+        <div style="font-size:12px;color:var(--gray-400);">Dimanche 5 juillet 2026</div>
+      </div>
     </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+      <div style="background:var(--gray-50, #F7F8FA);border-radius:var(--radius-sm);padding:10px;text-align:center;"><div style="font-size:20px;font-weight:800;">168,5</div><div style="font-size:10px;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.05em;">km</div></div>
+      <div style="background:var(--gray-50, #F7F8FA);border-radius:var(--radius-sm);padding:10px;text-align:center;"><div style="font-size:20px;font-weight:800;">2 500</div><div style="font-size:10px;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.05em;">m D+</div></div>
+      <div style="background:var(--gray-50, #F7F8FA);border-radius:var(--radius-sm);padding:10px;text-align:center;"><div style="font-size:20px;font-weight:800;">13h45</div><div style="font-size:10px;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.05em;">Départ</div></div>
+      <div style="background:var(--gray-50, #F7F8FA);border-radius:var(--radius-sm);padding:10px;text-align:center;"><div style="font-size:20px;font-weight:800;">17h35</div><div style="font-size:10px;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.05em;">Arrivée est.</div></div>
+    </div>
+    <div style="padding-top:12px;border-top:1px solid var(--gray-100);">
+      <div style="font-size:12px;color:var(--gray-400);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Profil du jour</div>
+      <div style="font-size:13px;color:var(--gray-600);line-height:1.7;">75 km plats le long de la Costa Daurada, puis <strong>Côte de Begues</strong> (2ᵉ cat., 6,1 km à 6,5%) avant un final explosif dans Barcelone : <strong>3 ascensions de Montjuïc</strong> (1,6 km à 9,3%), la dernière à 2 km de l'arrivée.</div>
+    </div>
+    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--gray-100);">
+      <div style="font-size:12px;color:var(--gray-400);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Favoris du jour</div>
+      <div style="font-size:13px;color:var(--gray-600);line-height:1.7;">⭐⭐⭐⭐⭐ Tadej Pogačar, Mathieu van der Poel, Remco Evenepoel<br>⭐⭐⭐ Paul Seixas, Jonas Vingegaard, Tom Pidcock</div>
+    </div>
+    <div style="margin-top:12px;background:#FFF8DC;border-radius:var(--radius-sm);padding:10px 12px;font-size:12px;color:#7A5A00;">🌡 Jusqu'à 34°C attendus, vent de sud défavorable dans Montjuïc mais porteur dans la montée finale.</div>
   </div>
 </div>
 
@@ -642,6 +650,22 @@ const CLASSEMENT_GENERAL = [
   {p:10,nom:'Paul Seixas',pays:'🇫🇷',equipe:'Decathlon CMA CGM',temps:'',ecart:'+39"'},
 ];
 
+function renderHomeClassementTop10() {
+  const el = document.getElementById('home-classement-top10');
+  if (!el) return;
+  el.innerHTML = `<div style="background:var(--white);border-radius:var(--radius);border:1px solid var(--gray-100);overflow:hidden;margin-bottom:16px;">
+    ${CLASSEMENT_GENERAL.map(r => `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--gray-100);${r.p===1?'background:#1565C011;':''}">
+      <div style="width:20px;font-size:12px;font-weight:800;color:${r.p===1?'var(--gray-900)':'var(--gray-400)'};flex-shrink:0;">${r.p}</div>
+      <div style="font-size:15px;flex-shrink:0;">${r.pays}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;font-weight:700;color:var(--gray-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.nom}</div>
+        <div style="font-size:10px;color:var(--gray-400);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.equipe}</div>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:${r.p===1?'#1565C0':'var(--gray-600)'};flex-shrink:0;">${r.temps||r.ecart}</div>
+    </div>`).join('')}
+  </div>`;
+}
+
 function renderClassementTable(data, highlight) {
   return `<div style="background:var(--white);border-radius:var(--radius);border:1px solid var(--gray-100);overflow:hidden;">
     ${data.map(r => `<div style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--gray-100);${r.p===1?'background:'+highlight+'11;':''}">
@@ -888,6 +912,7 @@ function openArticle(encodedUrl) {
 // INIT
 // ============================================================
 renderEtapes();
+renderHomeClassementTop10();
 renderCoureurs();
 renderMesPronos();
 initFirebase();
