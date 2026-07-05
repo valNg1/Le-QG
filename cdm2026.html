@@ -120,19 +120,34 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
 <!-- ACCUEIL -->
 <div id="view-accueil" class="view active">
   <div class="hero">
-    <div class="hero-label">🏟 Prochaine édition</div>
-    <div class="hero-title">Coupe du Monde FIFA 2026</div>
-    <div class="hero-sub">🟢 Compétition en cours · 16 villes hôtes · USA, Canada, Mexique</div>
+    <div class="hero-label">🔴 Phase actuelle</div>
+    <div class="hero-title">Huitièmes de finale</div>
+    <div class="hero-sub">4 → 7 juillet 2026 · 16 équipes en lice pour 8 places en quarts</div>
     <div class="stats-grid">
-      <div class="stat-box"><div class="stat-val">48</div><div class="stat-lbl">Équipes</div></div>
-      <div class="stat-box"><div class="stat-val">104</div><div class="stat-lbl">Matchs</div></div>
-      <div class="stat-box"><div class="stat-val">16</div><div class="stat-lbl">Stades</div></div>
-      <div class="stat-box"><div class="stat-val">39</div><div class="stat-lbl">Jours</div></div>
+      <div class="stat-box"><div class="stat-val">16</div><div class="stat-lbl">Qualifiés</div></div>
+      <div class="stat-box"><div class="stat-val">8</div><div class="stat-lbl">Matchs</div></div>
+      <div class="stat-box"><div class="stat-val">2</div><div class="stat-lbl">Joués</div></div>
+      <div class="stat-box"><div class="stat-val">19 juil</div><div class="stat-lbl">Finale</div></div>
     </div>
   </div>
 
-  <p class="sec">Calendrier clé</p>
-  <div id="calendar-key"></div>
+  <p class="sec">🇫🇷 Les Bleus en direct</p>
+  <div style="background:linear-gradient(135deg,#0A2010,#1A3020);border-radius:var(--r);padding:16px;border:1px solid rgba(201,168,76,.25);margin-bottom:16px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+      <span style="font-size:22px;">🇫🇷</span>
+      <div style="font-size:16px;font-weight:800;color:#fff;">France 1 – 0 Paraguay</div>
+    </div>
+    <div style="font-size:12px;color:rgba(255,255,255,.7);margin-bottom:10px;">Philadelphie · 4 juillet · Buteur : Mbappé (71&#39;, penalty)</div>
+    <div style="font-size:13px;color:rgba(255,255,255,.85);line-height:1.6;">Longtemps muselés par le bloc bas paraguayen, les Bleus arrachent leur qualification sur un penalty de Mbappé (19ᵉ but en Coupe du Monde, à 1 longueur du record de Messi).</div>
+    <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-size:12px;color:var(--gold);font-weight:700;">➡️ Prochain match</div>
+      <div style="font-size:13px;color:#fff;font-weight:700;">France 🇫🇷 vs 🇲🇦 Maroc</div>
+    </div>
+    <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:2px;">Quart de finale · Jeudi 9 juillet · 22h (FR) · Boston</div>
+  </div>
+
+  <p class="sec">Huitièmes de finale — résultats & programme</p>
+  <div id="r16-schedule"></div>
 
   <p class="sec">Villes hôtes</p>
   <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;">
@@ -148,7 +163,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     <div style="font-size:48px">🇦🇷</div>
     <div>
       <div style="font-size:20px;font-weight:800;color:var(--text);">Argentine</div>
-      <div style="font-size:13px;color:var(--muted);">Champion du Monde 2022<br>Qatar — 3 étoiles ⭐⭐⭐<br><span style="color:#34C77B;font-weight:600;">✅ Qualifiée pour les 16es</span></div>
+      <div style="font-size:13px;color:var(--muted);">Champion du Monde 2022 — 3 étoiles ⭐⭐⭐<br>Qualifiée pour les 8es (3-2 a.p. vs Cap-Vert)<br><span style="color:#34C77B;font-weight:600;">🔜 8e de finale vs Égypte</span></div>
     </div>
   </div>
 </div>
@@ -269,19 +284,6 @@ function showView(id, idx) {
 }
 
 // Données
-// anciens groupes remplacés
-
-  {nom:"A", equipes:[{f:"🇦🇷",n:"Argentine"},{f:"🇨🇱",n:"Chili"},{f:"🇵🇪",n:"Pérou"},{f:"🇨🇦",n:"Canada"}]},
-  {nom:"B", equipes:[{f:"🇫🇷",n:"France"},{f:"🇲🇦",n:"Maroc"},{f:"🇵🇹",n:"Portugal"},{f:"🇿🇦",n:"Afrique du Sud"}]},
-  {nom:"C", equipes:[{f:"🇪🇸",n:"Espagne"},{f:"🇩🇪",n:"Allemagne"},{f:"🇯🇵",n:"Japon"},{f:"🇨🇷",n:"Costa Rica"}]},
-  {nom:"D", equipes:[{f:"🇧🇷",n:"Brésil"},{f:"🇲🇽",n:"Mexique"},{f:"🇸🇳",n:"Sénégal"},{f:"🇮🇷",n:"Iran"}]},
-  {nom:"E", equipes:[{f:"🇦🇪",n:"Angleterre"},{f:"🇳🇱",n:"Pays-Bas"},{f:"🇺🇸",n:"États-Unis"},{f:"🇦🇺",n:"Australie"}]},
-  {nom:"F", equipes:[{f:"🇧🇪",n:"Belgique"},{f:"🇭🇷",n:"Croatie"},{f:"🇲🇽",n:"Mexique"},{f:"🇳🇬",n:"Nigeria"}]},
-  {nom:"G", equipes:[{f:"🇵🇹",n:"Portugal"},{f:"🇺🇸",n:"États-Unis"},{f:"🇺🇾",n:"Uruguay"},{f:"🇰🇷",n:"Corée du Sud"}]},
-  {nom:"H", equipes:[{f:"🇦🇷",n:"Argentine"},{f:"🇩🇰",n:"Danemark"},{f:"🇲🇦",n:"Maroc"},{f:"🇳🇬",n:"Nigeria"}]},
-  // Format étendu 48 équipes : 12 groupes de 4
-];
-
 const GROUPES = [
   {nom:"A", equipes:[{f:"🇲🇽",n:"Mexique"},{f:"🇿🇦",n:"Afrique du Sud"},{f:"🇰🇷",n:"Corée du Sud"},{f:"🇨🇿",n:"Tchéquie"}]},
   {nom:"B", equipes:[{f:"🇨🇦",n:"Canada"},{f:"🇧🇦",n:"Bosnie"},{f:"🇶🇦",n:"Qatar"},{f:"🇨🇭",n:"Suisse"}]},
@@ -383,21 +385,33 @@ function renderTeams(teams) {
     </div>`).join("");
 }
 
-// Calendrier clé accueil
-function renderCalendar() {
-  const events = [
-    {date:"11 juin",label:"✅ Mexique 2-0 Afrique du Sud (ouverture)"},
-    {date:"17 juin",label:"✅ France 3-0 Irak — Les Bleus lancés !"},
-    {date:"23 juin",label:"✅ France 3-2 Sénégal — Qualifiés !"},
-    {date:"26 juin",label:"🔴 EN COURS — Norvège vs France (Boston, 21h FR)"},
-    {date:"28-30 juin",label:"⚽ Seizièmes de finale — 32 équipes"},
-    {date:"19 juillet",label:"🏆 Finale — MetLife Stadium, New York"},
-  ];
-  document.getElementById("calendar-key").innerHTML = events.map(e=>`
-    <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);align-items:center;">
-      <div style="font-size:11px;color:var(--muted);font-weight:600;min-width:60px;flex-shrink:0">${e.date.split(" ").slice(0,2).join(" ")}</div>
-      <div style="font-size:13px;color:var(--text);font-weight:500">${e.label}</div>
-    </div>`).join("");
+// Huitièmes de finale — résultats réels + programme
+const R16_MATCHES = [
+  {date:"4 juil",ville:"Houston",eq1:"🇨🇦 Canada",eq2:"🇲🇦 Maroc",score:"0-3",done:true,note:"Le Maroc file en quarts"},
+  {date:"4 juil",ville:"Philadelphie",eq1:"🇫🇷 France",eq2:"🇵🇾 Paraguay",score:"1-0",done:true,note:"Mbappé (pen. 71')"},
+  {date:"6 juil",ville:"Seattle",eq1:"🇧🇪 Belgique",eq2:"🇺🇸 USA",score:"",done:false,note:"2h (FR)"},
+  {date:"6 juil",ville:"—",eq1:"🇭🇷 Croatie",eq2:"🇲🇽 Mexique",score:"",done:false,note:"À venir"},
+  {date:"7 juil",ville:"Vancouver",eq1:"🇨🇭 Suisse",eq2:"🇨🇴 Colombie",score:"",done:false,note:"22h (FR)"},
+  {date:"À venir",ville:"—",eq1:"🇪🇸 Espagne",eq2:"🇵🇹 Portugal",score:"",done:false,note:"Affiche phare"},
+  {date:"À venir",ville:"—",eq1:"🇦🇷 Argentine",eq2:"🇪🇬 Égypte",score:"",done:false,note:""},
+  {date:"À venir",ville:"—",eq1:"?",eq2:"?",score:"",done:false,note:"Dernière affiche à confirmer"},
+];
+
+function renderR16Schedule() {
+  const el = document.getElementById("r16-schedule");
+  if (!el) return;
+  el.innerHTML = `<div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;">
+    ${R16_MATCHES.map(m => `<div style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border);${m.done?'background:rgba(52,199,123,.05);':''}">
+      <div style="font-size:10px;color:var(--muted);font-weight:700;min-width:42px;flex-shrink:0;text-transform:uppercase;">${m.date}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:700;color:var(--text);">${m.eq1} <span style="color:var(--muted);font-weight:500;">vs</span> ${m.eq2}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:1px;">${m.ville!=="—"?m.ville+" · ":""}${m.note}</div>
+      </div>
+      ${m.done
+        ? `<div style="font-size:14px;font-weight:800;color:#34C77B;flex-shrink:0;">${m.score}</div>`
+        : `<span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(201,168,76,.12);color:var(--gold);font-weight:700;flex-shrink:0;">${m.done?'':'À jouer'}</span>`}
+    </div>`).join("")}
+  </div>`;
 }
 
 // Pronos
@@ -436,7 +450,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   filterMatchs("group");
   renderTeams();
   renderPronos();
-  renderCalendar();
+  renderR16Schedule();
 });
 </script>
 </body>
