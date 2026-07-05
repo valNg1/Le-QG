@@ -1800,10 +1800,24 @@ function renderWidgetsZone() {
     const filLabels = {fr:"🇫🇷 France",world:"🌍 Monde",sport:"⚽ Sport",tech:"💻 Tech",science:"🔬 Science"};
     html += `<div style="display:flex;align-items:center;justify-content:space-between;margin:20px 0 10px;"><p class="sec" style="margin:0;">Actualités</p><div id="actu-fil-btns" style="display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;"></div></div><div id="actu-zone"><div class="loading">Chargement...</div></div>`;
   }
-  if(state.widgets.tdf) html += `<p class="sec" style="margin-top:16px;">Tour de France 2026</p><div class="tdf-card"><div class="tdf-hdr"><div class="tdf-logo"><div class="tdf-bands"><div class="tdf-band" style="background:#002395"></div><div class="tdf-band" style="background:#FFF"></div><div class="tdf-band" style="background:#ED2939"></div></div><div class="tdf-label">Tour de France <span>2026</span></div></div><div class="tdf-badge">4–26 JUIL</div></div><a href="https://legeneral.org/tdf2026.html" target="_blank" class="tdf-open">🚴 Ouvrir l'app Tour de France</a></div>`;
+  const sportApps = [
+    {id:"tdf",   emoji:"🚴", nom:"Tour de France",    sub:"4–26 juillet",      url:"tdf2026.html",   color:"#ED2939"},
+    {id:"cdm",   emoji:"🏆", nom:"Coupe du Monde",    sub:"8es de finale",     url:"cdm2026.html",   color:"#34C77B"},
+    {id:"rugby", emoji:"🏉", nom:"Top 14",            sub:"Dès le 5 sept.",    url:"rugby2026.html", color:"#C9A84C"},
+  ].filter(a => state.widgets[a.id]);
+  if (sportApps.length) {
+    html += `<p class="sec" style="margin-top:16px;">Apps sportives</p><div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;">`;
+    html += sportApps.map((a,i) => `<a href="https://legeneral.org/${a.url}" target="_blank" style="display:flex;align-items:center;gap:12px;padding:13px 14px;text-decoration:none;${i<sportApps.length-1?'border-bottom:1px solid var(--border);':''}">
+      <span style="font-size:22px;flex-shrink:0;">${a.emoji}</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:700;color:var(--text);">${a.nom}</div>
+        <div style="font-size:11px;color:var(--muted);">${a.sub}</div>
+      </div>
+      <span style="font-size:18px;color:${a.color};flex-shrink:0;">→</span>
+    </a>`).join("");
+    html += `</div>`;
+  }
   if(state.widgets.taches) html += `<p class="sec" style="margin-top:16px;">Tâches ménagères</p><div id="taches-zone"></div>`;
-  if(state.widgets.cdm) html += `<p class="sec" style="margin-top:16px;">Coupe du Monde 2026</p><div class="tdf-card" style="border-color:rgba(34,199,123,.2);"><div class="tdf-hdr"><div class="tdf-logo"><div class="tdf-bands"><div class="tdf-band" style="background:#002395"></div><div class="tdf-band" style="background:#fff"></div><div class="tdf-band" style="background:#ED2939"></div></div><div class="tdf-label">Coupe du Monde <span>2026</span></div></div><div class="tdf-badge" style="background:var(--green);">14 JUI–19 JUL</div></div><a href="https://legeneral.org/cdm2026.html" target="_blank" class="tdf-open" style="color:var(--green);border-color:rgba(52,199,123,.3);background:rgba(52,199,123,.1);">🏆 Ouvrir l'app Coupe du Monde</a></div>`;
-  if(state.widgets.rugby) html += `<p class="sec" style="margin-top:16px;">Top 14 2026-2027</p><div class="tdf-card" style="border-color:rgba(201,168,76,.25);"><div class="tdf-hdr"><div class="tdf-logo"><div style="font-size:20px;">🏉</div></div><div class="tdf-label">Top 14 <span>2026-27</span></div></div><div class="tdf-badge" style="background:var(--gold);color:#1A1916;">DÈS 5 SEPT</div></div><a href="https://legeneral.org/rugby2026.html" target="_blank" class="tdf-open" style="color:var(--gold);border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.1);">🏉 Ouvrir l'app Top 14</a></div>`;
   zone.innerHTML = html;
   if(state.widgets.taches) renderTaches();
   if(state.widgets.env) fetchAirQuality();
