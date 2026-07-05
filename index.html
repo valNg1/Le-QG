@@ -499,7 +499,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
   <!-- BLOC 3 : CETTE SEMAINE -->
   <div class="agenda-hdr">
     <p class="sec" style="margin:0;">Cette semaine</p>
-    <button class="agenda-add" id="agenda-add-btn">+ Ajouter</button>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <button onclick="showView('agenda')" style="background:none;border:none;color:var(--yellow);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);">Voir tout →</button>
+      <button class="agenda-add" id="agenda-add-btn">+ Ajouter</button>
+    </div>
   </div>
   <div id="anniv-strips"></div>
   <div id="events-list"></div>
@@ -755,11 +758,23 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
   <div id="module-cdm_mod" style="display:none;">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
       <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
-      <div style="font-size:16px;font-weight:700;color:var(--text);">🏆 Coupe du Monde 2026</div>
+      <div style="font-size:16px;font-weight:700;color:var(--text);">⚽ Coupe du Monde 2026</div>
     </div>
-    <a href="https://legeneral.org/cdm2026.html" target="_blank" class="tdf-open" style="display:flex;margin-bottom:12px;color:var(--green);border-color:rgba(52,199,123,.3);background:rgba(52,199,123,.1);">🏆 Ouvrir l'app complète</a>
+    <a href="https://legeneral.org/cdm2026.html" target="_blank" class="tdf-open" style="display:flex;margin-bottom:12px;color:var(--green);border-color:rgba(52,199,123,.3);background:rgba(52,199,123,.1);">⚽ Ouvrir l'app complète</a>
     <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:16px;font-size:13px;color:var(--muted);line-height:1.8;">
-      🔴 En cours — 11 juin → 19 juillet 2026<br>🇫🇷 France : qualifiée pour les 16es !<br>🏟 16 stades · USA, Canada, Mexique<br>⚽ 48 équipes · 104 matchs
+      🔴 8es de finale — 4 → 7 juillet<br>🇫🇷 France 1-0 Paraguay : en quarts !<br>🏟 16 stades · USA, Canada, Mexique<br>⚽ Prochain : France vs Maroc, 9 juillet
+    </div>
+  </div>
+
+  <!-- Rugby MODULE -->
+  <div id="module-rugby_mod" style="display:none;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
+      <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
+      <div style="font-size:16px;font-weight:700;color:var(--text);">🏉 Top 14 2026-2027</div>
+    </div>
+    <a href="https://legeneral.org/rugby2026.html" target="_blank" class="tdf-open" style="display:flex;margin-bottom:12px;color:var(--gold);border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.1);">🏉 Ouvrir l'app complète</a>
+    <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:16px;font-size:13px;color:var(--muted);line-height:1.8;">
+      🏆 Champion en titre : Stade Toulousain (4ᵉ sacre)<br>⬆️ RC Vannes promu de Pro D2<br>🗓 Coup d'envoi : 5 septembre 2026<br>🏟 Finale : Stade de France, 26 juin 2027
     </div>
   </div>
 
@@ -801,22 +816,14 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
     <span>Accueil</span>
   </button>
-  <button class="nav-btn" id="nav-agenda" data-view="agenda">
-    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-    <span>Agenda</span>
-  </button>
   <button class="nav-btn" id="nav-groupe" data-view="groupe">
     <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
     <span>Groupe</span>
   </button>
   <button class="nav-btn" id="nav-modules" data-view="modules">
-    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-    <span>Modules</span>
+    <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    <span>Play</span>
   </button>
-  <a class="nav-btn" href="https://legeneral.org/tdf2026.html" target="_blank">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    <span>TDF</span>
-  </a>
   <button class="nav-btn" id="nav-mur" data-view="mur">
     <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
     <span>Mur</span>
@@ -2147,7 +2154,8 @@ const ALL_MODULES = [
   { id:"lecture", name:"Lectures",           desc:"Recommandations du groupe",    emoji:"📚", color:"#34C77B", theme:"culture" },
   { id:"scores",  name:"Scores live",        desc:"Résultats de tes équipes",     emoji:"⚽", color:"#F5874A", theme:"sport"   },
   { id:"tdf_mod", name:"Tour de France",     desc:"App TDF 2026",                 emoji:"🚴", color:"#C9A84C", theme:"sport"   },
-  { id:"cdm_mod", name:"Coupe du Monde",     desc:"App CdM 2026",                 emoji:"🏆", color:"#34C77B", theme:"sport"   },
+  { id:"cdm_mod", name:"Coupe du Monde",     desc:"App CdM 2026 — 8es de finale",  emoji:"⚽", color:"#34C77B", theme:"sport"   },
+  { id:"rugby_mod", name:"Top 14",           desc:"Saison 2026-2027",              emoji:"🏉", color:"#C9A84C", theme:"sport"   },
 ];
 
 let currentModuleTheme = "all";
@@ -2203,7 +2211,7 @@ function openModule(id) {
   if (id==="quiz") { setTimeout(initQuiz, 50); return; }
   if (id==="cine") { setTimeout(initCine, 50); return; }
   if (id==="lecture") { setTimeout(initLecture, 50); return; }
-  if (id==="tdf_mod" || id==="cdm_mod") {} // HTML statique
+  if (id==="tdf_mod" || id==="cdm_mod" || id==="rugby_mod") {} // HTML statique
 }
 
 function backToModules() {
