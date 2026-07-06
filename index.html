@@ -369,6 +369,15 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
 </head>
 
 <!-- BANDEAU MISE À JOUR DISPONIBLE -->
+
+<!-- ÉCRAN SUSPENSION (accès coupé par admin) -->
+<div id="suspended-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:5000;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;">
+  <div style="font-size:56px;margin-bottom:20px;">🔒</div>
+  <div style="font-size:22px;font-weight:800;color:var(--text);margin-bottom:12px;">Accès temporairement indisponible</div>
+  <div style="font-size:15px;color:var(--muted);line-height:1.6;max-width:320px;margin-bottom:24px;">L'accès à ce groupe est actuellement suspendu. Contacte l'administrateur pour réactiver ton accès.</div>
+  <a id="suspended-contact" href="#" style="background:var(--yellow);color:#1A1916;text-decoration:none;border-radius:20px;padding:12px 24px;font-family:var(--font);font-size:14px;font-weight:700;">Contacter l'administrateur</a>
+</div>
+
 <div id="update-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:var(--yellow);color:#1A1916;padding:12px 16px;text-align:center;font-family:var(--font);font-size:14px;font-weight:700;">
   ✨ Nouvelle version disponible
   <button id="update-reload-btn" style="margin-left:10px;background:#1A1916;color:var(--yellow);border:none;border-radius:20px;padding:6px 16px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;">Recharger</button>
@@ -553,8 +562,32 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
   </div>
   <button id="reset-app-btn" style="width:100%;background:rgba(232,56,79,.08);border:1px solid rgba(232,56,79,.25);color:var(--red);border-radius:var(--r-sm);padding:12px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;margin:20px 0 4px;">🗑 Réinitialiser l'application</button>
 <p style="font-size:11px;color:var(--muted2);text-align:center;margin-bottom:8px;">Efface toutes les données locales de cet appareil (profil, tâches, réglages)</p>
-<div style="text-align:center;font-size:11px;color:var(--muted2);margin:16px 0 8px;">Le Général v3.2.1</div>
-  <button id="save-perso-btn" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:13px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;margin-top:16px;">💾 Enregistrer</button>
+<button id="save-perso-btn" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:13px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;margin-top:16px;">💾 Enregistrer</button>
+
+  <!-- ═══ ESPACE ADMIN (Val uniquement) ═══ -->
+  <div id="admin-section" style="margin-top:28px;">
+    <button id="admin-unlock-btn" style="width:100%;background:none;border:1px solid var(--border2);color:var(--muted2);border-radius:var(--r-sm);padding:10px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;">🔐 Espace administrateur</button>
+    <div id="admin-panel" style="display:none;margin-top:12px;">
+      <div style="background:var(--surface);border-radius:var(--r);border:1px solid rgba(201,168,76,.3);padding:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div style="font-size:14px;font-weight:800;color:var(--gold);">👑 Administration</div>
+          <button id="admin-refresh-btn" style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;">🔄</button>
+        </div>
+        <div id="admin-stats" style="display:flex;gap:8px;margin-bottom:14px;"></div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;">Groupes inscrits</div>
+        <div id="admin-groups-list"><div style="color:var(--muted);font-size:13px;padding:10px 0;">Chargement...</div></div>
+      </div>
+      <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-top:12px;">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;">Lien de paiement Stripe</div>
+        <p style="font-size:12px;color:var(--muted2);margin-bottom:8px;line-height:1.5;">Colle ici ton Stripe Payment Link (https://buy.stripe.com/...). Il sera utilisé par le bouton « Envoyer lien » de chaque groupe.</p>
+        <input id="admin-stripe-link" class="modal-input" placeholder="https://buy.stripe.com/..." type="text" style="font-size:12px;">
+        <button id="admin-save-stripe" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--r-sm);padding:10px;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;margin-top:6px;">Enregistrer le lien</button>
+      </div>
+      <button id="admin-lock-btn" style="width:100%;background:none;border:none;color:var(--muted2);font-family:var(--font);font-size:12px;cursor:pointer;padding:12px;margin-top:8px;">🔒 Verrouiller l'espace admin</button>
+    </div>
+  </div>
+
+  <div style="text-align:center;font-size:11px;color:var(--muted2);margin:16px 0 8px;">Le Général v3.3.0</div>
 </div>
 
 
@@ -1309,7 +1342,7 @@ function showView(id) {
   const viewEl = document.getElementById("view-"+id);
   if (viewEl) viewEl.classList.add("active");
   document.querySelectorAll(".nav-btn[data-view]").forEach(b => b.classList.toggle("active", b.dataset.view===id));
-  if (id==="perso") { renderPerso(); renderGroupe(); }
+  if (id==="perso") { renderPerso(); renderGroupe(); initAdminSection(); }
   if (id==="mur") renderMurList();
   if (id==="modules") renderModulesHome();
   if (id==="postit") { backToPostit(); renderPostitHome(); }
@@ -2091,6 +2124,149 @@ document.getElementById("mur-input").addEventListener("keydown",e=>{if(e.key==="
 // ════════════════════════════════════════════
 // MON QG (perso)
 // ════════════════════════════════════════════
+
+// ════════════════════════════════════════════
+// ESPACE ADMIN (Val uniquement)
+// ════════════════════════════════════════════
+// Note : mot de passe côté client = protège des curieux, pas des experts.
+// Pour un vrai verrouillage il faudra des règles Firestore côté serveur.
+const ADMIN_PASS_HASH = "3007"; // change-le quand tu veux
+
+function initAdminSection() {
+  document.getElementById("admin-unlock-btn")?.addEventListener("click", () => {
+    const pass = prompt("Mot de passe administrateur :");
+    if (pass === null) return;
+    if (pass === ADMIN_PASS_HASH) {
+      document.getElementById("admin-unlock-btn").style.display = "none";
+      document.getElementById("admin-panel").style.display = "block";
+      sessionStorage.setItem("qg_admin_ok", "1");
+      loadAdminData();
+    } else {
+      showToast("Mot de passe incorrect");
+    }
+  });
+
+  // Reste déverrouillé le temps de la session
+  if (sessionStorage.getItem("qg_admin_ok") === "1") {
+    const ub = document.getElementById("admin-unlock-btn");
+    const ap = document.getElementById("admin-panel");
+    if (ub) ub.style.display = "none";
+    if (ap) ap.style.display = "block";
+  }
+
+  document.getElementById("admin-lock-btn")?.addEventListener("click", () => {
+    sessionStorage.removeItem("qg_admin_ok");
+    document.getElementById("admin-panel").style.display = "none";
+    document.getElementById("admin-unlock-btn").style.display = "block";
+  });
+
+  document.getElementById("admin-refresh-btn")?.addEventListener("click", loadAdminData);
+
+  // Lien Stripe
+  const stripeInput = document.getElementById("admin-stripe-link");
+  if (stripeInput) stripeInput.value = localStorage.getItem("qg_stripe_link") || "";
+  document.getElementById("admin-save-stripe")?.addEventListener("click", () => {
+    const link = document.getElementById("admin-stripe-link").value.trim();
+    localStorage.setItem("qg_stripe_link", link);
+    showToast("Lien Stripe enregistré ✓");
+  });
+}
+
+async function loadAdminData() {
+  const listEl = document.getElementById("admin-groups-list");
+  const statsEl = document.getElementById("admin-stats");
+  if (!listEl) return;
+  if (!firebaseReady) { listEl.innerHTML = `<div style="color:var(--red);font-size:13px;">Firebase non connecté</div>`; return; }
+  listEl.innerHTML = `<div style="color:var(--muted);font-size:13px;padding:10px 0;">Chargement...</div>`;
+
+  try {
+    const snap = await db.collection("groupes").get();
+    const groups = [];
+    snap.forEach(doc => groups.push({ id: doc.id, ...doc.data() }));
+
+    // Stats
+    const total = groups.length;
+    const suspended = groups.filter(g => g.suspended).length;
+    const totalMembers = groups.reduce((sum, g) => sum + (g.members?.length || 0), 0);
+    statsEl.innerHTML = `
+      <div style="flex:1;background:var(--surface2);border-radius:var(--r-sm);padding:10px;text-align:center;">
+        <div style="font-size:20px;font-weight:800;color:var(--text);">${total}</div>
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;">Groupes</div>
+      </div>
+      <div style="flex:1;background:var(--surface2);border-radius:var(--r-sm);padding:10px;text-align:center;">
+        <div style="font-size:20px;font-weight:800;color:var(--text);">${totalMembers}</div>
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;">Membres</div>
+      </div>
+      <div style="flex:1;background:var(--surface2);border-radius:var(--r-sm);padding:10px;text-align:center;">
+        <div style="font-size:20px;font-weight:800;color:${suspended?'var(--red)':'var(--text)'};">${suspended}</div>
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;">Suspendus</div>
+      </div>`;
+
+    if (!groups.length) {
+      listEl.innerHTML = `<div style="color:var(--muted);font-size:13px;padding:10px 0;">Aucun groupe pour l'instant</div>`;
+      return;
+    }
+
+    // Tri par date de création (récent d'abord)
+    groups.sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
+
+    listEl.innerHTML = groups.map(g => {
+      const created = g.createdAt?.seconds ? new Date(g.createdAt.seconds*1000).toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"}) : "—";
+      const memberCount = g.members?.length || 0;
+      const memberNames = (g.members||[]).map(m => m.name).join(", ");
+      const isSusp = !!g.suspended;
+      return `<div style="background:var(--surface2);border-radius:var(--r-sm);padding:12px;margin-bottom:8px;border-left:3px solid ${isSusp?'var(--red)':'var(--green)'};">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <div style="font-size:14px;font-weight:700;color:var(--text);">${g.name||g.id}</div>
+          <div style="font-size:11px;font-weight:700;color:${isSusp?'var(--red)':'var(--green)'};">${isSusp?'🔴 Suspendu':'🟢 Actif'}</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:2px;">Code : <strong>${g.id}</strong> · Admin : ${g.admin||"?"}</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:2px;">Inscrit le ${created}</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">${memberCount} membre${memberCount>1?'s':''} : ${memberNames}</div>
+        <div style="display:flex;gap:6px;">
+          <button data-admin-stripe="${g.id}" style="flex:1;background:rgba(99,91,255,.12);border:1px solid rgba(99,91,255,.3);color:#8B84FF;border-radius:var(--r-sm);padding:8px;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;">💳 Envoyer lien</button>
+          <button data-admin-toggle="${g.id}" data-susp="${isSusp?'1':'0'}" style="flex:1;background:${isSusp?'rgba(52,199,123,.12)':'rgba(232,56,79,.12)'};border:1px solid ${isSusp?'rgba(52,199,123,.3)':'rgba(232,56,79,.3)'};color:${isSusp?'var(--green)':'var(--red)'};border-radius:var(--r-sm);padding:8px;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;">${isSusp?'✅ Réactiver':'🚫 Suspendre'}</button>
+        </div>
+      </div>`;
+    }).join("");
+
+    // Handlers Envoyer lien
+    listEl.querySelectorAll("[data-admin-stripe]").forEach(btn => {
+      btn.addEventListener("click", function() {
+        const link = localStorage.getItem("qg_stripe_link");
+        if (!link) { showToast("Configure d'abord ton lien Stripe ci-dessous"); return; }
+        const gid = this.dataset.adminStripe;
+        const msg = `Bonjour ! Pour continuer à profiter de Le Général, voici le lien d'abonnement (1€/mois/personne) : ${link}`;
+        if (navigator.share) {
+          navigator.share({ text: msg }).catch(()=>{});
+        } else {
+          navigator.clipboard.writeText(msg).then(()=>showToast("Message copié !")).catch(()=>showToast(link));
+        }
+      });
+    });
+
+    // Handlers Suspendre/Réactiver
+    listEl.querySelectorAll("[data-admin-toggle]").forEach(btn => {
+      btn.addEventListener("click", async function() {
+        const gid = this.dataset.adminToggle;
+        const currentlySusp = this.dataset.susp === "1";
+        const action = currentlySusp ? "réactiver" : "suspendre";
+        if (!confirm(`Confirmer : ${action} le groupe ${gid} ?`)) return;
+        try {
+          await db.collection("groupes").doc(gid).update({ suspended: !currentlySusp });
+          showToast(currentlySusp ? "Groupe réactivé ✓" : "Groupe suspendu");
+          loadAdminData();
+        } catch(e) {
+          showToast("Erreur : " + e.message);
+        }
+      });
+    });
+
+  } catch(e) {
+    listEl.innerHTML = `<div style="color:var(--red);font-size:13px;">Erreur : ${e.message}</div>`;
+  }
+}
+
 function renderPerso() {
   // Widgets toggles
   const wl=document.getElementById("widget-list");
@@ -3859,8 +4035,26 @@ function renderActu(articles) {
 // ════════════════════════════════════════════
 // FIREBASE SYNC
 // ════════════════════════════════════════════
+
+function showSuspendedScreen() {
+  const el = document.getElementById("suspended-screen");
+  if (el) el.style.display = "flex";
+}
+function hideSuspendedScreen() {
+  const el = document.getElementById("suspended-screen");
+  if (el) el.style.display = "none";
+}
+
 function loadGroupData() {
   if(!firebaseReady||!state.groupCode) return;
+  // Vérifie si le groupe a été suspendu par l'admin (paiement non reçu)
+  db.collection("groupes").doc(state.groupCode).onSnapshot(doc => {
+    if (doc.exists && doc.data().suspended) {
+      showSuspendedScreen();
+    } else {
+      hideSuspendedScreen();
+    }
+  });
   loadGroupMembers();
   // Events
   db.collection("groupes").doc(state.groupCode).collection("events").orderBy("date").onSnapshot(snap=>{
