@@ -120,7 +120,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     <div class="stats-grid">
       <div class="stat-box"><div class="stat-val">16</div><div class="stat-lbl">Qualifiés</div></div>
       <div class="stat-box"><div class="stat-val">8</div><div class="stat-lbl">Matchs</div></div>
-      <div class="stat-box"><div class="stat-val">2</div><div class="stat-lbl">Joués</div></div>
+      <div class="stat-box"><div class="stat-val">4</div><div class="stat-lbl">Joués</div></div>
       <div class="stat-box"><div class="stat-val">19 juil</div><div class="stat-lbl">Finale</div></div>
     </div>
   </div>
@@ -173,25 +173,25 @@ function showView(id, idx) {
 const R16_MATCHES = [
   {date:"4 juil",ville:"Houston",eq1:"🇨🇦 Canada",eq2:"🇲🇦 Maroc",score:"0-3",done:true,note:"Le Maroc file en quarts"},
   {date:"4 juil",ville:"Philadelphie",eq1:"🇫🇷 France",eq2:"🇵🇾 Paraguay",score:"1-0",done:true,note:"Mbappé (pen. 71')"},
-  {date:"6 juil",ville:"Seattle",eq1:"🇧🇪 Belgique",eq2:"🇺🇸 USA",score:"",done:false,note:"2h (FR)"},
-  {date:"6 juil",ville:"—",eq1:"🇭🇷 Croatie",eq2:"🇲🇽 Mexique",score:"",done:false,note:"À venir"},
+  {date:"5 juil",ville:"New Jersey",eq1:"🇧🇷 Brésil",eq2:"🇳🇴 Norvège",score:"1-2",done:true,note:"Doublé Haaland — le Brésil éliminé !"},
+  {date:"5 juil",ville:"Mexico",eq1:"🇲🇽 Mexique",eq2:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 Angleterre",score:"2-3",done:true,note:"Doublé Bellingham, l'Angleterre passe"},
+  {date:"6 juil",ville:"Dallas",eq1:"🇵🇹 Portugal",eq2:"🇪🇸 Espagne",score:"",done:false,note:"21h (FR) · Affiche phare"},
+  {date:"7 juil",ville:"Seattle",eq1:"🇺🇸 USA",eq2:"🇧🇪 Belgique",score:"",done:false,note:"2h (FR)"},
+  {date:"7 juil",ville:"Atlanta",eq1:"🇦🇷 Argentine",eq2:"🇪🇬 Égypte",score:"",done:false,note:"18h (FR)"},
   {date:"7 juil",ville:"Vancouver",eq1:"🇨🇭 Suisse",eq2:"🇨🇴 Colombie",score:"",done:false,note:"22h (FR)"},
-  {date:"À venir",ville:"—",eq1:"🇪🇸 Espagne",eq2:"🇵🇹 Portugal",score:"",done:false,note:"Affiche phare"},
-  {date:"À venir",ville:"—",eq1:"🇦🇷 Argentine",eq2:"🇪🇬 Égypte",score:"",done:false,note:""},
-  {date:"À venir",ville:"—",eq1:"?",eq2:"?",score:"",done:false,note:"Dernière affiche à confirmer"},
 ];
 
 
 // Classement des buteurs (après les 2 premiers 8es)
 const BUTEURS = [
-  {p:1,nom:"Lionel Messi",pays:"🇦🇷",buts:7,note:"4 matchs joués"},
-  {p:2,nom:"Kylian Mbappé",pays:"🇫🇷",buts:7,note:"Pénalty vs Paraguay (71')"},
-  {p:3,nom:"Harry Kane",pays:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",buts:5,note:""},
-  {p:3,nom:"Erling Haaland",pays:"🇳🇴",buts:5,note:""},
+  {p:1,nom:"Erling Haaland",pays:"🇳🇴",buts:7,note:"Doublé vs Brésil — en quarts"},
+  {p:1,nom:"Lionel Messi",pays:"🇦🇷",buts:7,note:"Joue le 7 juillet vs Égypte"},
+  {p:1,nom:"Kylian Mbappé",pays:"🇫🇷",buts:7,note:"Pénalty vs Paraguay (71')"},
+  {p:4,nom:"Harry Kane",pays:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",buts:5,note:"Angleterre en quarts"},
+  {p:5,nom:"Jude Bellingham",pays:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",buts:4,note:"Doublé vs Mexique"},
   {p:5,nom:"Ousmane Dembélé",pays:"🇫🇷",buts:4,note:""},
   {p:5,nom:"Mikel Oyarzabal",pays:"🇪🇸",buts:4,note:""},
-  {p:5,nom:"Vinícius Júnior",pays:"🇧🇷",buts:4,note:""},
-  {p:5,nom:"Ismaïla Sarr",pays:"🇸🇳",buts:4,note:""},
+  {p:5,nom:"Ismaïla Sarr",pays:"🇸🇳",buts:4,note:"Éliminé (Belgique)"},
 ];
 
 function renderButeurs() {
@@ -208,7 +208,7 @@ function renderButeurs() {
       <div style="font-size:15px;font-weight:800;color:var(--text);flex-shrink:0;">⚽ ${b.buts}</div>
     </div>`).join("")}
   </div>
-  <div style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center;">Messi et Mbappé à égalité en tête après les 8es</div>`;
+  <div style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center;">Haaland rejoint Messi et Mbappé en tête (7 buts) après son doublé face au Brésil</div>`;
 }
 
 function renderR16Schedule() {
