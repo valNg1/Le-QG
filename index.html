@@ -1252,18 +1252,19 @@ function startApp() {
     const mv = state.meteoVilles || ["paris","quiberon"];
     if (mv[0] !== "paris" || mv[1] !== "quiberon") renderMeteoCards(mv);
   }
-  renderDiner();
-  renderEvents();
-  renderAnnivStrips();
-  renderWidgetsZone();
-  renderGroupe();
-  renderMurWho();
-  renderMurList();
-  renderPerso();
-  renderBandeau();
+  const safe = (fn, name) => { try { fn(); } catch(e) { console.log("startApp/"+name+":", e.message); } };
+  safe(renderDiner, "renderDiner");
+  safe(renderEvents, "renderEvents");
+  safe(renderAnnivStrips, "renderAnnivStrips");
+  safe(renderWidgetsZone, "renderWidgetsZone");
+  safe(renderGroupe, "renderGroupe");
+  safe(renderMurWho, "renderMurWho");
+  safe(renderMurList, "renderMurList");
+  safe(renderPerso, "renderPerso");
+  safe(renderBandeau, "renderBandeau");
   // Sync anniversaires → événements
-  (state.annivs||[]).forEach(a => addAnnivToEvents(a));
-  if (state.groupCode) loadGroupData();
+  try { (state.annivs||[]).forEach(a => addAnnivToEvents(a)); } catch(e) { console.log("sync annivs:", e.message); }
+  if (state.groupCode) { try { loadGroupData(); } catch(e) { console.log("loadGroupData:", e.message); } }
   // Timers
   setInterval(updateHeader, 60000);
   setInterval(() => { fetchMeteo("paris"); fetchMeteo("quiberon"); }, 30*60000);
@@ -1628,6 +1629,7 @@ function renderDiner() {
   const today = new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
   document.getElementById("diner-date").textContent = today.charAt(0).toUpperCase()+today.slice(1);
   const members = getGroupMembers();
+  if (!state.diner) state.diner = {};
   const dinerToday = state.diner[getDinerKey()] || {};
   const grid = document.getElementById("diner-grid");
   grid.innerHTML = members.map(m => {
