@@ -553,9 +553,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
   <div id="teams-picker"></div>
   <div id="podcasts-picker" style="display:none;"></div>
   <div id="taches-config" style="margin-bottom:10px;"></div>
-  <p class="sec">Clé IA (recommandations)</p>
+  <p class="sec">Clé IA (quiz & recommandations)</p>
   <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-bottom:10px;">
-    <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">Clé OpenRouter pour les recommandations films et livres par IA. Gratuit sur openrouter.ai</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">Clé OpenRouter pour générer des <strong>quiz à l'infini</strong> et les recommandations films/livres par IA. Gratuit sur openrouter.ai — reste stockée uniquement sur cet appareil.</p>
     <input id="or-key-input" class="modal-input" placeholder="sk-or-v1-..." type="password"
       style="font-family:monospace;font-size:13px;">
     <div id="or-key-status" style="font-size:12px;margin-top:6px;"></div>
@@ -1824,11 +1824,25 @@ document.getElementById("ev-submit-btn").addEventListener("click", () => {
     color: selectedEvColor, adder: state.name,
     owner: state.name, perso: isPerso
   };
-  state.events.push(ev);
-  saveState();
-  if (!isPerso) saveEventToFirebase(ev);
-  renderEvents();
-  renderAnnivStrips();
+  if (isPerso) {
+    // Événement perso : uniquement local
+    state.events.push(ev);
+    saveState();
+    renderEvents();
+    renderAnnivStrips();
+  } else {
+    // Événement de groupe : on l'envoie à Firebase, le listener onSnapshot
+    // se chargera de l'afficher (évite le doublon).
+    if (firebaseReady && state.groupCode) {
+      saveEventToFirebase(ev);
+    } else {
+      // Pas de groupe/Firebase : on l'ajoute localement en secours
+      state.events.push(ev);
+      saveState();
+      renderEvents();
+      renderAnnivStrips();
+    }
+  }
   document.getElementById("ev-modal")?.classList.add("hidden");
   showToast("Événement ajouté ✓");
 });
@@ -3303,13 +3317,15 @@ function addTachePerso() {
   };
   state.tachesPerso.push(t);
   saveState();
-  document.getElementById("tp-title").value = "";
-  document.getElementById("tp-date").value = "";
+  const titleEl = document.getElementById("tp-title");
+  const dateEl = document.getElementById("tp-date");
+  if (titleEl) titleEl.value = "";
+  if (dateEl) dateEl.value = "";
   tpStarActive = false;
   const starBtn = document.getElementById("tp-star-toggle");
   if (starBtn) { starBtn.textContent="☆"; starBtn.style.color="var(--muted)"; }
-  renderTachesPerso();
-  renderBandeau();
+  try { renderTachesPerso(); } catch(e) { console.log("renderTachesPerso:", e); }
+  try { renderBandeau(); } catch(e) { console.log("renderBandeau:", e); }
   showToast("Tâche ajoutée ✓");
 }
 
@@ -4224,6 +4240,19 @@ document.addEventListener("click", function(e) {
 document.addEventListener("click", function(e) {
   if (e.target.closest && e.target.closest("#meteo-edit-btn")) openMeteoPicker();
   if (e.target.closest && e.target.closest("#meteo-save-btn")) saveMeteoCities();
+});
+
+// Délégation robuste : bouton "+ Ajouter" des tâches perso (marche quel que soit le chemin)
+document.addEventListener("click", function(e) {
+  if (e.target.closest && e.target.closest("#tp-add-btn")) {
+    addTachePerso();
+  }
+});
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Enter" && e.target.id === "tp-title") {
+    e.preventDefault();
+    addTachePerso();
+  }
 });
 
 
