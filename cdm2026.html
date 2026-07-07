@@ -120,7 +120,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     <div class="stats-grid">
       <div class="stat-box"><div class="stat-val">16</div><div class="stat-lbl">Qualifiés</div></div>
       <div class="stat-box"><div class="stat-val">8</div><div class="stat-lbl">Matchs</div></div>
-      <div class="stat-box"><div class="stat-val">4</div><div class="stat-lbl">Joués</div></div>
+      <div class="stat-box"><div class="stat-val">6</div><div class="stat-lbl">Joués</div></div>
       <div class="stat-box"><div class="stat-val">19 juil</div><div class="stat-lbl">Finale</div></div>
     </div>
   </div>
@@ -175,8 +175,8 @@ const R16_MATCHES = [
   {date:"4 juil",ville:"Philadelphie",eq1:"🇫🇷 France",eq2:"🇵🇾 Paraguay",score:"1-0",done:true,note:"Mbappé (pen. 71')"},
   {date:"5 juil",ville:"New Jersey",eq1:"🇧🇷 Brésil",eq2:"🇳🇴 Norvège",score:"1-2",done:true,note:"Doublé Haaland — le Brésil éliminé !"},
   {date:"5 juil",ville:"Mexico",eq1:"🇲🇽 Mexique",eq2:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 Angleterre",score:"2-3",done:true,note:"Doublé Bellingham, l'Angleterre passe"},
-  {date:"6 juil",ville:"Dallas",eq1:"🇵🇹 Portugal",eq2:"🇪🇸 Espagne",score:"",done:false,note:"21h (FR) · Affiche phare"},
-  {date:"7 juil",ville:"Seattle",eq1:"🇺🇸 USA",eq2:"🇧🇪 Belgique",score:"",done:false,note:"2h (FR)"},
+  {date:"6 juil",ville:"Dallas",eq1:"🇵🇹 Portugal",eq2:"🇪🇸 Espagne",score:"0-1",done:true,note:"Merino (90+1') — dernier Mondial de Ronaldo"},
+  {date:"6 juil",ville:"Seattle",eq1:"🇺🇸 USA",eq2:"🇧🇪 Belgique",score:"1-4",done:true,note:"La Belgique déroule (De Ketelaere x2)"},
   {date:"7 juil",ville:"Atlanta",eq1:"🇦🇷 Argentine",eq2:"🇪🇬 Égypte",score:"",done:false,note:"18h (FR)"},
   {date:"7 juil",ville:"Vancouver",eq1:"🇨🇭 Suisse",eq2:"🇨🇴 Colombie",score:"",done:false,note:"22h (FR)"},
 ];
@@ -191,7 +191,7 @@ const BUTEURS = [
   {p:5,nom:"Jude Bellingham",pays:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",buts:4,note:"Doublé vs Mexique"},
   {p:5,nom:"Ousmane Dembélé",pays:"🇫🇷",buts:4,note:""},
   {p:5,nom:"Mikel Oyarzabal",pays:"🇪🇸",buts:4,note:""},
-  {p:5,nom:"Ismaïla Sarr",pays:"🇸🇳",buts:4,note:"Éliminé (Belgique)"},
+  {p:5,nom:"Ismaïla Sarr",pays:"🇸🇳",buts:4,note:""},
 ];
 
 function renderButeurs() {
