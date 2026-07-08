@@ -3067,17 +3067,60 @@ function initQuiz() {
   renderThemePicker();
 }
 
+
+// ════════════════════════════════════════════
+// QUIZ — NIVEAUX DE DIFFICULTÉ PAR THÈME (1 à 5)
+// ════════════════════════════════════════════
+const QUIZ_LEVEL_LABELS = { 1:"Facile", 2:"Intermédiaire", 3:"Confirmé", 4:"Expert", 5:"Maître" };
+const QUIZ_LEVEL_WINDOW = 10; // nombre de questions pour évaluer le passage de niveau
+const QUIZ_LEVEL_THRESHOLD = 0.9; // 90% de réussite requis
+
+function getQuizLevel(theme) {
+  if (!state.quizLevels) state.quizLevels = {};
+  return state.quizLevels[theme]?.level || 1;
+}
+
+function getQuizLevelProgress(theme) {
+  if (!state.quizLevels) state.quizLevels = {};
+  const d = state.quizLevels[theme] || { level: 1, correct: 0, total: 0 };
+  return d;
+}
+
+// Enregistre une réponse (juste/faux) pour le thème en cours, et gère le passage de niveau
+function recordQuizAnswer(theme, isCorrect) {
+  if (!state.quizLevels) state.quizLevels = {};
+  if (!state.quizLevels[theme]) state.quizLevels[theme] = { level: 1, correct: 0, total: 0 };
+  const d = state.quizLevels[theme];
+  d.total++;
+  if (isCorrect) d.correct++;
+  let leveledUp = false;
+  if (d.total >= QUIZ_LEVEL_WINDOW) {
+    if (d.correct / d.total >= QUIZ_LEVEL_THRESHOLD && d.level < 5) {
+      d.level++;
+      leveledUp = true;
+    }
+    // Fenêtre glissante : on repart à zéro pour réévaluer sur les 10 prochaines
+    d.correct = 0;
+    d.total = 0;
+  }
+  saveState();
+  return leveledUp;
+}
+
 function renderThemePicker() {
   document.getElementById("quiz-theme-picker").style.display = "block";
   document.getElementById("quiz-content").style.display = "none";
   document.getElementById("quiz-review").style.display = "none";
   const grid = document.getElementById("quiz-theme-grid");
   if (!grid) return;
-  grid.innerHTML = QUIZ_THEMES.map(t => `
-    <button style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;font-family:var(--font);transition:all .15s;" data-theme="${t.id}">
+  grid.innerHTML = QUIZ_THEMES.map(t => {
+    const lvl = getQuizLevel(t.id);
+    return `<button style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;font-family:var(--font);transition:all .15s;position:relative;" data-theme="${t.id}">
       <span style="font-size:22px;">${t.emoji}</span>
-      <span style="font-size:13px;font-weight:600;color:var(--text);text-align:left;">${t.label.replace(t.emoji+" ","")}</span>
-    </button>`).join("");
+      <span style="font-size:13px;font-weight:600;color:var(--text);text-align:left;flex:1;">${t.label.replace(t.emoji+" ","")}</span>
+      ${t.id!=="all"?`<span style="font-size:10px;font-weight:700;color:var(--yellow);background:rgba(247,193,4,.12);border-radius:8px;padding:2px 7px;white-space:nowrap;">Nv.${lvl}</span>`:""}
+    </button>`;
+  }).join("");
   grid.querySelectorAll("[data-theme]").forEach(btn => {
     btn.addEventListener("click", function() {
       startQuiz(this.dataset.theme);
@@ -3111,7 +3154,8 @@ async function startQuiz(theme, reviewWrong) {
     // Questions déjà vues récemment (pour demander à l'IA de les éviter)
     const seenAll = JSON.parse(localStorage.getItem("qg_quiz_seen") || "[]");
     const avoidList = seenAll.slice(-25);
-    const aiQuestions = await generateQuizAI(orKey, themeLabel, avoidList);
+    const level = getQuizLevel(quizState.theme);
+    const aiQuestions = await generateQuizAI(orKey, themeLabel, avoidList, level);
     if (aiQuestions && aiQuestions.length >= 5) {
       // Mémorise ces questions pour éviter les répétitions au prochain tour
       const merged = [...seenAll, ...aiQuestions.map(q=>q.q)].slice(-80);
@@ -3139,7 +3183,7 @@ async function startQuiz(theme, reviewWrong) {
 }
 
 // Génère un quiz via IA, avec 2 modèles gratuits en secours + décodage tolérant
-async function generateQuizAI(orKey, themeLabel, avoidList) {
+async function generateQuizAI(orKey, themeLabel, avoidList, level) {
   const MODELS = [
     "meta-llama/llama-3.3-70b-instruct:free",
     "google/gemma-3-12b-it:free",
@@ -3147,7 +3191,15 @@ async function generateQuizAI(orKey, themeLabel, avoidList) {
   const avoidTxt = (avoidList && avoidList.length)
     ? " ÉVITE ABSOLUMENT ces questions déjà posées : " + avoidList.map(q=>`"${q}"`).join(", ") + "."
     : "";
-  const sysPrompt = `Tu es un créateur de quiz de culture générale en français. Génère EXACTEMENT 10 questions variées, originales et intéressantes sur le thème "${themeLabel}". Niveau grand public. Réponds UNIQUEMENT avec un tableau JSON valide, sans texte avant/après, sans markdown. Format strict: [{"q":"question","opts":["bonne réponse","mauvaise 1","mauvaise 2","mauvaise 3"],"a":0}]. La bonne réponse est TOUJOURS en position 0.`;
+  const lvl = level || 1;
+  const DIFFICULTY_DESC = {
+    1: "très facile, niveau grand public, réponses évidentes pour la plupart des gens",
+    2: "facile à intermédiaire, culture générale courante",
+    3: "intermédiaire à confirmé, demande de bonnes connaissances générales",
+    4: "difficile, niveau expert, questions pointues et détails précis",
+    5: "très difficile, niveau spécialiste/passionné, questions rares et exigeantes"
+  };
+  const sysPrompt = `Tu es un créateur de quiz de culture générale en français. Génère EXACTEMENT 10 questions variées, originales et intéressantes sur le thème "${themeLabel}", de difficulté ${lvl}/5 (${DIFFICULTY_DESC[lvl]}). Réponds UNIQUEMENT avec un tableau JSON valide, sans texte avant/après, sans markdown. Format strict: [{"q":"question","opts":["bonne réponse","mauvaise 1","mauvaise 2","mauvaise 3"],"a":0}]. La bonne réponse est TOUJOURS en position 0.`;
 
   for (const model of MODELS) {
     try {
@@ -3245,9 +3297,13 @@ function renderQuiz() {
   const modeBadge = quizState.aiMode
     ? `<span style="color:var(--yellow);">✨ IA</span>`
     : `<span style="color:var(--muted2);">📚 hors-ligne</span>`;
+  const lvlProgress = getQuizLevelProgress(quizState.theme);
+  const lvlBadge = quizState.theme !== "all"
+    ? `<span style="color:var(--yellow);font-weight:700;">Nv.${lvlProgress.level} · ${lvlProgress.total}/${QUIZ_LEVEL_WINDOW}</span>`
+    : "";
   el.innerHTML = `
     <div class="quiz-progress"><div class="quiz-prog-fill" style="width:${idx/questions.length*100}%"></div></div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:12px;display:flex;justify-content:space-between;"><span>Question ${idx+1} / ${questions.length} · Score : ${score}</span>${modeBadge}</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:12px;display:flex;justify-content:space-between;gap:8px;"><span>Question ${idx+1} / ${questions.length} · Score : ${score}</span><span style="display:flex;gap:8px;">${lvlBadge}${modeBadge}</span></div>
     <div class="quiz-q">${q.q}</div>
     <div class="quiz-opts">${q.opts.map((opt,i)=>`<button class="quiz-opt" data-opt="${i}">${opt}</button>`).join("")}</div>`;
   el.querySelectorAll(".quiz-opt").forEach(btn => {
@@ -3260,6 +3316,8 @@ function renderQuiz() {
         if (i===correct) b.classList.add("correct");
         else if (i===chosen && chosen!==correct) b.classList.add("wrong");
       });
+      let leveledUp = false;
+      if (quizState.theme !== "all") leveledUp = recordQuizAnswer(quizState.theme, chosen===correct);
       if (chosen===correct) {
         quizState.score++;
       } else {
@@ -3273,6 +3331,10 @@ function renderQuiz() {
             localStorage.setItem("qg_quiz_wrong", JSON.stringify(lsWrong.slice(-30)));
           }
         } catch(e) {}
+      }
+      if (leveledUp) {
+        const newLvl = getQuizLevel(quizState.theme);
+        showToast(`🎉 Niveau ${newLvl} débloqué !`);
       }
       setTimeout(() => { quizState.idx++; quizState.answered=false; renderQuiz(); }, 1200);
     });
