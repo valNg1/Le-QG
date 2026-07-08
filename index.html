@@ -3533,7 +3533,7 @@ function renderBandeau() {
     html += `<div style="margin-bottom:8px;">
       <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
         ⭐ Mes tâches importantes
-        <button onclick="showView('modules');openModule('taches_perso')" style="background:none;border:none;color:var(--yellow);font-size:11px;font-weight:700;cursor:pointer;margin-left:auto;font-family:var(--font);">Voir tout →</button>
+        <button onclick="showView('postit');backToPostit();openPostitModule('taches_perso')" style="background:none;border:none;color:var(--yellow);font-size:11px;font-weight:700;cursor:pointer;margin-left:auto;font-family:var(--font);">Voir tout →</button>
       </div>`;
     starTaches.forEach(t => {
       const dateStr = t.date ? new Date(t.date+"T00:00:00").toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"short"}) : "";
