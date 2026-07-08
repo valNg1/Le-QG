@@ -120,7 +120,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     <div class="stats-grid">
       <div class="stat-box"><div class="stat-val">16</div><div class="stat-lbl">Qualifiés</div></div>
       <div class="stat-box"><div class="stat-val">8</div><div class="stat-lbl">Matchs</div></div>
-      <div class="stat-box"><div class="stat-val">6</div><div class="stat-lbl">Joués</div></div>
+      <div class="stat-box"><div class="stat-val">8</div><div class="stat-lbl">Joués</div></div>
       <div class="stat-box"><div class="stat-val">19 juil</div><div class="stat-lbl">Finale</div></div>
     </div>
   </div>
@@ -134,14 +134,34 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     <div style="font-size:12px;color:rgba(255,255,255,.7);margin-bottom:10px;">Philadelphie · 4 juillet · Buteur : Mbappé (71&#39;, penalty)</div>
     <div style="font-size:13px;color:rgba(255,255,255,.85);line-height:1.6;">Longtemps muselés par le bloc bas paraguayen, les Bleus arrachent leur qualification sur un penalty de Mbappé (19ᵉ but en Coupe du Monde, à 1 longueur du record de Messi).</div>
     <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between;">
-      <div style="font-size:12px;color:var(--gold);font-weight:700;">➡️ Prochain match</div>
+      <div style="font-size:12px;color:var(--gold);font-weight:700;">➡️ Prochain match confirmé</div>
       <div style="font-size:13px;color:#fff;font-weight:700;">France 🇫🇷 vs 🇲🇦 Maroc</div>
     </div>
     <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:2px;">Quart de finale · Jeudi 9 juillet · 22h (FR) · Boston</div>
   </div>
 
-  <p class="sec">Huitièmes de finale — résultats & programme</p>
+  <p class="sec">Huitièmes de finale — résultats</p>
   <div id="r16-schedule"></div>
+
+  <p class="sec">🏆 Quarts de finale — programme</p>
+  <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;">
+    <div style="padding:11px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-size:13px;font-weight:700;color:var(--text);">🇲🇦 Maroc vs 🇫🇷 France</div>
+      <div style="font-size:11px;color:var(--muted);">Jeu 9 juil · 22h (FR) · Boston</div>
+    </div>
+    <div style="padding:11px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-size:13px;font-weight:700;color:var(--text);">🇪🇸 Espagne vs 🇧🇪 Belgique</div>
+      <div style="font-size:11px;color:var(--muted);">Ven 10 juil · 21h (FR) · Los Angeles</div>
+    </div>
+    <div style="padding:11px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-size:13px;font-weight:700;color:var(--text);">🇳🇴 Norvège vs 🏴󠁧󠁢󠁥󠁮󠁧󠁿 Angleterre</div>
+      <div style="font-size:11px;color:var(--muted);">Sam 11 juil · 23h (FR) · Miami</div>
+    </div>
+    <div style="padding:11px 14px;display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-size:13px;font-weight:700;color:var(--text);">🇦🇷 Argentine vs 🇨🇭 Suisse</div>
+      <div style="font-size:11px;color:var(--muted);">Sam 11 juil · 3h (FR) · Kansas City</div>
+    </div>
+  </div>
 
   <p class="sec">Villes hôtes</p>
   <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;">
@@ -177,16 +197,16 @@ const R16_MATCHES = [
   {date:"5 juil",ville:"Mexico",eq1:"🇲🇽 Mexique",eq2:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 Angleterre",score:"2-3",done:true,note:"Doublé Bellingham, l'Angleterre passe"},
   {date:"6 juil",ville:"Dallas",eq1:"🇵🇹 Portugal",eq2:"🇪🇸 Espagne",score:"0-1",done:true,note:"Merino (90+1') — dernier Mondial de Ronaldo"},
   {date:"6 juil",ville:"Seattle",eq1:"🇺🇸 USA",eq2:"🇧🇪 Belgique",score:"1-4",done:true,note:"La Belgique déroule (De Ketelaere x2)"},
-  {date:"7 juil",ville:"Atlanta",eq1:"🇦🇷 Argentine",eq2:"🇪🇬 Égypte",score:"",done:false,note:"18h (FR)"},
-  {date:"7 juil",ville:"Vancouver",eq1:"🇨🇭 Suisse",eq2:"🇨🇴 Colombie",score:"",done:false,note:"22h (FR)"},
+  {date:"7 juil",ville:"Atlanta",eq1:"🇦🇷 Argentine",eq2:"🇪🇬 Égypte",score:"3-2",done:true,note:"Messi renverse tout après 2-0 égyptien"},
+  {date:"7 juil",ville:"Vancouver",eq1:"🇨🇭 Suisse",eq2:"🇨🇴 Colombie",score:"0-0",done:true,note:"Suisse qualifiée aux tirs au but (4-3)"},
 ];
 
 
 // Classement des buteurs (après les 2 premiers 8es)
 const BUTEURS = [
-  {p:1,nom:"Erling Haaland",pays:"🇳🇴",buts:7,note:"Doublé vs Brésil — en quarts"},
-  {p:1,nom:"Lionel Messi",pays:"🇦🇷",buts:7,note:"Joue le 7 juillet vs Égypte"},
-  {p:1,nom:"Kylian Mbappé",pays:"🇫🇷",buts:7,note:"Pénalty vs Paraguay (71')"},
+  {p:1,nom:"Lionel Messi",pays:"🇦🇷",buts:8,note:"Renverse l'Égypte à lui seul — en quarts"},
+  {p:2,nom:"Erling Haaland",pays:"🇳🇴",buts:7,note:"Doublé vs Brésil — en quarts"},
+  {p:2,nom:"Kylian Mbappé",pays:"🇫🇷",buts:7,note:"Pénalty vs Paraguay (71')"},
   {p:4,nom:"Harry Kane",pays:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",buts:5,note:"Angleterre en quarts"},
   {p:5,nom:"Jude Bellingham",pays:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",buts:4,note:"Doublé vs Mexique"},
   {p:5,nom:"Ousmane Dembélé",pays:"🇫🇷",buts:4,note:""},
