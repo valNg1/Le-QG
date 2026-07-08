@@ -378,12 +378,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
   <a id="suspended-contact" href="#" style="background:var(--yellow);color:#1A1916;text-decoration:none;border-radius:20px;padding:12px 24px;font-family:var(--font);font-size:14px;font-weight:700;">Contacter l'administrateur</a>
 </div>
 
+<body>
+
 <div id="update-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:var(--yellow);color:#1A1916;padding:12px 16px;text-align:center;font-family:var(--font);font-size:14px;font-weight:700;">
   ✨ Nouvelle version disponible
   <button id="update-reload-btn" style="margin-left:10px;background:#1A1916;color:var(--yellow);border:none;border-radius:20px;padding:6px 16px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;">Recharger</button>
 </div>
 
-<body>
 
 <!-- ═══ ONBOARDING ═══ -->
 <!-- ═══ ÉCRAN D'INVITATION ═══ -->
@@ -1029,7 +1030,7 @@ function initFirebase() {
     db = firebase.firestore();
     firebaseReady = true;
     console.log("✅ Firebase OK");
-    console.log("📦 Le Général v3.2.1");
+    console.log("📦 Le Général v3.3.0");
     renderBandeau();
   // Sync anniversaires → événements
   (state.annivs||[]).forEach(a => addAnnivToEvents(a));
@@ -4440,7 +4441,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.2.1";
+const APP_VERSION = "3.3.0";
 async function checkForUpdate() {
   try {
     const res = await fetch("version.json?t=" + Date.now(), { cache: "no-store" });
