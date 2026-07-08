@@ -1110,7 +1110,8 @@ function obNext() {
     Object.keys(state).forEach(k => delete state[k]);
     Object.assign(state, freshState);
     // Purge aussi les caches annexes
-    ["qg_quiz_seen","qg_quiz_wrong"].forEach(k => localStorage.removeItem(k));
+    Object.keys(localStorage).filter(k => k.startsWith("qg_quiz_seen")).forEach(k => localStorage.removeItem(k));
+    localStorage.removeItem("qg_quiz_wrong");
   }
   state.name = name; state.avatar = obAvatar || "🧑";
   saveState();
@@ -3144,6 +3145,7 @@ async function startQuiz(theme, reviewWrong) {
   // Génération IA via OpenRouter
   const orKey = localStorage.getItem("qg_or_key");
   const themeLabel = QUIZ_THEMES.find(t=>t.id===quizState.theme)?.label?.replace(/^\S+ /,"") || "culture générale";
+  const seenKey = "qg_quiz_seen_" + quizState.theme;
 
   document.getElementById("quiz-theme-picker").style.display = "none";
   document.getElementById("quiz-content").style.display = "block";
@@ -3151,35 +3153,37 @@ async function startQuiz(theme, reviewWrong) {
   document.getElementById("quiz-content").innerHTML = `<div class="loading">✨ Génération de nouvelles questions...</div>`;
 
   if (orKey) {
-    // Questions déjà vues récemment (pour demander à l'IA de les éviter)
-    const seenAll = JSON.parse(localStorage.getItem("qg_quiz_seen") || "[]");
-    const avoidList = seenAll.slice(-25);
+    // Questions déjà vues récemment SUR CE THÈME (liste dédiée, pas mélangée avec les autres thèmes)
+    const seenAll = JSON.parse(localStorage.getItem(seenKey) || "[]");
+    const avoidList = seenAll.slice(-40);
     const level = getQuizLevel(quizState.theme);
     const aiQuestions = await generateQuizAI(orKey, themeLabel, avoidList, level);
     if (aiQuestions && aiQuestions.length >= 5) {
-      // Mémorise ces questions pour éviter les répétitions au prochain tour
-      const merged = [...seenAll, ...aiQuestions.map(q=>q.q)].slice(-80);
-      localStorage.setItem("qg_quiz_seen", JSON.stringify(merged));
+      // Mémorise ces questions pour éviter les répétitions au prochain tour (par thème)
+      const merged = [...seenAll, ...aiQuestions.map(q=>q.q)].slice(-100);
+      localStorage.setItem(seenKey, JSON.stringify(merged));
       quizState.aiMode = true;
       launchQuizWith(aiQuestions);
+      showToast("✨ Questions générées par IA");
       return;
     }
-    // Si l'IA a échoué, on prévient discrètement avant de basculer en local
+    // Si l'IA a échoué, on prévient clairement avant de basculer en local
     console.log("Quiz IA indisponible → banque locale");
   }
 
-  // Fallback : banque locale avec tracking anti-répétition
+  // Fallback : banque locale avec tracking anti-répétition (par thème)
   quizState.aiMode = false;
   const allPool = quizState.theme && quizState.theme !== "all"
     ? QUIZ_QUESTIONS.filter(q => q.t === quizState.theme)
     : [...QUIZ_QUESTIONS];
-  const seenQs = JSON.parse(localStorage.getItem("qg_quiz_seen") || "[]");
+  const seenQs = JSON.parse(localStorage.getItem(seenKey) || "[]");
   const unseen = allPool.filter(q => !seenQs.includes(q.q));
   const pool = unseen.length >= 5 ? unseen : allPool;
   const shuffled = [...pool].sort(()=>Math.random()-.5).slice(0, Math.min(10, pool.length));
-  const prevSeen = JSON.parse(localStorage.getItem("qg_quiz_seen") || "[]");
-  localStorage.setItem("qg_quiz_seen", JSON.stringify([...prevSeen, ...shuffled.map(q=>q.q)].slice(-80)));
+  const prevSeen = JSON.parse(localStorage.getItem(seenKey) || "[]");
+  localStorage.setItem(seenKey, JSON.stringify([...prevSeen, ...shuffled.map(q=>q.q)].slice(-100)));
   launchQuizWith(shuffled);
+  showToast(orKey ? "📚 IA indisponible — mode hors-ligne" : "📚 Mode hors-ligne (pas de clé IA)");
 }
 
 // Génère un quiz via IA, avec 2 modèles gratuits en secours + décodage tolérant
@@ -3189,7 +3193,7 @@ async function generateQuizAI(orKey, themeLabel, avoidList, level) {
     "google/gemma-3-12b-it:free",
   ];
   const avoidTxt = (avoidList && avoidList.length)
-    ? " ÉVITE ABSOLUMENT ces questions déjà posées : " + avoidList.map(q=>`"${q}"`).join(", ") + "."
+    ? ` ÉVITE ABSOLUMENT ces questions déjà posées (et évite aussi de reposer la même info/anecdote reformulée différemment) : ` + avoidList.map(q=>`"${q}"`).join(", ") + "."
     : "";
   const lvl = level || 1;
   const DIFFICULTY_DESC = {
@@ -3199,7 +3203,15 @@ async function generateQuizAI(orKey, themeLabel, avoidList, level) {
     4: "difficile, niveau expert, questions pointues et détails précis",
     5: "très difficile, niveau spécialiste/passionné, questions rares et exigeantes"
   };
-  const sysPrompt = `Tu es un créateur de quiz de culture générale en français. Génère EXACTEMENT 10 questions variées, originales et intéressantes sur le thème "${themeLabel}", de difficulté ${lvl}/5 (${DIFFICULTY_DESC[lvl]}). Réponds UNIQUEMENT avec un tableau JSON valide, sans texte avant/après, sans markdown. Format strict: [{"q":"question","opts":["bonne réponse","mauvaise 1","mauvaise 2","mauvaise 3"],"a":0}]. La bonne réponse est TOUJOURS en position 0.`;
+  // Angles aléatoires pour forcer la diversité des sujets abordés (au-delà de ce que la température seule permet)
+  const ANGLES = [
+    "des faits historiques peu connus", "des records et superlatifs", "des inventions et découvertes",
+    "des personnalités marquantes", "des lieux et monuments", "des chiffres et statistiques surprenants",
+    "des anecdotes insolites", "des œuvres et créations", "des événements récents (2020-2026)",
+    "des origines et étymologies", "des comparaisons internationales", "des premières fois historiques"
+  ];
+  const shuffledAngles = [...ANGLES].sort(()=>Math.random()-.5).slice(0,4);
+  const sysPrompt = `Tu es un créateur de quiz de culture générale en français. Génère EXACTEMENT 10 questions variées, originales et intéressantes sur le thème "${themeLabel}", de difficulté ${lvl}/5 (${DIFFICULTY_DESC[lvl]}). Pour garantir la diversité, base des questions sur ces angles différents : ${shuffledAngles.join(", ")}. Ne recycle pas les questions les plus classiques/évidentes du thème si possible. Réponds UNIQUEMENT avec un tableau JSON valide, sans texte avant/après, sans markdown. Format strict: [{"q":"question","opts":["bonne réponse","mauvaise 1","mauvaise 2","mauvaise 3"],"a":0}]. La bonne réponse est TOUJOURS en position 0.`;
 
   for (const model of MODELS) {
     try {
