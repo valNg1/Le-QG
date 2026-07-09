@@ -547,6 +547,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
   <div id="media-home">
     <p class="sec" style="margin-top:8px;">📰 Média</p>
     <div class="module-grid" id="media-grid"></div>
+    <details style="margin-top:8px;">
+      <summary style="font-size:12px;color:var(--muted);cursor:pointer;padding:4px 0;">⚙️ Choisir mes sources</summary>
+      <div id="media-fils-picker" style="margin-top:10px;"></div>
+    </details>
   </div>
   <div id="module-media-detail" style="display:none;">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
@@ -623,7 +627,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     </div>
   </div>
 
-  <div style="text-align:center;font-size:11px;color:var(--muted2);margin:16px 0 8px;">Le Général v3.3.4</div>
+  <div style="text-align:center;font-size:11px;color:var(--muted2);margin:16px 0 8px;">Le Général v3.3.5</div>
 </div>
 
 
@@ -1066,7 +1070,7 @@ function initFirebase() {
     db = firebase.firestore();
     firebaseReady = true;
     console.log("✅ Firebase OK");
-    console.log("📦 Le Général v3.3.4");
+    console.log("📦 Le Général v3.3.5");
     renderBandeau();
   // Sync anniversaires → événements
   (state.annivs||[]).forEach(a => addAnnivToEvents(a));
@@ -1387,7 +1391,7 @@ function showView(id) {
   if (id==="modules") renderModulesHome();
   if (id==="postit") { backToPostit(); renderPostitHome(); }
   if (id==="sante") { backToSante(); renderSanteHome(); }
-  if (id==="media") { backToMedia(); renderMediaHome(); }
+  if (id==="media") { backToMedia(); renderMediaHome(); renderFilsPicker("media-fils-picker", "Coche les sources à afficher :"); }
 }
 
 // ════════════════════════════════════════════
@@ -2485,30 +2489,9 @@ function renderPerso() {
     });
   }
 
-  // Fils d'actualités
-  const ap=document.getElementById("teams-picker");
-  if(ap) {
-    ap.innerHTML = `<p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Choisis tes fils d'actualités (si le widget Actualités est activé)</p>` +
-    NEWS_FILS.map(f=>{
-      const sel=(state.actuFils||["fr"]).includes(f.id);
-      return `<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--surface);border-radius:var(--r-sm);border:1px solid ${sel?"var(--yellow)":"var(--border)"};margin-bottom:6px;cursor:pointer;" data-fil-pick="${f.id}">
-        <div style="font-size:20px">${f.label.split(" ")[0]}</div>
-        <div style="flex:1;font-size:13px;font-weight:600;color:var(--text)">${f.label}</div>
-        <div style="width:20px;height:20px;border-radius:50%;border:2px solid ${sel?"var(--yellow)":"var(--border2)"};background:${sel?"var(--yellow)":"none"};display:flex;align-items:center;justify-content:center;font-size:11px;color:#1A1916">${sel?"✓":""}</div>
-      </div>`;
-    }).join("");
-    ap.querySelectorAll("[data-fil-pick]").forEach(row=>{
-      row.addEventListener("click",function(){
-        const id=this.dataset.filPick;
-        if(!state.actuFils) state.actuFils=["fr"];
-        if(state.actuFils.includes(id)) { if(state.actuFils.length>1) state.actuFils=state.actuFils.filter(x=>x!==id); }
-        else state.actuFils.push(id);
-        saveState();
-        renderPerso();
-        if (document.getElementById("view-media")?.classList.contains("active")) renderMediaHome(); // rafraîchit la page Média si elle est ouverte
-      });
-    });
-  }
+  // Fils d'actualités (Mon QG)
+  renderFilsPicker("teams-picker", "Choisis tes fils d'actualités (aussi modifiable directement dans l'onglet Média)");
+
   // Podcasts picker — caché (widget supprimé)
   const pp=document.getElementById("podcasts-picker");
   if(pp) pp.innerHTML="";
@@ -4478,6 +4461,31 @@ const NEWS_FILS = [
 ];
 let actuCache = {}, currentFil = null;
 
+function renderFilsPicker(containerId, introText) {
+  const ap = document.getElementById(containerId);
+  if (!ap) return;
+  ap.innerHTML = `<p style="font-size:12px;color:var(--muted);margin-bottom:10px;">${introText}</p>` +
+    NEWS_FILS.map(f=>{
+      const sel=(state.actuFils||["fr"]).includes(f.id);
+      return `<div onclick="toggleFilPick('${f.id}')" style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--surface);border-radius:var(--r-sm);border:1px solid ${sel?"var(--yellow)":"var(--border)"};margin-bottom:6px;cursor:pointer;">
+        <div style="font-size:20px">${f.label.split(" ")[0]}</div>
+        <div style="flex:1;font-size:13px;font-weight:600;color:var(--text)">${f.label}</div>
+        <div style="width:20px;height:20px;border-radius:50%;border:2px solid ${sel?"var(--yellow)":"var(--border2)"};background:${sel?"var(--yellow)":"none"};display:flex;align-items:center;justify-content:center;font-size:11px;color:#1A1916">${sel?"✓":""}</div>
+      </div>`;
+    }).join("");
+}
+
+function toggleFilPick(id) {
+  if (!state.actuFils) state.actuFils = ["fr"];
+  if (state.actuFils.includes(id)) { if (state.actuFils.length>1) state.actuFils = state.actuFils.filter(x=>x!==id); }
+  else state.actuFils.push(id);
+  saveState();
+  // Rafraîchit tous les sélecteurs + grilles visibles à l'écran
+  renderFilsPicker("teams-picker", "Choisis tes fils d'actualités (aussi modifiable directement dans l'onglet Média)");
+  renderFilsPicker("media-fils-picker", "Coche les sources à afficher :");
+  renderMediaHome();
+}
+
 function renderMediaHome() {
   if (!state.actuFils) state.actuFils = ["fr"];
   const el = document.getElementById("media-grid");
@@ -4535,7 +4543,11 @@ async function fetchActu(filId, force=false, targetId="media-detail-zone", limit
     if (fil.country) url += `&country=${fil.country}`;
     if (fil.language) url += `&language=${fil.language}`;
     if (fil.q) url += `&q=${encodeURIComponent(fil.q)}`;
-    if (fil.domain && withDomain) url += `&domainurl=${encodeURIComponent(fil.domain)}`;
+    if (fil.domain && withDomain) {
+      // newsdata.io a utilisé différents noms de paramètre selon les versions de son API —
+      // on envoie les deux pour maximiser la compatibilité.
+      url += `&domainurl=${encodeURIComponent(fil.domain)}&domain=${encodeURIComponent(fil.domain.replace(/\.com$|\.org$|\.net$/,""))}`;
+    }
     url += "&category=top";
     return url;
   };
@@ -4543,9 +4555,9 @@ async function fetchActu(filId, force=false, targetId="media-detail-zone", limit
   try {
     let res = await fetch(buildUrl(true));
     let data = await res.json();
-    if (data.status !== "success" && fil.domain) {
-      // Le filtre par domaine a échoué (ex. non supporté sur ce plan) → on réessaie sans filtre
-      console.log("fetchActu: domainurl a échoué, repli sans filtre de domaine:", data.message);
+    // Repli sans filtre de domaine si : erreur API, OU réponse vide (le filtre ne matche rien)
+    if (fil.domain && (data.status !== "success" || !(data.results||[]).length)) {
+      console.log("fetchActu: filtre domaine sans résultat/en erreur, repli général:", data.message||"résultats vides");
       res = await fetch(buildUrl(false));
       data = await res.json();
     }
@@ -4797,7 +4809,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.4";
+const APP_VERSION = "3.3.5";
 async function checkForUpdate() {
   try {
     const res = await fetch("version.json?t=" + Date.now(), { cache: "no-store" });
