@@ -4457,6 +4457,7 @@ const NEWS_FILS = [
   { id:"sport",   label:"⚽ Sport",     country:"",  language:"fr", q:"sport" },
   { id:"tech",    label:"💻 Tech",      country:"",  language:"fr", q:"technology" },
   { id:"science", label:"🔬 Science",   country:"",  language:"fr", q:"science" },
+  { id:"usatoday",label:"🇺🇸 USA Today",country:"",  language:"en", q:"", domain:"usatoday.com" },
 ];
 let actuCache = {}, currentFil = null;
 
@@ -4506,6 +4507,7 @@ async function fetchActu(filId, force=false) {
     if (fil.country) url += `&country=${fil.country}`;
     if (fil.language) url += `&language=${fil.language}`;
     if (fil.q) url += `&q=${encodeURIComponent(fil.q)}`;
+    if (fil.domain) url += `&domainurl=${encodeURIComponent(fil.domain)}`;
     url += "&category=top";
     const res = await fetch(url);
     const data = await res.json();
