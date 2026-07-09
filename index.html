@@ -3223,18 +3223,22 @@ function recordQuizAnswer(theme, isCorrect) {
   const d = state.quizLevels[theme];
   d.total++;
   if (isCorrect) d.correct++;
-  let leveledUp = false;
+  let result = { leveledUp: false, windowClosed: false, correct: d.correct, total: d.total, level: d.level };
   if (d.total >= QUIZ_LEVEL_WINDOW) {
+    result.windowClosed = true;
+    result.correct = d.correct;
+    result.total = d.total;
     if (d.correct / d.total >= QUIZ_LEVEL_THRESHOLD && d.level < 5) {
       d.level++;
-      leveledUp = true;
+      result.leveledUp = true;
     }
+    result.level = d.level;
     // Fenêtre glissante : on repart à zéro pour réévaluer sur les 10 prochaines
     d.correct = 0;
     d.total = 0;
   }
   saveState();
-  return leveledUp;
+  return result;
 }
 
 function renderThemePicker() {
@@ -3459,12 +3463,21 @@ function renderQuiz() {
     ? `<span style="color:var(--yellow);">✨ IA</span>`
     : `<span style="color:var(--muted2);">📚 hors-ligne</span>`;
   const lvlProgress = getQuizLevelProgress(quizState.theme);
-  const lvlBadge = quizState.theme !== "all"
-    ? `<span style="color:var(--yellow);font-weight:700;">Nv.${lvlProgress.level} · ${lvlProgress.total}/${QUIZ_LEVEL_WINDOW}</span>`
+  const lvlBar = quizState.theme !== "all"
+    ? `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <span style="font-size:13px;font-weight:800;color:var(--yellow);">🎯 Niveau ${lvlProgress.level} — ${QUIZ_LEVEL_LABELS[lvlProgress.level]}</span>
+          <span style="font-size:11px;color:var(--muted);font-weight:600;">${lvlProgress.total}/${QUIZ_LEVEL_WINDOW} avant le prochain palier</span>
+        </div>
+        <div style="background:var(--surface2);border-radius:10px;height:8px;overflow:hidden;">
+          <div style="background:var(--yellow);height:100%;width:${lvlProgress.total/QUIZ_LEVEL_WINDOW*100}%;border-radius:10px;transition:width .3s;"></div>
+        </div>
+      </div>`
     : "";
   el.innerHTML = `
     <div class="quiz-progress"><div class="quiz-prog-fill" style="width:${idx/questions.length*100}%"></div></div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:12px;display:flex;justify-content:space-between;gap:8px;"><span>Question ${idx+1} / ${questions.length} · Score : ${score}</span><span style="display:flex;gap:8px;">${lvlBadge}${modeBadge}</span></div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;display:flex;justify-content:space-between;gap:8px;"><span>Question ${idx+1} / ${questions.length} · Score : ${score}</span>${modeBadge}</div>
+    ${lvlBar}
     <div class="quiz-q">${q.q}</div>
     <div class="quiz-opts">${q.opts.map((opt,i)=>`<button class="quiz-opt" data-opt="${i}">${opt}</button>`).join("")}</div>`;
   el.querySelectorAll(".quiz-opt").forEach(btn => {
@@ -3477,8 +3490,8 @@ function renderQuiz() {
         if (i===correct) b.classList.add("correct");
         else if (i===chosen && chosen!==correct) b.classList.add("wrong");
       });
-      let leveledUp = false;
-      if (quizState.theme !== "all") leveledUp = recordQuizAnswer(quizState.theme, chosen===correct);
+      let levelResult = null;
+      if (quizState.theme !== "all") levelResult = recordQuizAnswer(quizState.theme, chosen===correct);
       if (chosen===correct) {
         quizState.score++;
       } else {
@@ -3493,12 +3506,42 @@ function renderQuiz() {
           }
         } catch(e) {}
       }
-      if (leveledUp) {
-        const newLvl = getQuizLevel(quizState.theme);
-        showToast(`🎉 Niveau ${newLvl} débloqué !`);
+      if (levelResult && levelResult.windowClosed) {
+        // Palier atteint : on montre un écran dédié (félicitations ou encouragement) avant de continuer
+        setTimeout(() => showLevelCheckpoint(levelResult), 1200);
+      } else {
+        setTimeout(() => { quizState.idx++; quizState.answered=false; renderQuiz(); }, 1200);
       }
-      setTimeout(() => { quizState.idx++; quizState.answered=false; renderQuiz(); }, 1200);
     });
+  });
+}
+
+function showLevelCheckpoint(result) {
+  const el = document.getElementById("quiz-content");
+  if (!el) return;
+  const pct = Math.round(result.correct/result.total*100);
+  const ENCOURAGEMENTS = [
+    "Continue comme ça, tu progresses !", "Pas loin ! La prochaine série sera la bonne.",
+    "Chaque question compte, tu t'améliores !", "Belle énergie, garde le rythme !"
+  ];
+  const encourageMsg = ENCOURAGEMENTS[Math.floor(Math.random()*ENCOURAGEMENTS.length)];
+  el.innerHTML = result.leveledUp
+    ? `<div style="text-align:center;padding:40px 20px;">
+        <div style="font-size:56px;margin-bottom:12px;">🎉</div>
+        <div style="font-size:19px;font-weight:800;color:var(--yellow);margin-bottom:6px;">Niveau ${result.level} débloqué !</div>
+        <div style="font-size:14px;color:var(--text);margin-bottom:4px;">${QUIZ_LEVEL_LABELS[result.level]}</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:24px;">${result.correct}/${result.total} bonnes réponses (${pct}%) — bravo !</div>
+        <button id="quiz-checkpoint-continue" style="background:var(--yellow);color:#1A1916;border:none;border-radius:20px;padding:12px 28px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">Continuer →</button>
+      </div>`
+    : `<div style="text-align:center;padding:40px 20px;">
+        <div style="font-size:56px;margin-bottom:12px;">💪</div>
+        <div style="font-size:17px;font-weight:800;color:var(--text);margin-bottom:6px;">${result.correct}/${result.total} bonnes réponses (${pct}%)</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:4px;">Il fallait 90% pour passer niveau ${result.level+1}</div>
+        <div style="font-size:13px;color:var(--yellow);font-weight:600;margin-bottom:24px;">${encourageMsg}</div>
+        <button id="quiz-checkpoint-continue" style="background:var(--yellow);color:#1A1916;border:none;border-radius:20px;padding:12px 28px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">Continuer →</button>
+      </div>`;
+  document.getElementById("quiz-checkpoint-continue")?.addEventListener("click", () => {
+    quizState.idx++; quizState.answered=false; renderQuiz();
   });
 }
 
