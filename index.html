@@ -3261,7 +3261,7 @@ function renderThemePicker() {
 async function startQuiz(theme, reviewWrong) {
   quizState.theme = theme || "all";
 
-  // Mode révision : questions ratées depuis localStorage
+  // Mode révision : questions ratées depuis localStorage — TOUJOURS les mêmes questions, volontairement
   const lsWrong = JSON.parse(localStorage.getItem("qg_quiz_wrong") || "[]");
   const allWrong = [...(quizState.wrong||[]), ...lsWrong.filter(w => !(quizState.wrong||[]).find(x=>x.q===w.q))];
   if (reviewWrong && allWrong.length) {
@@ -3275,44 +3275,63 @@ async function startQuiz(theme, reviewWrong) {
   const orKey = localStorage.getItem("qg_or_key");
   const themeLabel = QUIZ_THEMES.find(t=>t.id===quizState.theme)?.label?.replace(/^\S+ /,"") || "culture générale";
   const seenKey = "qg_quiz_seen_" + quizState.theme;
+  const normalize = s => (s||"").toLowerCase().trim().replace(/\s+/g," ");
 
   document.getElementById("quiz-theme-picker").style.display = "none";
   document.getElementById("quiz-content").style.display = "block";
   document.getElementById("quiz-review").style.display = "none";
   document.getElementById("quiz-content").innerHTML = `<div class="loading">✨ Génération de nouvelles questions...</div>`;
 
+  // Liste COMPLÈTE des questions déjà posées sur ce thème (jamais purgée, sauf reset de l'app)
+  const seenAll = JSON.parse(localStorage.getItem(seenKey) || "[]");
+  const seenSet = new Set(seenAll.map(normalize));
+
   if (orKey) {
-    // Questions déjà vues récemment SUR CE THÈME (liste dédiée, pas mélangée avec les autres thèmes)
-    const seenAll = JSON.parse(localStorage.getItem(seenKey) || "[]");
-    const avoidList = seenAll.slice(-40);
+    const avoidList = seenAll.slice(-40); // instruction donnée à l'IA (dernières 40, pour ne pas alourdir le prompt)
     const level = getQuizLevel(quizState.theme);
-    const aiQuestions = await generateQuizAI(orKey, themeLabel, avoidList, level);
-    if (aiQuestions && aiQuestions.length >= 5) {
-      // Mémorise ces questions pour éviter les répétitions au prochain tour (par thème)
-      const merged = [...seenAll, ...aiQuestions.map(q=>q.q)].slice(-100);
+    const aiQuestionsRaw = await generateQuizAI(orKey, themeLabel, avoidList, level);
+    // Filtre de sécurité : on ne fait PAS confiance uniquement à l'IA pour éviter les doublons,
+    // on vérifie nous-mêmes contre TOUT l'historique du thème.
+    const aiQuestions = (aiQuestionsRaw||[]).filter(q => !seenSet.has(normalize(q.q))).slice(0, 10);
+    if (aiQuestions.length >= 5) {
+      const merged = [...seenAll, ...aiQuestions.map(q=>q.q)]; // jamais tronqué : historique complet conservé
       localStorage.setItem(seenKey, JSON.stringify(merged));
       quizState.aiMode = true;
       launchQuizWith(aiQuestions);
       showToast("✨ Questions générées par IA");
       return;
     }
-    // Si l'IA a échoué, on prévient clairement avant de basculer en local
-    console.log("Quiz IA indisponible → banque locale");
+    console.log("Quiz IA indisponible ou doublons → banque locale");
   }
 
-  // Fallback : banque locale avec tracking anti-répétition (par thème)
+  // Fallback : banque locale, avec la même règle stricte anti-répétition
   quizState.aiMode = false;
   const allPool = quizState.theme && quizState.theme !== "all"
     ? QUIZ_QUESTIONS.filter(q => q.t === quizState.theme)
     : [...QUIZ_QUESTIONS];
-  const seenQs = JSON.parse(localStorage.getItem(seenKey) || "[]");
-  const unseen = allPool.filter(q => !seenQs.includes(q.q));
-  const pool = unseen.length >= 5 ? unseen : allPool;
-  const shuffled = [...pool].sort(()=>Math.random()-.5).slice(0, Math.min(10, pool.length));
-  const prevSeen = JSON.parse(localStorage.getItem(seenKey) || "[]");
-  localStorage.setItem(seenKey, JSON.stringify([...prevSeen, ...shuffled.map(q=>q.q)].slice(-100)));
+  const unseen = allPool.filter(q => !seenSet.has(normalize(q.q)));
+
+  if (unseen.length < 5) {
+    // Plus assez de questions inédites disponibles : on prévient plutôt que de répéter
+    document.getElementById("quiz-content").innerHTML = `<div style="text-align:center;padding:40px 20px;">
+      <div style="font-size:40px;margin-bottom:12px;">🏆</div>
+      <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px;">Toutes les questions faites !</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px;">Tu as épuisé les questions disponibles sur ce thème en mode hors-ligne.${orKey ? " Réessaie un peu plus tard : l'IA générera de nouvelles questions dès qu'elle sera disponible." : " Ajoute une clé IA dans Mon QG pour un stock de questions illimité."}</div>
+      <button onclick="backToQuizThemes()" style="background:var(--yellow);color:#1A1916;border:none;border-radius:20px;padding:10px 24px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;">← Choisir un autre thème</button>
+    </div>`;
+    return;
+  }
+
+  const shuffled = [...unseen].sort(()=>Math.random()-.5).slice(0, Math.min(10, unseen.length));
+  const merged = [...seenAll, ...shuffled.map(q=>q.q)]; // historique complet conservé
+  localStorage.setItem(seenKey, JSON.stringify(merged));
   launchQuizWith(shuffled);
   showToast(orKey ? "📚 IA indisponible — mode hors-ligne" : "📚 Mode hors-ligne (pas de clé IA)");
+}
+
+function backToQuizThemes() {
+  document.getElementById("quiz-content").style.display = "none";
+  document.getElementById("quiz-theme-picker").style.display = "block";
 }
 
 // Génère un quiz via IA, avec 2 modèles gratuits en secours + décodage tolérant
@@ -3342,6 +3361,7 @@ async function generateQuizAI(orKey, themeLabel, avoidList, level) {
   const shuffledAngles = [...ANGLES].sort(()=>Math.random()-.5).slice(0,4);
   const sysPrompt = `Tu es un créateur de quiz de culture générale en français. Génère EXACTEMENT 10 questions variées, originales et intéressantes sur le thème "${themeLabel}", de difficulté ${lvl}/5 (${DIFFICULTY_DESC[lvl]}). Pour garantir la diversité, base des questions sur ces angles différents : ${shuffledAngles.join(", ")}. Ne recycle pas les questions les plus classiques/évidentes du thème si possible. Réponds UNIQUEMENT avec un tableau JSON valide, sans texte avant/après, sans markdown. Format strict: [{"q":"question","opts":["bonne réponse","mauvaise 1","mauvaise 2","mauvaise 3"],"a":0}]. La bonne réponse est TOUJOURS en position 0.`;
 
+  let collected = [];
   for (const model of MODELS) {
     try {
       const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -3367,13 +3387,13 @@ async function generateQuizAI(orKey, themeLabel, avoidList, level) {
       const text = data.choices?.[0]?.message?.content || "";
       const parsed = parseQuizJSON(text);
       const valid = parsed.filter(q => q.q && Array.isArray(q.opts) && q.opts.length === 4 && Number.isInteger(q.a));
-      if (valid.length >= 5) return valid;
-      console.log("Quiz IA:", model, "format insuffisant (", valid.length, "questions )");
+      collected = collected.concat(valid);
+      if (collected.length >= 10) break; // assez de matière, pas besoin du 2e modèle
     } catch(e) {
       console.log("Quiz IA:", model, "erreur", e.message);
     }
   }
-  return null;
+  return collected.length ? collected : null;
 }
 
 // Décodage tolérant : extrait le tableau JSON même s'il y a du texte autour
