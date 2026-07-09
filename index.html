@@ -542,6 +542,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
   <div id="events-full"></div>
 </div>
 
+<!-- ═══ VIEW MÉDIA ═══ -->
+<div id="view-media" class="view">
+  <p class="sec" style="margin-top:8px;">📰 Média</p>
+  <div id="media-fils-content"></div>
+</div>
+
 <!-- ═══ VIEW GROUPE ═══ -->
 <!-- ═══ VIEW MON QG (perso) ═══ -->
 <div id="view-perso" class="view">
@@ -608,7 +614,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     </div>
   </div>
 
-  <div style="text-align:center;font-size:11px;color:var(--muted2);margin:16px 0 8px;">Le Général v3.3.1</div>
+  <div style="text-align:center;font-size:11px;color:var(--muted2);margin:16px 0 8px;">Le Général v3.3.2</div>
 </div>
 
 
@@ -1047,7 +1053,7 @@ function initFirebase() {
     db = firebase.firestore();
     firebaseReady = true;
     console.log("✅ Firebase OK");
-    console.log("📦 Le Général v3.3.1");
+    console.log("📦 Le Général v3.3.2");
     renderBandeau();
   // Sync anniversaires → événements
   (state.annivs||[]).forEach(a => addAnnivToEvents(a));
@@ -1368,6 +1374,7 @@ function showView(id) {
   if (id==="modules") renderModulesHome();
   if (id==="postit") { backToPostit(); renderPostitHome(); }
   if (id==="sante") { backToSante(); renderSanteHome(); }
+  if (id==="media") { renderMediaView(); }
 }
 
 // ════════════════════════════════════════════
@@ -2020,9 +2027,10 @@ function renderWidgetsZone() {
     html += `</div>`;
   }
   if(state.widgets.actu) {
-    const fils = (state.actuFils||["fr"]);
-    const filLabels = {fr:"🇫🇷 France",world:"🌍 Monde",sport:"⚽ Sport",tech:"💻 Tech",science:"🔬 Science"};
-    html += `<div style="display:flex;align-items:center;justify-content:space-between;margin:20px 0 10px;"><p class="sec" style="margin:0;">Actualités</p><div id="actu-fil-btns" style="display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;"></div></div><div id="actu-zone"><div class="loading">Chargement...</div></div>`;
+    html += `<div style="display:flex;align-items:center;justify-content:space-between;margin:20px 0 10px;">
+      <p class="sec" style="margin:0;">Actualités</p>
+      <button onclick="showView('media')" style="background:none;border:none;color:var(--yellow);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);">Voir tout →</button>
+    </div><div id="actu-zone-home"><div class="loading">Chargement...</div></div>`;
   }
   const sportApps = [
     {id:"tdf",   emoji:"🚴", nom:"Tour de France 2026",    sub:"4–26 juillet",      url:"tdf2026.html",   color:"#ED2939"},
@@ -4465,32 +4473,34 @@ let actuCache = {}, currentFil = null;
 
 function initActu() {
   if (!state.actuFils) state.actuFils = ["fr"];
-  currentFil = state.actuFils[0] || "fr";
-  renderActuFils();
-  fetchActu(currentFil);
+  const firstFil = state.actuFils[0] || "fr";
+  fetchActu(firstFil, false, "actu-zone-home", 4);
 }
 
-function renderActuFils() {
-  const el = document.getElementById("actu-fil-btns");
+function renderMediaView() {
+  if (!state.actuFils) state.actuFils = ["fr"];
+  const el = document.getElementById("media-fils-content");
   if (!el) return;
-  const enabled = state.actuFils || ["fr"];
-  el.innerHTML = NEWS_FILS.filter(f => enabled.includes(f.id)).map(f =>
-    `<button type="button" onclick="switchActuFil('${f.id}')" style="background:${f.id===currentFil?"var(--yellow)":"var(--surface2)"};color:${f.id===currentFil?"#1A1916":"var(--muted)"};border:1px solid ${f.id===currentFil?"var(--yellow)":"var(--border2)"};border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--font);">${f.label}</button>`
-  ).join("");
-}
-
-function switchActuFil(filId) {
-  currentFil = filId;
-  renderActuFils();
-  fetchActu(filId, true);
-}
-
-async function fetchActu(filId, force=false) {
-  const now = Date.now();
-  if (!force && actuCache[filId] && (now - actuCache[filId].ts) < 30*60*1000) {
-    renderActu(actuCache[filId].articles); return;
+  const enabled = NEWS_FILS.filter(f => state.actuFils.includes(f.id));
+  if (!enabled.length) {
+    el.innerHTML = `<div style="text-align:center;color:var(--muted);font-size:13px;padding:30px 0;">Aucun fil sélectionné — choisis tes fils dans Mon QG</div>`;
+    return;
   }
-  const el = document.getElementById("actu-zone");
+  // Un bloc par fil, tous empilés — pas de clic nécessaire pour changer de fil
+  el.innerHTML = enabled.map(f => `
+    <div style="margin-bottom:24px;">
+      <p class="sec" style="margin-bottom:8px;">${f.label}</p>
+      <div id="media-zone-${f.id}"><div class="loading">Chargement...</div></div>
+    </div>`).join("");
+  enabled.forEach(f => fetchActu(f.id, false, "media-zone-" + f.id, 6));
+}
+
+async function fetchActu(filId, force=false, targetId="actu-zone-home", limit=8) {
+  const now = Date.now();
+  const el = document.getElementById(targetId);
+  if (!force && actuCache[filId] && (now - actuCache[filId].ts) < 30*60*1000) {
+    renderActu(actuCache[filId].articles.slice(0, limit), targetId); return;
+  }
   const fil = NEWS_FILS.find(f => f.id===filId);
   if (!fil) return;
 
@@ -4500,8 +4510,7 @@ async function fetchActu(filId, force=false) {
   if (lsCached) {
     try {
       const parsed = JSON.parse(lsCached);
-      if (el) el.innerHTML = `<div style="font-size:11px;color:var(--muted);margin-bottom:8px;padding:0 2px;">📦 Dernière mise à jour : ${parsed.dateLabel||"—"}</div>`;
-      renderActu(parsed.articles, true);
+      renderActu(parsed.articles.slice(0, limit), targetId);
     } catch(e) {}
   } else {
     if (el) el.innerHTML = `<div class="loading">Chargement...</div>`;
@@ -4536,26 +4545,23 @@ async function fetchActu(filId, force=false) {
       date: a.pubDate ? new Date(a.pubDate).toLocaleDateString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}) : "",
     }));
     actuCache[filId] = { ts: now, articles };
-    // Sauvegarde dans localStorage avec date
     const dateLabel = new Date().toLocaleString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
     localStorage.setItem(lsKey, JSON.stringify({ articles, dateLabel }));
-    // Efface le bandeau "dernière mise à jour" et affiche les vrais articles
-    if (el) el.innerHTML = "";
-    renderActu(articles);
+    renderActu(articles.slice(0, limit), targetId);
   } catch(e) {
     console.log("fetchActu error:", e.message);
-    // Si pas de cache, affiche un message
     if (!lsCached) {
-      const el2 = document.getElementById("actu-zone");
+      const el2 = document.getElementById(targetId);
       if (el2) el2.innerHTML = `<div class="loading">Actualités indisponibles — réessaie dans un moment</div>`;
     }
     // Sinon garde le cache déjà affiché
   }
 }
 
-function renderActu(articles) {
-  const el = document.getElementById("actu-zone");
+function renderActu(articles, targetId="actu-zone-home") {
+  const el = document.getElementById(targetId);
   if (!el) return;
+  if (!articles.length) { el.innerHTML = `<div style="text-align:center;color:var(--muted);font-size:12px;padding:14px 0;">Aucun article pour l'instant</div>`; return; }
   el.innerHTML = articles.map(a => `
     <div onclick="window.open('${a.url}','_blank')" style="display:flex;gap:12px;background:var(--surface);border-radius:var(--r-sm);border:1px solid var(--border);padding:12px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;">
       ${a.image ? `<img src="${a.image}" style="width:72px;height:72px;border-radius:var(--r-sm);object-fit:cover;flex-shrink:0;" onerror="this.style.display='none'">` : `<div style="width:72px;height:72px;border-radius:var(--r-sm);background:var(--surface2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:28px;">📰</div>`}
@@ -4777,7 +4783,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.1";
+const APP_VERSION = "3.3.2";
 async function checkForUpdate() {
   try {
     const res = await fetch("version.json?t=" + Date.now(), { cache: "no-store" });
