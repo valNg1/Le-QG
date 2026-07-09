@@ -1888,10 +1888,17 @@ function showEvDetail(id) {
 }
 
 function deleteEvent(id) {
+  const ev = (state.events||[]).find(e => String(e.id)===String(id));
   state.events = state.events.filter(e=>String(e.id)!==String(id));
   saveState();
   renderEvents();
   showToast("Événement supprimé");
+  // Événement de groupe : il faut aussi le supprimer côté Firebase,
+  // sinon le listener temps réel le remet automatiquement.
+  if (ev && ev.fbId && firebaseReady && state.groupCode) {
+    db.collection("groupes").doc(state.groupCode).collection("events").doc(ev.fbId).delete()
+      .catch(e => console.log("deleteEvent Firebase error:", e.message));
+  }
 }
 
 function showAddEvent() {
