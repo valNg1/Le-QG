@@ -4477,10 +4477,17 @@ function renderActuFils() {
   el.innerHTML = NEWS_FILS.filter(f => enabled.includes(f.id)).map(f =>
     `<button style="background:${f.id===currentFil?"var(--yellow)":"var(--surface2)"};color:${f.id===currentFil?"#1A1916":"var(--muted)"};border:1px solid ${f.id===currentFil?"var(--yellow)":"var(--border2)"};border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--font);" data-fil="${f.id}">${f.label}</button>`
   ).join("");
-  el.querySelectorAll("[data-fil]").forEach(b => {
-    b.addEventListener("click", () => { currentFil = b.dataset.fil; renderActuFils(); fetchActu(currentFil); });
-  });
 }
+// Délégation d'événement sur le conteneur parent : plus robuste que des écouteurs
+// individuels par bouton (fonctionne même si les boutons sont recréés dynamiquement).
+document.addEventListener("click", function(e) {
+  const btn = e.target.closest && e.target.closest("#actu-fil-btns [data-fil]");
+  if (btn) {
+    currentFil = btn.dataset.fil;
+    renderActuFils();
+    fetchActu(currentFil);
+  }
+});
 
 async function fetchActu(filId, force=false) {
   const now = Date.now();
