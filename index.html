@@ -1014,21 +1014,18 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
 <div class="toast" id="toast"></div>
 
 <script>
-// ── KILL SERVICE WORKER — force la version fraîche ──
+// ── SERVICE WORKER ──
+// 1) Purge tout cache résiduel d'anciennes versions (sécurité, ne coûte rien)
+// 2) Enregistre un SW minimal 100% passthrough réseau (aucun cache) —
+//    nécessaire sur certaines versions de Chrome Android pour que le menu
+//    "Installer l'application" apparaisse, sans risque de contenu périmé.
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.getRegistrations().then(regs => {
-    regs.forEach(reg => {
-      reg.unregister();
-      console.log("SW désinscrit:", reg.scope);
-    });
-    if (regs.length > 0) {
-      // Vide aussi les caches
-      if (window.caches) {
-        caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-      }
-      console.log("SW + caches purgés — recharge la page pour la version fraîche");
-    }
-  });
+  if (window.caches) {
+    caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+  }
+  navigator.serviceWorker.register("/sw.js")
+    .then(reg => console.log("SW enregistré (passthrough réseau):", reg.scope))
+    .catch(e => console.log("SW registration error:", e.message));
 }
 
 // ════════════════════════════════════════════
