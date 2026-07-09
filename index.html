@@ -544,8 +544,17 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
 
 <!-- ═══ VIEW MÉDIA ═══ -->
 <div id="view-media" class="view">
-  <p class="sec" style="margin-top:8px;">📰 Média</p>
-  <div id="media-fils-content"></div>
+  <div id="media-home">
+    <p class="sec" style="margin-top:8px;">📰 Média</p>
+    <div class="module-grid" id="media-grid"></div>
+  </div>
+  <div id="module-media-detail" style="display:none;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
+      <button onclick="backToMedia()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
+      <div style="font-size:16px;font-weight:700;color:var(--text);" id="media-detail-title">—</div>
+    </div>
+    <div id="media-detail-zone"><div class="loading">Chargement...</div></div>
+  </div>
 </div>
 
 <!-- ═══ VIEW GROUPE ═══ -->
@@ -614,7 +623,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     </div>
   </div>
 
-  <div style="text-align:center;font-size:11px;color:var(--muted2);margin:16px 0 8px;">Le Général v3.3.2</div>
+  <div style="text-align:center;font-size:11px;color:var(--muted2);margin:16px 0 8px;">Le Général v3.3.3</div>
 </div>
 
 
@@ -920,6 +929,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
     <span>Santé</span>
   </button>
+  <button class="nav-btn" id="nav-media" data-view="media">
+    <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 8h20"/><circle cx="6" cy="6" r=".5" fill="currentColor"/></svg>
+    <span>Média</span>
+  </button>
   <button class="nav-btn" id="nav-mur" data-view="mur">
     <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
     <span>Mur</span>
@@ -1053,7 +1066,7 @@ function initFirebase() {
     db = firebase.firestore();
     firebaseReady = true;
     console.log("✅ Firebase OK");
-    console.log("📦 Le Général v3.3.2");
+    console.log("📦 Le Général v3.3.3");
     renderBandeau();
   // Sync anniversaires → événements
   (state.annivs||[]).forEach(a => addAnnivToEvents(a));
@@ -1374,7 +1387,7 @@ function showView(id) {
   if (id==="modules") renderModulesHome();
   if (id==="postit") { backToPostit(); renderPostitHome(); }
   if (id==="sante") { backToSante(); renderSanteHome(); }
-  if (id==="media") { renderMediaView(); }
+  if (id==="media") { backToMedia(); renderMediaHome(); }
 }
 
 // ════════════════════════════════════════════
@@ -2026,12 +2039,7 @@ function renderWidgetsZone() {
     if(state.widgets.transport) html += `<div class="info-card" id="transport-card"><div class="info-label">Transports IDF</div><div class="transport-lines" id="transport-lines"><div class="skel" style="height:18px;border-radius:4px;margin-bottom:6px;"></div><div class="skel" style="height:18px;border-radius:4px;"></div></div></div>`;
     html += `</div>`;
   }
-  if(state.widgets.actu) {
-    html += `<div style="display:flex;align-items:center;justify-content:space-between;margin:20px 0 10px;">
-      <p class="sec" style="margin:0;">Actualités</p>
-      <button onclick="showView('media')" style="background:none;border:none;color:var(--yellow);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);">Voir tout →</button>
-    </div><div id="actu-zone-home"><div class="loading">Chargement...</div></div>`;
-  }
+  // Widget Actualités retiré de l'accueil — accessible via l'onglet Média dédié
   const sportApps = [
     {id:"tdf",   emoji:"🚴", nom:"Tour de France 2026",    sub:"4–26 juillet",      url:"tdf2026.html",   color:"#ED2939"},
     {id:"cdm",   emoji:"⚽", nom:"Coupe du Monde 2026",    sub:"8es de finale",     url:"cdm2026.html",   color:"#34C77B"},
@@ -2052,7 +2060,6 @@ function renderWidgetsZone() {
   if(state.widgets.taches) renderTaches();
   if(state.widgets.env) fetchAirQuality();
   if(state.widgets.transport) renderTransport();
-  if(state.widgets.actu) initActu();
 }
 
 // ── Air ──
@@ -2498,7 +2505,7 @@ function renderPerso() {
         else state.actuFils.push(id);
         saveState();
         renderPerso();
-        if (state.widgets?.actu) initActu(); // rafraîchit tout de suite le widget de l'accueil
+        if (document.getElementById("view-media")?.classList.contains("active")) renderMediaHome(); // rafraîchit la page Média si elle est ouverte
       });
     });
   }
@@ -4471,31 +4478,44 @@ const NEWS_FILS = [
 ];
 let actuCache = {}, currentFil = null;
 
-function initActu() {
+function renderMediaHome() {
   if (!state.actuFils) state.actuFils = ["fr"];
-  const firstFil = state.actuFils[0] || "fr";
-  fetchActu(firstFil, false, "actu-zone-home", 4);
-}
-
-function renderMediaView() {
-  if (!state.actuFils) state.actuFils = ["fr"];
-  const el = document.getElementById("media-fils-content");
+  const el = document.getElementById("media-grid");
   if (!el) return;
   const enabled = NEWS_FILS.filter(f => state.actuFils.includes(f.id));
   if (!enabled.length) {
-    el.innerHTML = `<div style="text-align:center;color:var(--muted);font-size:13px;padding:30px 0;">Aucun fil sélectionné — choisis tes fils dans Mon QG</div>`;
+    el.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:13px;padding:20px 0;">Aucun fil sélectionné — choisis tes fils dans Mon QG</div>`;
     return;
   }
-  // Un bloc par fil, tous empilés — pas de clic nécessaire pour changer de fil
-  el.innerHTML = enabled.map(f => `
-    <div style="margin-bottom:24px;">
-      <p class="sec" style="margin-bottom:8px;">${f.label}</p>
-      <div id="media-zone-${f.id}"><div class="loading">Chargement...</div></div>
-    </div>`).join("");
-  enabled.forEach(f => fetchActu(f.id, false, "media-zone-" + f.id, 6));
+  el.innerHTML = enabled.map(f => `<div class="module-card" data-media-fil="${f.id}" style="display:block;min-height:110px;">
+    <div class="module-icon" style="font-size:32px;margin-bottom:8px;">${f.label.split(" ")[0]}</div>
+    <div class="module-name" style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;">${f.label.split(" ").slice(1).join(" ")}</div>
+    <div class="module-desc" style="font-size:12px;color:var(--muted);">Voir les articles</div>
+  </div>`).join("");
+  el.querySelectorAll("[data-media-fil]").forEach(card => {
+    card.addEventListener("click", function(e) {
+      e.stopPropagation();
+      openMediaFil(this.dataset.mediaFil);
+    });
+  });
 }
 
-async function fetchActu(filId, force=false, targetId="actu-zone-home", limit=8) {
+function openMediaFil(filId) {
+  const fil = NEWS_FILS.find(f => f.id === filId);
+  if (!fil) return;
+  document.getElementById("media-home").style.display = "none";
+  document.getElementById("module-media-detail").style.display = "block";
+  document.getElementById("media-detail-title").textContent = fil.label;
+  fetchActu(filId, false, "media-detail-zone", 10);
+}
+
+function backToMedia() {
+  document.getElementById("module-media-detail").style.display = "none";
+  const home = document.getElementById("media-home");
+  if (home) home.style.display = "block";
+}
+
+async function fetchActu(filId, force=false, targetId="media-detail-zone", limit=8) {
   const now = Date.now();
   const el = document.getElementById(targetId);
   if (!force && actuCache[filId] && (now - actuCache[filId].ts) < 30*60*1000) {
@@ -4783,7 +4803,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.2";
+const APP_VERSION = "3.3.3";
 async function checkForUpdate() {
   try {
     const res = await fetch("version.json?t=" + Date.now(), { cache: "no-store" });
