@@ -627,7 +627,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     </div>
   </div>
 
-  <div style="text-align:center;font-size:11px;color:var(--muted2);margin:16px 0 8px;">Le Général v3.3.5</div>
+  <div style="text-align:center;font-size:11px;color:var(--muted2);margin:16px 0 8px;">Le Général v3.3.6</div>
 </div>
 
 
@@ -1070,7 +1070,7 @@ function initFirebase() {
     db = firebase.firestore();
     firebaseReady = true;
     console.log("✅ Firebase OK");
-    console.log("📦 Le Général v3.3.5");
+    console.log("📦 Le Général v3.3.6");
     renderBandeau();
   // Sync anniversaires → événements
   (state.annivs||[]).forEach(a => addAnnivToEvents(a));
@@ -3314,6 +3314,158 @@ const QUIZ_QUESTIONS = [
   {q:"Quel pays a remporté le plus de Coupes du monde de rugby ?",opts:["Afrique du Sud","Nouvelle-Zélande","Australie","Angleterre"],a:0,t:"rugby"},
   {q:"Comment appelle-t-on un coup de pied tombé qui rapporte 3 points ?",opts:["Un drop","Une pénalité","Un renvoi","Un coup franc"],a:0,t:"rugby"},
   {q:"Combien de temps dure un match de rugby à XV (hors arrêts de jeu) ?",opts:["80 minutes","90 minutes","70 minutes","60 minutes"],a:0,t:"rugby"},
+  // ─── Rugby (suite) ───
+  {q:"Combien de joueurs de champ (hors remplaçants) une équipe peut-elle utiliser au maximum en Top 14 ?",opts:["8 remplaçants","6 remplaçants","10 remplaçants","5 remplaçants"],a:0,t:"rugby"},
+  {q:"Comment appelle-t-on la ligne où se regroupent les avants pour disputer le ballon au sol ?",opts:["Le ruck","Le maul","La mêlée","La touche"],a:0,t:"rugby"},
+  {q:"Quel pays a inventé le rugby, selon la légende de William Webb Ellis ?",opts:["L'Angleterre","L'Écosse","Le Pays de Galles","L'Irlande"],a:0,t:"rugby"},
+  {q:"Quelle compétition oppose les meilleurs clubs européens de rugby ?",opts:["La Champions Cup","La Coupe du Monde","Le Super Rugby","Le Tri Nations"],a:0,t:"rugby"},
+  {q:"Comment appelle-t-on un regroupement debout autour du ballon porté ?",opts:["Un maul","Un ruck","Une mêlée","Un plaquage"],a:0,t:"rugby"},
+  {q:"Quel joueur est le meilleur réalisateur (points) de l'histoire du Tournoi des 6 Nations ?",opts:["Jonny Wilkinson","Dan Carter","Ronan O'Gara","Owen Farrell"],a:0,t:"rugby"},
+  {q:"Combien d'essais rapportent un bonus offensif en Top 14 ?",opts:["4 essais","3 essais","5 essais","2 essais"],a:0,t:"rugby"},
+  {q:"Quelle nation domine le rugby féminin mondial ces dernières années ?",opts:["Nouvelle-Zélande","France","Angleterre","Afrique du Sud"],a:0,t:"rugby"},
+  {q:"Comment appelle-t-on l'action de plaquer un adversaire au-dessus des épaules (interdite) ?",opts:["Un plaquage haut","Un tampon","Un cadrage","Un raffut"],a:0,t:"rugby"},
+  {q:"Quel est le nom du maillot porté par le capitaine du XV de France ?",opts:["Il n'y a pas de maillot spécifique","Le maillot doré","Le maillot à galons","Le brassard bleu"],a:0,t:"rugby"},
+  {q:"Quelle ville accueille traditionnellement la finale du Top 14 ?",opts:["Paris (Stade de France)","Marseille","Toulouse","Lyon"],a:0,t:"rugby"},
+  {q:"Combien de temps dure la mi-temps au rugby ?",opts:["10 minutes","5 minutes","15 minutes","20 minutes"],a:0,t:"rugby"},
+  {q:"Quel pays a remporté la Coupe du monde de rugby 2023 ?",opts:["Afrique du Sud","Nouvelle-Zélande","France","Irlande"],a:0,t:"rugby"},
+  {q:"Comment appelle-t-on un joueur qui joue à l'arrière au rugby ?",opts:["L'arrière","Le pilier","Le talonneur","Le demi de mêlée"],a:0,t:"rugby"},
+  {q:"Quelle équipe est surnommée le \"XV du Chardon\" ?",opts:["L'Écosse","Le Pays de Galles","L'Irlande","L'Angleterre"],a:0,t:"rugby"},
+  // ─── Architecture (suite) ───
+  {q:"Quel style architectural est caractérisé par des arcs en plein cintre et des voûtes en berceau ?",opts:["Le roman","Le gothique","Le baroque","Le classique"],a:0,t:"archi"},
+  {q:"Quel ingénieur a conçu la structure du Golden Gate Bridge ?",opts:["Joseph Strauss","Gustave Eiffel","Isambard Brunel","John Roebling"],a:0,t:"archi"},
+  {q:"Quel bâtiment est célèbre pour son dôme conçu par Brunelleschi ?",opts:["La cathédrale de Florence","Saint-Pierre de Rome","Le Panthéon","Notre-Dame de Paris"],a:0,t:"archi"},
+  {q:"Quel mouvement architectural prône la fonction avant la décoration (\"form follows function\") ?",opts:["Le fonctionnalisme","Le baroque","L'Art nouveau","Le rococo"],a:0,t:"archi"},
+  {q:"Quelle ville abrite la Maison Loire de Frank Lloyd Wright, dite Falling Water ?",opts:["Mill Run (Pennsylvanie)","Chicago","New York","Los Angeles"],a:0,t:"archi"},
+  {q:"Quel élément architectural gothique permet de faire entrer plus de lumière dans les cathédrales ?",opts:["Le vitrail","Le pilier","Le dôme","Le clocher"],a:0,t:"archi"},
+  {q:"Quel est le nom du célèbre architecte brésilien qui a conçu Brasília ?",opts:["Oscar Niemeyer","Lúcio Costa","Roberto Burle Marx","Paulo Mendes"],a:0,t:"archi"},
+  {q:"Quel style architectural utilise des courbes organiques inspirées de la nature (ex : métro parisien) ?",opts:["L'Art nouveau","Le Bauhaus","Le brutalisme","Le classicisme"],a:0,t:"archi"},
+  {q:"Quel matériau caractérise le mouvement architectural \"brutaliste\" ?",opts:["Le béton brut","Le verre","L'acier inoxydable","Le bois"],a:0,t:"archi"},
+  {q:"Quelle structure parisienne a été construite pour l'Exposition universelle de 1889 ?",opts:["La Tour Eiffel","Le Grand Palais","Le Petit Palais","La gare d'Orsay"],a:0,t:"archi"},
+  {q:"Quel architecte a conçu le Guggenheim de Bilbao ?",opts:["Frank Gehry","Zaha Hadid","Rem Koolhaas","Renzo Piano"],a:0,t:"archi"},
+  {q:"Quelle est la fonction première d'un contrefort en architecture ?",opts:["Soutenir un mur","Décorer une façade","Éclairer l'intérieur","Ventiler un bâtiment"],a:0,t:"archi"},
+  {q:"Quel palais français est un exemple emblématique de l'architecture classique du 17e siècle ?",opts:["Le château de Versailles","Le Louvre médiéval","Le château de Chambord","Le Panthéon"],a:0,t:"archi"},
+  {q:"Quelle architecte irako-britannique est connue pour ses formes futuristes fluides ?",opts:["Zaha Hadid","Norman Foster","Renzo Piano","Tadao Ando"],a:0,t:"archi"},
+  {q:"Quel est le principal matériau de construction des pyramides égyptiennes ?",opts:["La pierre calcaire","La brique","Le granit uniquement","L'argile"],a:0,t:"archi"},
+  // ─── Basket (suite) ───
+  {q:"Quel joueur est surnommé \"The King\" ?",opts:["LeBron James","Kevin Durant","Stephen Curry","Kawhi Leonard"],a:0,t:"basket"},
+  {q:"Combien de temps dure la prolongation en NBA en cas d'égalité ?",opts:["5 minutes","10 minutes","3 minutes","15 minutes"],a:0,t:"basket"},
+  {q:"Quel joueur détient le record du plus grand nombre de passes décisives en carrière NBA ?",opts:["John Stockton","Magic Johnson","Chris Paul","Steve Nash"],a:0,t:"basket"},
+  {q:"Comment appelle-t-on un tir à trois points réussi consécutivement plusieurs fois de suite ?",opts:["Une série (streak)","Un combo","Un buzzer beater","Un clutch"],a:0,t:"basket"},
+  {q:"Quelle université américaine est réputée pour son programme de basket universitaire (NCAA), Duke ou Kentucky par exemple ?",opts:["Les deux sont réputées","Seule Duke l'est","Seule Kentucky l'est","Aucune des deux"],a:0,t:"basket"},
+  {q:"Quel pays a gagné la Coupe du monde de basket 2023 ?",opts:["Allemagne","États-Unis","Serbie","Canada"],a:0,t:"basket"},
+  {q:"Comment appelle-t-on la zone restrictive proche du panier ?",opts:["La raquette","La zone","Le cercle","Le corner"],a:0,t:"basket"},
+  {q:"Quel joueur a marqué 100 points dans un seul match NBA en 1962 ?",opts:["Wilt Chamberlain","Kobe Bryant","Michael Jordan","Elgin Baylor"],a:0,t:"basket"},
+  {q:"Quelle est la hauteur réglementaire d'un panier de basket ?",opts:["3,05 mètres","2,80 mètres","3,20 mètres","2,50 mètres"],a:0,t:"basket"},
+  {q:"Quel geste technique consiste à faire rebondir la balle en dribblant très bas et vite ?",opts:["Le crossover","Le fadeaway","Le pick and roll","Le screen"],a:0,t:"basket"},
+  {q:"Quelle équipe française a vu jouer Tony Parker en NBA ?",opts:["San Antonio Spurs","Los Angeles Lakers","Chicago Bulls","Boston Celtics"],a:0,t:"basket"},
+  {q:"Combien de fois Michael Jordan a-t-il été champion NBA ?",opts:["6 fois","5 fois","7 fois","4 fois"],a:0,t:"basket"},
+  {q:"Comment appelle-t-on un tir marqué juste avant la fin du temps réglementaire ?",opts:["Un buzzer beater","Un airball","Un alley-oop","Un fadeaway"],a:0,t:"basket"},
+  {q:"Quelle ligue est considérée comme le plus haut niveau de basket féminin aux États-Unis ?",opts:["La WNBA","La NCAA-W","La NBA-W","La FIBA-W"],a:0,t:"basket"},
+  {q:"Quel est le poste généralement le plus grand sur le terrain ?",opts:["Le pivot (centre)","Le meneur","L'arrière","L'ailier"],a:0,t:"basket"},
+  // ─── Judo (suite) ───
+  {q:"Combien existe-t-il de grades de ceintures colorées avant la ceinture noire (dans le système classique) ?",opts:["6","4","8","5"],a:0,t:"judo"},
+  {q:"Comment appelle-t-on une immobilisation au sol en judo ?",opts:["Osaekomi","Ippon","Randori","Ukemi"],a:0,t:"judo"},
+  {q:"Quel principe fondamental Jigoro Kano a-t-il inscrit au cœur du judo ?",opts:["L'entraide et le profit mutuel","La force brute","La vitesse pure","L'endurance"],a:0,t:"judo"},
+  {q:"Quelle technique de judo consiste à faire un balayage de jambe ?",opts:["Un ashi-waza","Un te-waza","Un koshi-waza","Un sutemi-waza"],a:0,t:"judo"},
+  {q:"Comment appelle-t-on l'entraînement libre en judo, sans combat formel ?",opts:["Le randori","Le kata","Le shiai","Le uchikomi"],a:0,t:"judo"},
+  {q:"Quel pays européen a une forte tradition judo, souvent médaillé olympique ?",opts:["La France","L'Espagne","L'Italie","Le Portugal"],a:0,t:"judo"},
+  {q:"Quelle judokate japonaise est une légende du judo féminin (multiples titres mondiaux) ?",opts:["Ryoko Tani","Ai Shishime","Uta Abe","Tsukasa Yoshida"],a:0,t:"judo"},
+  {q:"Comment appelle-t-on les katas, ces enchaînements codifiés du judo ?",opts:["Des formes préétablies de techniques","Des combats libres","Des compétitions officielles","Des exercices de musculation"],a:0,t:"judo"},
+  {q:"Quel pays organise les premiers championnats du monde de judo en 1956 ?",opts:["Japon","France","Brésil","États-Unis"],a:0,t:"judo"},
+  {q:"Comment appelle-t-on la ceinture d'un débutant en judo ?",opts:["La ceinture blanche","La ceinture jaune","La ceinture orange","La ceinture verte"],a:0,t:"judo"},
+  {q:"Quel judoka a remporté l'or olympique à Tokyo 2021 en plus de 100kg ?",opts:["Teddy Riner","Lukas Krpalek","Kim Min-jong","David Moura"],a:0,t:"judo"},
+  {q:"Que signifie le terme \"waza\" en judo ?",opts:["Technique","Combat","Ceinture","Salut"],a:0,t:"judo"},
+  {q:"Quel est le poids le plus léger en compétition masculine de judo (JO) ?",opts:["-60 kg","-66 kg","-73 kg","-55 kg"],a:0,t:"judo"},
+  {q:"Comment appelle-t-on une pénalité en judo qui peut mener à la disqualification ?",opts:["Un shido","Un ippon","Un yuko","Un koka"],a:0,t:"judo"},
+  {q:"Quel art martial japonais est à l'origine du judo, dont Kano s'est inspiré ?",opts:["Le jujitsu","Le karaté","L'aïkido","Le kendo"],a:0,t:"judo"},
+  // ─── Sciences (suite) ───
+  {q:"Quel scientifique a formulé la théorie de la relativité ?",opts:["Albert Einstein","Isaac Newton","Niels Bohr","Max Planck"],a:0,t:"science"},
+  {q:"Quel est le symbole chimique de l'or ?",opts:["Au","Ag","Or","Go"],a:0,t:"science"},
+  {q:"Combien de chromosomes possède l'être humain ?",opts:["46","44","48","42"],a:0,t:"science"},
+  {q:"Quelle est l'unité de mesure de la force ?",opts:["Le newton","Le watt","Le joule","Le pascal"],a:0,t:"science"},
+  {q:"Quel gaz les plantes absorbent-elles principalement pour la photosynthèse ?",opts:["Le dioxyde de carbone","L'oxygène","L'azote","L'hydrogène"],a:0,t:"science"},
+  {q:"Quelle particule subatomique porte une charge négative ?",opts:["L'électron","Le proton","Le neutron","Le photon"],a:0,t:"science"},
+  {q:"Quel savant a découvert la radioactivité naturelle ?",opts:["Henri Becquerel","Marie Curie","Pierre Curie","Ernest Rutherford"],a:0,t:"science"},
+  {q:"Quelle est la vitesse de la lumière dans le vide (arrondie) ?",opts:["300 000 km/s","150 000 km/s","1 million km/s","30 000 km/s"],a:0,t:"science"},
+  {q:"Quel organe humain produit l'insuline ?",opts:["Le pancréas","Le foie","Les reins","La rate"],a:0,t:"science"},
+  {q:"Quelle planète possède le plus grand nombre de lunes connues ?",opts:["Saturne","Jupiter","Uranus","Neptune"],a:0,t:"science"},
+  {q:"Quel est le nom du processus par lequel l'eau passe de l'état liquide à l'état gazeux ?",opts:["L'évaporation","La condensation","La sublimation","La fusion"],a:0,t:"science"},
+  {q:"Quel élément chimique a pour symbole \"Fe\" ?",opts:["Le fer","Le fluor","Le francium","Le fermium"],a:0,t:"science"},
+  {q:"Quel physicien a énoncé les trois lois du mouvement ?",opts:["Isaac Newton","Galilée","Einstein","Kepler"],a:0,t:"science"},
+  {q:"Quel pourcentage approximatif de l'atmosphère terrestre est composé d'azote ?",opts:["78%","50%","21%","90%"],a:0,t:"science"},
+  {q:"Quelle est la plus petite unité de vie autonome ?",opts:["La cellule","L'atome","La molécule","Le tissu"],a:0,t:"science"},
+  // ─── Culture (suite) ───
+  {q:"Qui a peint la Joconde ?",opts:["Léonard de Vinci","Michel-Ange","Raphaël","Botticelli"],a:0,t:"culture"},
+  {q:"Quel écrivain français a écrit \"Les Misérables\" ?",opts:["Victor Hugo","Émile Zola","Gustave Flaubert","Alexandre Dumas"],a:0,t:"culture"},
+  {q:"Quel compositeur allemand est devenu sourd et a continué à composer ?",opts:["Beethoven","Mozart","Bach","Brahms"],a:0,t:"culture"},
+  {q:"Dans quel musée parisien se trouve la Joconde ?",opts:["Le Louvre","Le musée d'Orsay","Le Centre Pompidou","Le Petit Palais"],a:0,t:"culture"},
+  {q:"Quel mouvement artistique est associé à Claude Monet et Renoir ?",opts:["L'impressionnisme","Le cubisme","Le surréalisme","Le fauvisme"],a:0,t:"culture"},
+  {q:"Qui a sculpté \"Le Penseur\" ?",opts:["Auguste Rodin","Camille Claudel","Antoine Bourdelle","Aristide Maillol"],a:0,t:"culture"},
+  {q:"Quel écrivain a créé le personnage de Sherlock Holmes ?",opts:["Arthur Conan Doyle","Agatha Christie","Charles Dickens","Oscar Wilde"],a:0,t:"culture"},
+  {q:"Quel peintre espagnol est célèbre pour le cubisme ?",opts:["Pablo Picasso","Salvador Dalí","Joan Miró","Diego Velázquez"],a:0,t:"culture"},
+  {q:"Quel opéra célèbre a été composé par Bizet ?",opts:["Carmen","La Traviata","Aïda","La Bohème"],a:0,t:"culture"},
+  {q:"Quel écrivain russe a écrit \"Guerre et Paix\" ?",opts:["Léon Tolstoï","Fiodor Dostoïevski","Anton Tchekhov","Nicolas Gogol"],a:0,t:"culture"},
+  {q:"Quel style musical est né à La Nouvelle-Orléans au début du 20e siècle ?",opts:["Le jazz","Le blues","Le rock","Le reggae"],a:0,t:"culture"},
+  {q:"Quel peintre néerlandais a peint \"La Nuit étoilée\" ?",opts:["Vincent van Gogh","Rembrandt","Vermeer","Bosch"],a:0,t:"culture"},
+  {q:"Quel est le nom du célèbre ballet de Tchaïkovski avec des cygnes ?",opts:["Le Lac des cygnes","Casse-Noisette","La Belle au bois dormant","Giselle"],a:0,t:"culture"},
+  // ─── Nature (suite) ───
+  {q:"Quel est le plus rapide des animaux terrestres ?",opts:["Le guépard","Le lion","L'antilope","Le lévrier"],a:0,t:"nature"},
+  {q:"Combien de cœurs possède une pieuvre ?",opts:["3","1","2","4"],a:0,t:"nature"},
+  {q:"Quel est le plus grand mammifère terrestre ?",opts:["L'éléphant d'Afrique","La girafe","Le rhinocéros","L'hippopotame"],a:0,t:"nature"},
+  {q:"Quelle plante carnivore referme ses feuilles pour capturer des insectes ?",opts:["La dionée attrape-mouche","Le nénuphar","Le cactus","La sensitive"],a:0,t:"nature"},
+  {q:"Quel animal hiberne pendant l'hiver dans les régions froides ?",opts:["L'ours","Le loup","Le renard","Le cerf"],a:0,t:"nature"},
+  {q:"Combien de temps dure la gestation d'un éléphant ?",opts:["Environ 22 mois","12 mois","6 mois","18 mois"],a:0,t:"nature"},
+  {q:"Quel est le seul mammifère capable de voler activement ?",opts:["La chauve-souris","L'écureuil volant","Le colugo","Aucun"],a:0,t:"nature"},
+  {q:"Quelle forêt tropicale est surnommée le \"poumon de la Terre\" ?",opts:["L'Amazonie","La forêt du Congo","La forêt boréale","La forêt de Bornéo"],a:0,t:"nature"},
+  {q:"Quel animal marin est capable de changer de sexe au cours de sa vie ?",opts:["Le poisson-clown","Le dauphin","Le requin","La baleine"],a:0,t:"nature"},
+  {q:"Quelle est la durée de vie moyenne d'une tortue géante des Galápagos ?",opts:["Plus de 100 ans","30 ans","50 ans","70 ans"],a:0,t:"nature"},
+  {q:"Quel oiseau est connu pour imiter les sons de son environnement ?",opts:["Le perroquet","L'aigle","Le pigeon","Le moineau"],a:0,t:"nature"},
+  // ─── Cinéma (suite) ───
+  {q:"Quel réalisateur a créé la saga \"Star Wars\" ?",opts:["George Lucas","Steven Spielberg","James Cameron","Christopher Nolan"],a:0,t:"cinema"},
+  {q:"Quel film a remporté l'Oscar du meilleur film en 2020, une première pour un film non anglophone ?",opts:["Parasite","1917","Joker","Once Upon a Time in Hollywood"],a:0,t:"cinema"},
+  {q:"Quel acteur incarne Iron Man dans le Marvel Cinematic Universe ?",opts:["Robert Downey Jr.","Chris Evans","Chris Hemsworth","Mark Ruffalo"],a:0,t:"cinema"},
+  {q:"Quel film culte se déroule dans une matrice virtuelle avec Keanu Reeves ?",opts:["Matrix","Inception","Blade Runner","Ex Machina"],a:0,t:"cinema"},
+  {q:"Quel studio japonais a produit \"Mon voisin Totoro\" et \"Le Voyage de Chihiro\" ?",opts:["Studio Ghibli","Toei Animation","Sunrise","Madhouse"],a:0,t:"cinema"},
+  {q:"Quel réalisateur est connu pour des films comme \"Pulp Fiction\" et \"Kill Bill\" ?",opts:["Quentin Tarantino","Martin Scorsese","David Fincher","Christopher Nolan"],a:0,t:"cinema"},
+  {q:"Dans quel film trouve-t-on la réplique \"Que la force soit avec toi\" ?",opts:["Star Wars","Le Seigneur des Anneaux","Star Trek","Dune"],a:0,t:"cinema"},
+  {q:"Quelle actrice a remporté un Oscar pour \"La Vie en Rose\" (rôle d'Édith Piaf) ?",opts:["Marion Cotillard","Juliette Binoche","Audrey Tautou","Léa Seydoux"],a:0,t:"cinema"},
+  {q:"Quel film d'animation Pixar raconte l'histoire d'un vieil homme et d'une maison volante ?",opts:["Là-haut","Wall-E","Vice-Versa","Coco"],a:0,t:"cinema"},
+  {q:"Quel réalisateur a mis en scène la trilogie \"Le Seigneur des Anneaux\" ?",opts:["Peter Jackson","James Cameron","Ridley Scott","Denis Villeneuve"],a:0,t:"cinema"},
+  // ─── Géographie (suite) ───
+  {q:"Quel est le plus long fleuve du monde ?",opts:["Le Nil (ou l'Amazone selon les mesures)","Le Mississippi","Le Yangtsé","Le Danube"],a:0,t:"geo"},
+  {q:"Quelle chaîne de montagnes sépare l'Europe de l'Asie ?",opts:["L'Oural","Les Alpes","Les Carpates","Le Caucase"],a:0,t:"geo"},
+  {q:"Quel est le pays le plus étendu du monde ?",opts:["La Russie","Le Canada","La Chine","Les États-Unis"],a:0,t:"geo"},
+  {q:"Quelle capitale européenne est traversée par le Danube ?",opts:["Budapest","Varsovie","Madrid","Rome"],a:0,t:"geo"},
+  {q:"Quel désert est le plus grand désert chaud du monde ?",opts:["Le Sahara","Le désert de Gobi","Le Kalahari","Le désert d'Arabie"],a:0,t:"geo"},
+  {q:"Quel pays compte le plus grand nombre de fuseaux horaires ?",opts:["La France (via ses territoires d'outre-mer)","La Russie","Les États-Unis","Le Royaume-Uni"],a:0,t:"geo"},
+  // ─── Histoire (suite) ───
+  {q:"Quelle bataille a marqué la défaite finale de Napoléon en 1815 ?",opts:["Waterloo","Austerlitz","Trafalgar","Iéna"],a:0,t:"histoire"},
+  {q:"Quel empire romain a chuté en 476 ?",opts:["L'Empire romain d'Occident","L'Empire romain d'Orient","L'Empire byzantin","L'Empire carolingien"],a:0,t:"histoire"},
+  {q:"Quel mur emblématique est tombé en 1989 ?",opts:["Le mur de Berlin","La Grande Muraille","Le mur d'Hadrien","Le mur de Chine"],a:0,t:"histoire"},
+  {q:"Qui a été le premier président des États-Unis ?",opts:["George Washington","Thomas Jefferson","Abraham Lincoln","John Adams"],a:0,t:"histoire"},
+  {q:"Quelle révolution a débuté en France en 1789 ?",opts:["La Révolution française","La Révolution industrielle","La Commune de Paris","La Fronde"],a:0,t:"histoire"},
+  {q:"Quel traité a mis fin à la Première Guerre mondiale ?",opts:["Le traité de Versailles","Le traité de Vienne","Le traité de Westphalie","Le traité de Rome"],a:0,t:"histoire"},
+  {q:"Quelle civilisation a construit Machu Picchu ?",opts:["Les Incas","Les Aztèques","Les Mayas","Les Olmèques"],a:0,t:"histoire"},
+  {q:"Qui était le pharaon associé à la légende de l'Exode biblique ?",opts:["Ramsès II (selon certaines traditions)","Toutânkhamon","Khéops","Akhenaton"],a:0,t:"histoire"},
+  {q:"Quelle reine d'Angleterre a régné plus de 60 ans jusqu'en 2022 ?",opts:["Élisabeth II","Victoria","Elizabeth I","Anne"],a:0,t:"histoire"},
+  {q:"Quel événement a déclenché la Première Guerre mondiale en 1914 ?",opts:["L'assassinat de l'archiduc François-Ferdinand","L'invasion de la Pologne","La crise de Cuba","Le naufrage du Lusitania"],a:0,t:"histoire"},
+  // ─── Sport (suite) ───
+  {q:"Tous les combien d'années se déroule la Coupe du monde de football ?",opts:["4 ans","2 ans","3 ans","5 ans"],a:0,t:"sport"},
+  {q:"Quel pays a organisé les Jeux Olympiques d'été de 2024 ?",opts:["La France","Le Japon","Les États-Unis","Le Brésil"],a:0,t:"sport"},
+  {q:"Quel sport voit s'affronter deux équipes avec un palet sur une patinoire ?",opts:["Le hockey sur glace","Le curling","Le patinage","Le bobsleigh"],a:0,t:"sport"},
+  {q:"Combien de sets faut-il gagner pour remporter un match de tennis en 5 sets (Grand Chelem messieurs) ?",opts:["3 sets","2 sets","4 sets","5 sets"],a:0,t:"sport"},
+  {q:"Quel nageur est le plus médaillé de l'histoire olympique ?",opts:["Michael Phelps","Mark Spitz","Katie Ledecky","Ian Thorpe"],a:0,t:"sport"},
+  {q:"Quel pays a inventé le tennis moderne au 19e siècle ?",opts:["L'Angleterre","La France","Les États-Unis","L'Australie"],a:0,t:"sport"},
+  {q:"Quelle distance représente un marathon ?",opts:["42,195 km","40 km","45 km","50 km"],a:0,t:"sport"},
+  {q:"Quel sport se joue avec des raquettes et un volant ?",opts:["Le badminton","Le squash","Le tennis de table","Le padel"],a:0,t:"sport"},
+  {q:"Quel pays a remporté le plus de médailles d'or aux JO d'été au total ?",opts:["Les États-Unis","L'URSS/Russie","La Chine","L'Allemagne"],a:0,t:"sport"},
+  {q:"Combien de joueurs compte une équipe de volley-ball sur le terrain ?",opts:["6","7","5","8"],a:0,t:"sport"},
+  {q:"Quel événement cycliste français a lieu chaque année en juillet ?",opts:["Le Tour de France","Le Giro d'Italia","La Vuelta","Paris-Roubaix"],a:0,t:"sport"},
+  // ─── Compléments finaux ───
+  {q:"Quel réalisateur a créé \"E.T. l'extra-terrestre\" ?",opts:["Steven Spielberg","George Lucas","Robert Zemeckis","Ron Howard"],a:0,t:"cinema"},
+  {q:"Quel film met en scène un naufrage sur le paquebot Titanic avec Leonardo DiCaprio ?",opts:["Titanic","Pearl Harbor","The Aviator","Master and Commander"],a:0,t:"cinema"},
+  {q:"Quel animal marin utilise l'écholocation pour se repérer, comme les dauphins ?",opts:["La chauve-souris (sur terre) et le dauphin (en mer)","Le requin","La méduse","Le poulpe"],a:0,t:"nature"},
+  {q:"Quelle est la plante terrestre la plus haute du monde ?",opts:["Le séquoia géant","Le baobab","Le chêne","L'eucalyptus"],a:0,t:"nature"},
 ];
 
 let quizState = { questions:[], idx:0, score:0, answered:false, wrong:[], theme:"all" };
@@ -3403,31 +3555,43 @@ async function startQuiz(theme, reviewWrong) {
     return;
   }
 
+  const REAL_THEMES = QUIZ_THEMES.filter(t => t.id !== "all").map(t => t.id);
+  const normalize = s => (s||"").toLowerCase().trim().replace(/\s+/g," ");
+  const seenKeyFor = t => "qg_quiz_seen_" + t;
+  const getSeenSet = t => new Set(JSON.parse(localStorage.getItem(seenKeyFor(t)) || "[]").map(normalize));
+  const markSeen = (t, questionTexts) => {
+    const prev = JSON.parse(localStorage.getItem(seenKeyFor(t)) || "[]");
+    localStorage.setItem(seenKeyFor(t), JSON.stringify([...prev, ...questionTexts])); // historique complet, jamais tronqué
+  };
+
   // Génération IA via OpenRouter
   const orKey = localStorage.getItem("qg_or_key");
-  const themeLabel = QUIZ_THEMES.find(t=>t.id===quizState.theme)?.label?.replace(/^\S+ /,"") || "culture générale";
-  const seenKey = "qg_quiz_seen_" + quizState.theme;
-  const normalize = s => (s||"").toLowerCase().trim().replace(/\s+/g," ");
+  const isAll = quizState.theme === "all";
+  const themeLabel = isAll
+    ? "culture générale variée (mélange de plusieurs domaines différents)"
+    : (QUIZ_THEMES.find(t=>t.id===quizState.theme)?.label?.replace(/^\S+ /,"") || "culture générale");
 
   document.getElementById("quiz-theme-picker").style.display = "none";
   document.getElementById("quiz-content").style.display = "block";
   document.getElementById("quiz-review").style.display = "none";
   document.getElementById("quiz-content").innerHTML = `<div class="loading">✨ Génération de nouvelles questions...</div>`;
 
-  // Liste COMPLÈTE des questions déjà posées sur ce thème (jamais purgée, sauf reset de l'app)
-  const seenAll = JSON.parse(localStorage.getItem(seenKey) || "[]");
-  const seenSet = new Set(seenAll.map(normalize));
+  // Set combiné de tout ce qui a déjà été vu, tous thèmes concernés confondus
+  const relevantThemes = isAll ? REAL_THEMES : [quizState.theme];
+  const seenSet = new Set();
+  relevantThemes.forEach(t => getSeenSet(t).forEach(q => seenSet.add(q)));
 
   if (orKey) {
-    const avoidList = seenAll.slice(-40); // instruction donnée à l'IA (dernières 40, pour ne pas alourdir le prompt)
-    const level = getQuizLevel(quizState.theme);
-    const aiQuestionsRaw = await generateQuizAI(orKey, themeLabel, avoidList, level);
-    // Filtre de sécurité : on ne fait PAS confiance uniquement à l'IA pour éviter les doublons,
-    // on vérifie nous-mêmes contre TOUT l'historique du thème.
+    const seenAllFlat = relevantThemes.flatMap(t => JSON.parse(localStorage.getItem(seenKeyFor(t)) || "[]"));
+    const avoidList = seenAllFlat.slice(-40);
+    const level = isAll ? 1 : getQuizLevel(quizState.theme);
+    const extraInstruction = isAll ? ` Varie fortement entre ces catégories différentes : ${REAL_THEMES.map(t=>QUIZ_THEMES.find(x=>x.id===t)?.label).join(", ")}.` : "";
+    const aiQuestionsRaw = await generateQuizAI(orKey, themeLabel, avoidList, level, extraInstruction);
     const aiQuestions = (aiQuestionsRaw||[]).filter(q => !seenSet.has(normalize(q.q))).slice(0, 10);
     if (aiQuestions.length >= 5) {
-      const merged = [...seenAll, ...aiQuestions.map(q=>q.q)]; // jamais tronqué : historique complet conservé
-      localStorage.setItem(seenKey, JSON.stringify(merged));
+      // Marque chaque question comme vue dans SON thème d'origine si connu, sinon dans tous les thèmes concernés (mode "all")
+      if (isAll) markSeen("all_mixed", aiQuestions.map(q=>q.q));
+      else markSeen(quizState.theme, aiQuestions.map(q=>q.q));
       quizState.aiMode = true;
       launchQuizWith(aiQuestions);
       showToast("✨ Questions générées par IA");
@@ -3436,29 +3600,72 @@ async function startQuiz(theme, reviewWrong) {
     console.log("Quiz IA indisponible ou doublons → banque locale");
   }
 
-  // Fallback : banque locale, avec la même règle stricte anti-répétition
+  // ── Fallback banque locale ──
   quizState.aiMode = false;
-  const allPool = quizState.theme && quizState.theme !== "all"
-    ? QUIZ_QUESTIONS.filter(q => q.t === quizState.theme)
-    : [...QUIZ_QUESTIONS];
-  const unseen = allPool.filter(q => !seenSet.has(normalize(q.q)));
 
-  if (unseen.length < 5) {
-    // Plus assez de questions inédites disponibles : on prévient plutôt que de répéter
-    document.getElementById("quiz-content").innerHTML = `<div style="text-align:center;padding:40px 20px;">
-      <div style="font-size:40px;margin-bottom:12px;">🏆</div>
-      <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px;">Toutes les questions faites !</div>
-      <div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px;">Tu as épuisé les questions disponibles sur ce thème en mode hors-ligne.${orKey ? " Réessaie un peu plus tard : l'IA générera de nouvelles questions dès qu'elle sera disponible." : " Ajoute une clé IA dans Mon QG pour un stock de questions illimité."}</div>
-      <button onclick="backToQuizThemes()" style="background:var(--yellow);color:#1A1916;border:none;border-radius:20px;padding:10px 24px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;">← Choisir un autre thème</button>
-    </div>`;
+  if (!isAll) {
+    // Thème unique : on exige un stock complet de 10 questions inédites, jamais de partie partielle
+    const pool = QUIZ_QUESTIONS.filter(q => q.t === quizState.theme);
+    const unseen = pool.filter(q => !seenSet.has(normalize(q.q)));
+    if (unseen.length < 10) {
+      showQuizExhausted(orKey);
+      return;
+    }
+    const picked = [...unseen].sort(()=>Math.random()-.5).slice(0, 10);
+    markSeen(quizState.theme, picked.map(q=>q.q));
+    launchQuizWith(picked);
+    showToast(orKey ? "📚 IA indisponible — mode hors-ligne" : "📚 Mode hors-ligne (pas de clé IA)");
     return;
   }
 
-  const shuffled = [...unseen].sort(()=>Math.random()-.5).slice(0, Math.min(10, unseen.length));
-  const merged = [...seenAll, ...shuffled.map(q=>q.q)]; // historique complet conservé
-  localStorage.setItem(seenKey, JSON.stringify(merged));
-  launchQuizWith(shuffled);
-  showToast(orKey ? "📚 IA indisponible — mode hors-ligne" : "📚 Mode hors-ligne (pas de clé IA)");
+  // ── Mode "Tous les thèmes" : tirage équilibré, 1 question par thème (rotation aléatoire) ──
+  const shuffledThemes = [...REAL_THEMES].sort(()=>Math.random()-.5);
+  const picked = [];
+  const usedThemesThisRound = [];
+  for (const t of shuffledThemes) {
+    if (picked.length >= 10) break;
+    const pool = QUIZ_QUESTIONS.filter(q => q.t === t);
+    const unseenForT = pool.filter(q => !getSeenSet(t).has(normalize(q.q)) && !picked.find(p=>p.q===q.q));
+    if (unseenForT.length) {
+      const pick = unseenForT[Math.floor(Math.random()*unseenForT.length)];
+      picked.push(pick);
+      usedThemesThisRound.push(t);
+    }
+  }
+  // S'il manque encore des questions (certains thèmes épuisés), complète en repassant sur les thèmes non encore épuisés
+  if (picked.length < 10) {
+    for (const t of shuffledThemes) {
+      if (picked.length >= 10) break;
+      const pool = QUIZ_QUESTIONS.filter(q => q.t === t);
+      const unseenForT = pool.filter(q => !getSeenSet(t).has(normalize(q.q)) && !picked.find(p=>p.q===q.q));
+      for (const q of unseenForT) {
+        if (picked.length >= 10) break;
+        picked.push(q);
+      }
+    }
+  }
+
+  if (picked.length < 10) {
+    showQuizExhausted(orKey);
+    return;
+  }
+
+  // Marque chaque question comme vue dans SON PROPRE thème (cohérence entre mode "all" et thème individuel)
+  const byTheme = {};
+  picked.forEach(q => { if (!byTheme[q.t]) byTheme[q.t] = []; byTheme[q.t].push(q.q); });
+  Object.entries(byTheme).forEach(([t, qs]) => markSeen(t, qs));
+
+  launchQuizWith(picked.sort(()=>Math.random()-.5));
+  showToast(orKey ? "📚 IA indisponible — mode hors-ligne (mélange équilibré)" : "📚 Mode hors-ligne — mélange équilibré");
+}
+
+function showQuizExhausted(orKey) {
+  document.getElementById("quiz-content").innerHTML = `<div style="text-align:center;padding:40px 20px;">
+    <div style="font-size:40px;margin-bottom:12px;">🏆</div>
+    <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px;">Toutes les questions faites !</div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px;">Tu as épuisé les questions disponibles sur ce thème en mode hors-ligne.${orKey ? " Réessaie un peu plus tard : l'IA générera de nouvelles questions dès qu'elle sera disponible." : " Ajoute une clé IA dans Mon QG pour un stock de questions illimité."}</div>
+    <button onclick="backToQuizThemes()" style="background:var(--yellow);color:#1A1916;border:none;border-radius:20px;padding:10px 24px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;">← Choisir un autre thème</button>
+  </div>`;
 }
 
 function backToQuizThemes() {
@@ -3467,7 +3674,7 @@ function backToQuizThemes() {
 }
 
 // Génère un quiz via IA, avec 2 modèles gratuits en secours + décodage tolérant
-async function generateQuizAI(orKey, themeLabel, avoidList, level) {
+async function generateQuizAI(orKey, themeLabel, avoidList, level, extraInstruction) {
   const MODELS = [
     "meta-llama/llama-3.3-70b-instruct:free",
     "google/gemma-3-12b-it:free",
@@ -3491,7 +3698,7 @@ async function generateQuizAI(orKey, themeLabel, avoidList, level) {
     "des origines et étymologies", "des comparaisons internationales", "des premières fois historiques"
   ];
   const shuffledAngles = [...ANGLES].sort(()=>Math.random()-.5).slice(0,4);
-  const sysPrompt = `Tu es un créateur de quiz de culture générale en français. Génère EXACTEMENT 10 questions variées, originales et intéressantes sur le thème "${themeLabel}", de difficulté ${lvl}/5 (${DIFFICULTY_DESC[lvl]}). Pour garantir la diversité, base des questions sur ces angles différents : ${shuffledAngles.join(", ")}. Ne recycle pas les questions les plus classiques/évidentes du thème si possible. Réponds UNIQUEMENT avec un tableau JSON valide, sans texte avant/après, sans markdown. Format strict: [{"q":"question","opts":["bonne réponse","mauvaise 1","mauvaise 2","mauvaise 3"],"a":0}]. La bonne réponse est TOUJOURS en position 0.`;
+  const sysPrompt = `Tu es un créateur de quiz de culture générale en français. Génère EXACTEMENT 10 questions variées, originales et intéressantes sur le thème "${themeLabel}", de difficulté ${lvl}/5 (${DIFFICULTY_DESC[lvl]}). Pour garantir la diversité, base des questions sur ces angles différents : ${shuffledAngles.join(", ")}.${extraInstruction||""} Ne recycle pas les questions les plus classiques/évidentes du thème si possible. Réponds UNIQUEMENT avec un tableau JSON valide, sans texte avant/après, sans markdown. Format strict: [{"q":"question","opts":["bonne réponse","mauvaise 1","mauvaise 2","mauvaise 3"],"a":0}]. La bonne réponse est TOUJOURS en position 0.`;
 
   let collected = [];
   for (const model of MODELS) {
@@ -4809,7 +5016,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.5";
+const APP_VERSION = "3.3.6";
 async function checkForUpdate() {
   try {
     const res = await fetch("version.json?t=" + Date.now(), { cache: "no-store" });
