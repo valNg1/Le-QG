@@ -528,6 +528,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     <p class="sec" style="margin:0;">Agenda</p>
     <button class="agenda-add" id="agenda-add-btn2">+ Ajouter</button>
   </div>
+  <div id="feries-vacances-zone" style="margin-bottom:16px;"></div>
   <div id="events-full"></div>
 </div>
 
@@ -554,6 +555,15 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
   <div id="teams-picker"></div>
   <div id="podcasts-picker" style="display:none;"></div>
   <div id="taches-config" style="margin-bottom:10px;"></div>
+  <p class="sec">🏫 Zone scolaire</p>
+  <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-bottom:10px;">
+    <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">Pour afficher les bonnes dates de vacances scolaires dans l'Agenda.</p>
+    <div class="tag-row" id="zone-scolaire-tags" style="display:flex;gap:8px;">
+      <button class="tag" data-zone="A" style="flex:1;">Zone A</button>
+      <button class="tag" data-zone="B" style="flex:1;">Zone B</button>
+      <button class="tag" data-zone="C" style="flex:1;">Zone C</button>
+    </div>
+  </div>
   <p class="sec">Clé IA (quiz & recommandations)</p>
   <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-bottom:10px;">
     <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">Clé OpenRouter pour générer des <strong>quiz à l'infini</strong> et les recommandations films/livres par IA. Gratuit sur openrouter.ai — reste stockée uniquement sur cet appareil.</p>
@@ -1264,6 +1274,7 @@ function startApp() {
   safe(renderMurList, "renderMurList");
   safe(renderPerso, "renderPerso");
   safe(renderBandeau, "renderBandeau");
+  try { fetchFeriesVacances(false); } catch(e) { console.log("fetchFeriesVacances:", e.message); }
   // Sync anniversaires → événements
   try { (state.annivs||[]).forEach(a => addAnnivToEvents(a)); } catch(e) { console.log("sync annivs:", e.message); }
   if (state.groupCode) { try { loadGroupData(); } catch(e) { console.log("loadGroupData:", e.message); } }
@@ -1701,6 +1712,104 @@ document.getElementById("diner-picker-ov").addEventListener("click", function(e)
 // ════════════════════════════════════════════
 let selectedEvColor = "blue";
 let editingEvId = null;
+
+
+// ════════════════════════════════════════════
+// JOURS FÉRIÉS & VACANCES SCOLAIRES (API gouv.fr, gratuites, sans clé)
+// ════════════════════════════════════════════
+async function fetchFeriesVacances(force) {
+  const el = document.getElementById("feries-vacances-zone");
+  if (!el) return;
+
+  const cacheKey = "qg_feries_vacances";
+  const now = Date.now();
+  const CACHE_TTL = 24*60*60*1000; // 24h — ces données changent rarement
+
+  if (!force) {
+    try {
+      const cached = JSON.parse(localStorage.getItem(cacheKey) || "null");
+      if (cached && (now - cached.ts) < CACHE_TTL && cached.zone === (state.zoneScolaire||null)) {
+        renderFeriesVacances(cached.feries, cached.vacances);
+        return;
+      }
+    } catch(e) {}
+  }
+
+  el.innerHTML = `<div class="loading">Chargement...</div>`;
+
+  // ── Jours fériés (API officielle, aucune clé) ──
+  let feries = [];
+  try {
+    const res = await fetch("https://calendrier.api.gouv.fr/jours-feries/metropole.json");
+    const data = await res.json();
+    feries = Object.entries(data).map(([date, nom]) => ({ date, nom }));
+  } catch(e) {
+    console.log("fetchFeries error:", e.message);
+  }
+
+  // ── Vacances scolaires (API education.gouv.fr, aucune clé) ──
+  let vacances = [];
+  if (state.zoneScolaire) {
+    try {
+      const zoneParam = encodeURIComponent("Zone " + state.zoneScolaire);
+      const url = `https://data.education.gouv.fr/api/explore/v2.1/catalog/datasets/fr-en-calendrier-scolaire/records?limit=20&lang=fr&timezone=Europe/Paris&refine=zones:${zoneParam}&refine=population:-`;
+      const res = await fetch(url);
+      const data = await res.json();
+      vacances = (data.results||[]).map(r => ({
+        nom: r.description || "Vacances",
+        start: (r.start_date||"").split("T")[0],
+        end: (r.end_date||"").split("T")[0]
+      })).filter(v => v.start && v.end);
+    } catch(e) {
+      console.log("fetchVacances error:", e.message);
+    }
+  }
+
+  localStorage.setItem(cacheKey, JSON.stringify({ ts: now, zone: state.zoneScolaire||null, feries, vacances }));
+  renderFeriesVacances(feries, vacances);
+}
+
+function renderFeriesVacances(feries, vacances) {
+  const el = document.getElementById("feries-vacances-zone");
+  if (!el) return;
+  const todayStr = new Date().toISOString().split("T")[0];
+
+  // Prochain jour férié
+  const nextFerie = (feries||[]).filter(f => f.date >= todayStr).sort((a,b)=>a.date.localeCompare(b.date))[0];
+
+  // Vacances en cours ou à venir
+  const nextVac = (vacances||[]).filter(v => v.end >= todayStr).sort((a,b)=>a.start.localeCompare(b.start))[0];
+  const enCoursVac = nextVac && nextVac.start <= todayStr && nextVac.end >= todayStr;
+
+  const fmtDate = (iso) => { const d = new Date(iso+"T00:00:00"); return d.toLocaleDateString("fr-FR",{day:"numeric",month:"short"}); };
+  const daysUntil = (iso) => Math.ceil((new Date(iso+"T00:00:00") - new Date(todayStr+"T00:00:00")) / 86400000);
+
+  let html = `<div style="display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;">`;
+
+  if (nextFerie) {
+    const d = daysUntil(nextFerie.date);
+    html += `<div style="flex-shrink:0;background:var(--surface);border-radius:var(--r-sm);border:1px solid var(--border);padding:10px 14px;min-width:150px;">
+      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-bottom:3px;">🎉 Prochain férié</div>
+      <div style="font-size:13px;font-weight:700;color:var(--text);">${nextFerie.nom}</div>
+      <div style="font-size:11px;color:var(--yellow);font-weight:600;">${fmtDate(nextFerie.date)} · ${d===0?"aujourd'hui":d===1?"demain":"dans "+d+"j"}</div>
+    </div>`;
+  }
+
+  if (nextVac) {
+    html += `<div style="flex-shrink:0;background:var(--surface);border-radius:var(--r-sm);border:1px solid var(--border);padding:10px 14px;min-width:170px;">
+      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-bottom:3px;">🏖 Vacances (Zone ${state.zoneScolaire})</div>
+      <div style="font-size:13px;font-weight:700;color:var(--text);">${nextVac.nom}</div>
+      <div style="font-size:11px;color:var(--green);font-weight:600;">${enCoursVac ? "En cours jusqu'au "+fmtDate(nextVac.end) : "Du "+fmtDate(nextVac.start)+" au "+fmtDate(nextVac.end)}</div>
+    </div>`;
+  } else if (!state.zoneScolaire) {
+    html += `<div style="flex-shrink:0;background:var(--surface);border-radius:var(--r-sm);border:1px dashed var(--border2);padding:10px 14px;min-width:170px;display:flex;align-items:center;">
+      <div style="font-size:12px;color:var(--muted);">🏫 Choisis ta zone scolaire dans Mon QG pour voir les vacances</div>
+    </div>`;
+  }
+
+  html += `</div>`;
+  el.innerHTML = html;
+}
 
 function renderEvents() {
   const now = new Date(); now.setHours(0,0,0,0);
@@ -2307,6 +2416,18 @@ function renderPerso() {
   if (orStatus) orStatus.innerHTML = orKey
     ? `<span style="color:var(--green)">✅ Clé configurée</span>`
     : `<span style="color:var(--muted)">⚠️ Pas de clé — recommandations en mode local</span>`;
+
+  // Zone scolaire
+  document.querySelectorAll("#zone-scolaire-tags .tag").forEach(t => {
+    t.classList.toggle("sel", state.zoneScolaire === t.dataset.zone);
+    t.onclick = () => {
+      state.zoneScolaire = t.dataset.zone;
+      saveState();
+      document.querySelectorAll("#zone-scolaire-tags .tag").forEach(x => x.classList.toggle("sel", x===t));
+      fetchFeriesVacances(true);
+    };
+  });
+
   renderTachesConfig();
   // Météo picker
   const mp = document.getElementById("meteo-picker");
