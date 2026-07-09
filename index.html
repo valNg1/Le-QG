@@ -2488,7 +2488,9 @@ function renderPerso() {
         if(!state.actuFils) state.actuFils=["fr"];
         if(state.actuFils.includes(id)) { if(state.actuFils.length>1) state.actuFils=state.actuFils.filter(x=>x!==id); }
         else state.actuFils.push(id);
+        saveState();
         renderPerso();
+        if (state.widgets?.actu) initActu(); // rafraîchit tout de suite le widget de l'accueil
       });
     });
   }
