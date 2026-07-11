@@ -378,12 +378,23 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
   <a id="suspended-contact" href="#" style="background:var(--yellow);color:#1A1916;text-decoration:none;border-radius:20px;padding:12px 24px;font-family:var(--font);font-size:14px;font-weight:700;">Contacter l'administrateur</a>
 </div>
 
+<body>
+
+<div id="app-splash" style="position:fixed;inset:0;z-index:99999;background:#F7C104;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+  <div style="width:96px;height:96px;border-radius:24px;background:#1A1916;display:flex;align-items:center;justify-content:center;margin-bottom:22px;">
+    <span style="font-family:var(--serif);font-size:34px;font-weight:700;color:#F7C104;">QG</span>
+  </div>
+  <div style="text-align:center;line-height:1.15;">
+    <div style="font-family:var(--serif);font-size:34px;font-weight:700;color:#1A1916;">Le</div>
+    <div style="font-family:var(--serif);font-size:34px;font-weight:700;color:#1A1916;">Général</div>
+  </div>
+</div>
+
 <div id="update-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:var(--yellow);color:#1A1916;padding:12px 16px;text-align:center;font-family:var(--font);font-size:14px;font-weight:700;">
   ✨ Nouvelle version disponible
   <button id="update-reload-btn" style="margin-left:10px;background:#1A1916;color:var(--yellow);border:none;border-radius:20px;padding:6px 16px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;">Recharger</button>
 </div>
 
-<body>
 
 <!-- ═══ ONBOARDING ═══ -->
 <!-- ═══ ÉCRAN D'INVITATION ═══ -->
@@ -527,7 +538,27 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     <p class="sec" style="margin:0;">Agenda</p>
     <button class="agenda-add" id="agenda-add-btn2">+ Ajouter</button>
   </div>
+  <div id="feries-vacances-zone" style="margin-bottom:16px;"></div>
   <div id="events-full"></div>
+</div>
+
+<!-- ═══ VIEW MÉDIA ═══ -->
+<div id="view-media" class="view">
+  <div id="media-home">
+    <p class="sec" style="margin-top:8px;">📰 Média</p>
+    <div class="module-grid" id="media-grid"></div>
+    <details style="margin-top:8px;">
+      <summary style="font-size:12px;color:var(--muted);cursor:pointer;padding:4px 0;">⚙️ Choisir mes sources</summary>
+      <div id="media-fils-picker" style="margin-top:10px;"></div>
+    </details>
+  </div>
+  <div id="module-media-detail" style="display:none;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px;">
+      <button onclick="backToMedia()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
+      <div style="font-size:16px;font-weight:700;color:var(--text);" id="media-detail-title">—</div>
+    </div>
+    <div id="media-detail-zone"><div class="loading">Chargement...</div></div>
+  </div>
 </div>
 
 <!-- ═══ VIEW GROUPE ═══ -->
@@ -553,6 +584,15 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
   <div id="teams-picker"></div>
   <div id="podcasts-picker" style="display:none;"></div>
   <div id="taches-config" style="margin-bottom:10px;"></div>
+  <p class="sec">🏫 Zone scolaire</p>
+  <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-bottom:10px;">
+    <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">Pour afficher les bonnes dates de vacances scolaires dans l'Agenda.</p>
+    <div class="tag-row" id="zone-scolaire-tags" style="display:flex;gap:8px;">
+      <button class="tag" data-zone="A" style="flex:1;">Zone A</button>
+      <button class="tag" data-zone="B" style="flex:1;">Zone B</button>
+      <button class="tag" data-zone="C" style="flex:1;">Zone C</button>
+    </div>
+  </div>
   <p class="sec">Clé IA (quiz & recommandations)</p>
   <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-bottom:10px;">
     <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">Clé OpenRouter pour générer des <strong>quiz à l'infini</strong> et les recommandations films/livres par IA. Gratuit sur openrouter.ai — reste stockée uniquement sur cet appareil.</p>
@@ -587,7 +627,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     </div>
   </div>
 
-  <div style="text-align:center;font-size:11px;color:var(--muted2);margin:16px 0 8px;">Le Général v3.3.0</div>
+  <div style="text-align:center;font-size:11px;color:var(--muted2);margin:16px 0 8px;">Le Général v3.3.6</div>
 </div>
 
 
@@ -893,6 +933,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
     <span>Santé</span>
   </button>
+  <button class="nav-btn" id="nav-media" data-view="media">
+    <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 8h20"/><circle cx="6" cy="6" r=".5" fill="currentColor"/></svg>
+    <span>Média</span>
+  </button>
   <button class="nav-btn" id="nav-mur" data-view="mur">
     <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
     <span>Mur</span>
@@ -993,21 +1037,18 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
 <div class="toast" id="toast"></div>
 
 <script>
-// ── KILL SERVICE WORKER — force la version fraîche ──
+// ── SERVICE WORKER ──
+// 1) Purge tout cache résiduel d'anciennes versions (sécurité, ne coûte rien)
+// 2) Enregistre un SW minimal 100% passthrough réseau (aucun cache) —
+//    nécessaire sur certaines versions de Chrome Android pour que le menu
+//    "Installer l'application" apparaisse, sans risque de contenu périmé.
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.getRegistrations().then(regs => {
-    regs.forEach(reg => {
-      reg.unregister();
-      console.log("SW désinscrit:", reg.scope);
-    });
-    if (regs.length > 0) {
-      // Vide aussi les caches
-      if (window.caches) {
-        caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-      }
-      console.log("SW + caches purgés — recharge la page pour la version fraîche");
-    }
-  });
+  if (window.caches) {
+    caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+  }
+  navigator.serviceWorker.register("/sw.js")
+    .then(reg => console.log("SW enregistré (passthrough réseau):", reg.scope))
+    .catch(e => console.log("SW registration error:", e.message));
 }
 
 // ════════════════════════════════════════════
@@ -1029,7 +1070,7 @@ function initFirebase() {
     db = firebase.firestore();
     firebaseReady = true;
     console.log("✅ Firebase OK");
-    console.log("📦 Le Général v3.2.1");
+    console.log("📦 Le Général v3.3.6");
     renderBandeau();
   // Sync anniversaires → événements
   (state.annivs||[]).forEach(a => addAnnivToEvents(a));
@@ -1110,7 +1151,8 @@ function obNext() {
     Object.keys(state).forEach(k => delete state[k]);
     Object.assign(state, freshState);
     // Purge aussi les caches annexes
-    ["qg_quiz_seen","qg_quiz_wrong"].forEach(k => localStorage.removeItem(k));
+    Object.keys(localStorage).filter(k => k.startsWith("qg_quiz_seen")).forEach(k => localStorage.removeItem(k));
+    localStorage.removeItem("qg_quiz_wrong");
   }
   state.name = name; state.avatar = obAvatar || "🧑";
   saveState();
@@ -1262,6 +1304,7 @@ function startApp() {
   safe(renderMurList, "renderMurList");
   safe(renderPerso, "renderPerso");
   safe(renderBandeau, "renderBandeau");
+  try { fetchFeriesVacances(false); } catch(e) { console.log("fetchFeriesVacances:", e.message); }
   // Sync anniversaires → événements
   try { (state.annivs||[]).forEach(a => addAnnivToEvents(a)); } catch(e) { console.log("sync annivs:", e.message); }
   if (state.groupCode) { try { loadGroupData(); } catch(e) { console.log("loadGroupData:", e.message); } }
@@ -1348,6 +1391,7 @@ function showView(id) {
   if (id==="modules") renderModulesHome();
   if (id==="postit") { backToPostit(); renderPostitHome(); }
   if (id==="sante") { backToSante(); renderSanteHome(); }
+  if (id==="media") { backToMedia(); renderMediaHome(); renderFilsPicker("media-fils-picker", "Coche les sources à afficher :"); }
 }
 
 // ════════════════════════════════════════════
@@ -1700,6 +1744,104 @@ document.getElementById("diner-picker-ov").addEventListener("click", function(e)
 let selectedEvColor = "blue";
 let editingEvId = null;
 
+
+// ════════════════════════════════════════════
+// JOURS FÉRIÉS & VACANCES SCOLAIRES (API gouv.fr, gratuites, sans clé)
+// ════════════════════════════════════════════
+async function fetchFeriesVacances(force) {
+  const el = document.getElementById("feries-vacances-zone");
+  if (!el) return;
+
+  const cacheKey = "qg_feries_vacances";
+  const now = Date.now();
+  const CACHE_TTL = 24*60*60*1000; // 24h — ces données changent rarement
+
+  if (!force) {
+    try {
+      const cached = JSON.parse(localStorage.getItem(cacheKey) || "null");
+      if (cached && (now - cached.ts) < CACHE_TTL && cached.zone === (state.zoneScolaire||null)) {
+        renderFeriesVacances(cached.feries, cached.vacances);
+        return;
+      }
+    } catch(e) {}
+  }
+
+  el.innerHTML = `<div class="loading">Chargement...</div>`;
+
+  // ── Jours fériés (API officielle, aucune clé) ──
+  let feries = [];
+  try {
+    const res = await fetch("https://calendrier.api.gouv.fr/jours-feries/metropole.json");
+    const data = await res.json();
+    feries = Object.entries(data).map(([date, nom]) => ({ date, nom }));
+  } catch(e) {
+    console.log("fetchFeries error:", e.message);
+  }
+
+  // ── Vacances scolaires (API education.gouv.fr, aucune clé) ──
+  let vacances = [];
+  if (state.zoneScolaire) {
+    try {
+      const zoneParam = encodeURIComponent("Zone " + state.zoneScolaire);
+      const url = `https://data.education.gouv.fr/api/explore/v2.1/catalog/datasets/fr-en-calendrier-scolaire/records?limit=20&lang=fr&timezone=Europe/Paris&refine=zones:${zoneParam}&refine=population:-`;
+      const res = await fetch(url);
+      const data = await res.json();
+      vacances = (data.results||[]).map(r => ({
+        nom: r.description || "Vacances",
+        start: (r.start_date||"").split("T")[0],
+        end: (r.end_date||"").split("T")[0]
+      })).filter(v => v.start && v.end);
+    } catch(e) {
+      console.log("fetchVacances error:", e.message);
+    }
+  }
+
+  localStorage.setItem(cacheKey, JSON.stringify({ ts: now, zone: state.zoneScolaire||null, feries, vacances }));
+  renderFeriesVacances(feries, vacances);
+}
+
+function renderFeriesVacances(feries, vacances) {
+  const el = document.getElementById("feries-vacances-zone");
+  if (!el) return;
+  const todayStr = new Date().toISOString().split("T")[0];
+
+  // Prochain jour férié
+  const nextFerie = (feries||[]).filter(f => f.date >= todayStr).sort((a,b)=>a.date.localeCompare(b.date))[0];
+
+  // Vacances en cours ou à venir
+  const nextVac = (vacances||[]).filter(v => v.end >= todayStr).sort((a,b)=>a.start.localeCompare(b.start))[0];
+  const enCoursVac = nextVac && nextVac.start <= todayStr && nextVac.end >= todayStr;
+
+  const fmtDate = (iso) => { const d = new Date(iso+"T00:00:00"); return d.toLocaleDateString("fr-FR",{day:"numeric",month:"short"}); };
+  const daysUntil = (iso) => Math.ceil((new Date(iso+"T00:00:00") - new Date(todayStr+"T00:00:00")) / 86400000);
+
+  let html = `<div style="display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;">`;
+
+  if (nextFerie) {
+    const d = daysUntil(nextFerie.date);
+    html += `<div style="flex-shrink:0;background:var(--surface);border-radius:var(--r-sm);border:1px solid var(--border);padding:10px 14px;min-width:150px;">
+      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-bottom:3px;">🎉 Prochain férié</div>
+      <div style="font-size:13px;font-weight:700;color:var(--text);">${nextFerie.nom}</div>
+      <div style="font-size:11px;color:var(--yellow);font-weight:600;">${fmtDate(nextFerie.date)} · ${d===0?"aujourd'hui":d===1?"demain":"dans "+d+"j"}</div>
+    </div>`;
+  }
+
+  if (nextVac) {
+    html += `<div style="flex-shrink:0;background:var(--surface);border-radius:var(--r-sm);border:1px solid var(--border);padding:10px 14px;min-width:170px;">
+      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-bottom:3px;">🏖 Vacances (Zone ${state.zoneScolaire})</div>
+      <div style="font-size:13px;font-weight:700;color:var(--text);">${nextVac.nom}</div>
+      <div style="font-size:11px;color:var(--green);font-weight:600;">${enCoursVac ? "En cours jusqu'au "+fmtDate(nextVac.end) : "Du "+fmtDate(nextVac.start)+" au "+fmtDate(nextVac.end)}</div>
+    </div>`;
+  } else if (!state.zoneScolaire) {
+    html += `<div style="flex-shrink:0;background:var(--surface);border-radius:var(--r-sm);border:1px dashed var(--border2);padding:10px 14px;min-width:170px;display:flex;align-items:center;">
+      <div style="font-size:12px;color:var(--muted);">🏫 Choisis ta zone scolaire dans Mon QG pour voir les vacances</div>
+    </div>`;
+  }
+
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
 function renderEvents() {
   const now = new Date(); now.setHours(0,0,0,0);
   const in7 = new Date(now); in7.setDate(in7.getDate()+7);
@@ -1777,10 +1919,17 @@ function showEvDetail(id) {
 }
 
 function deleteEvent(id) {
+  const ev = (state.events||[]).find(e => String(e.id)===String(id));
   state.events = state.events.filter(e=>String(e.id)!==String(id));
   saveState();
   renderEvents();
   showToast("Événement supprimé");
+  // Événement de groupe : il faut aussi le supprimer côté Firebase,
+  // sinon le listener temps réel le remet automatiquement.
+  if (ev && ev.fbId && firebaseReady && state.groupCode) {
+    db.collection("groupes").doc(state.groupCode).collection("events").doc(ev.fbId).delete()
+      .catch(e => console.log("deleteEvent Firebase error:", e.message));
+  }
 }
 
 function showAddEvent() {
@@ -1894,11 +2043,7 @@ function renderWidgetsZone() {
     if(state.widgets.transport) html += `<div class="info-card" id="transport-card"><div class="info-label">Transports IDF</div><div class="transport-lines" id="transport-lines"><div class="skel" style="height:18px;border-radius:4px;margin-bottom:6px;"></div><div class="skel" style="height:18px;border-radius:4px;"></div></div></div>`;
     html += `</div>`;
   }
-  if(state.widgets.actu) {
-    const fils = (state.actuFils||["fr"]);
-    const filLabels = {fr:"🇫🇷 France",world:"🌍 Monde",sport:"⚽ Sport",tech:"💻 Tech",science:"🔬 Science"};
-    html += `<div style="display:flex;align-items:center;justify-content:space-between;margin:20px 0 10px;"><p class="sec" style="margin:0;">Actualités</p><div id="actu-fil-btns" style="display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;"></div></div><div id="actu-zone"><div class="loading">Chargement...</div></div>`;
-  }
+  // Widget Actualités retiré de l'accueil — accessible via l'onglet Média dédié
   const sportApps = [
     {id:"tdf",   emoji:"🚴", nom:"Tour de France 2026",    sub:"4–26 juillet",      url:"tdf2026.html",   color:"#ED2939"},
     {id:"cdm",   emoji:"⚽", nom:"Coupe du Monde 2026",    sub:"8es de finale",     url:"cdm2026.html",   color:"#34C77B"},
@@ -1919,7 +2064,6 @@ function renderWidgetsZone() {
   if(state.widgets.taches) renderTaches();
   if(state.widgets.env) fetchAirQuality();
   if(state.widgets.transport) renderTransport();
-  if(state.widgets.actu) initActu();
 }
 
 // ── Air ──
@@ -2305,6 +2449,18 @@ function renderPerso() {
   if (orStatus) orStatus.innerHTML = orKey
     ? `<span style="color:var(--green)">✅ Clé configurée</span>`
     : `<span style="color:var(--muted)">⚠️ Pas de clé — recommandations en mode local</span>`;
+
+  // Zone scolaire
+  document.querySelectorAll("#zone-scolaire-tags .tag").forEach(t => {
+    t.classList.toggle("sel", state.zoneScolaire === t.dataset.zone);
+    t.onclick = () => {
+      state.zoneScolaire = t.dataset.zone;
+      saveState();
+      document.querySelectorAll("#zone-scolaire-tags .tag").forEach(x => x.classList.toggle("sel", x===t));
+      fetchFeriesVacances(true);
+    };
+  });
+
   renderTachesConfig();
   // Météo picker
   const mp = document.getElementById("meteo-picker");
@@ -2333,28 +2489,9 @@ function renderPerso() {
     });
   }
 
-  // Fils d'actualités
-  const ap=document.getElementById("teams-picker");
-  if(ap) {
-    ap.innerHTML = `<p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Choisis tes fils d'actualités (si le widget Actualités est activé)</p>` +
-    NEWS_FILS.map(f=>{
-      const sel=(state.actuFils||["fr"]).includes(f.id);
-      return `<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--surface);border-radius:var(--r-sm);border:1px solid ${sel?"var(--yellow)":"var(--border)"};margin-bottom:6px;cursor:pointer;" data-fil-pick="${f.id}">
-        <div style="font-size:20px">${f.label.split(" ")[0]}</div>
-        <div style="flex:1;font-size:13px;font-weight:600;color:var(--text)">${f.label}</div>
-        <div style="width:20px;height:20px;border-radius:50%;border:2px solid ${sel?"var(--yellow)":"var(--border2)"};background:${sel?"var(--yellow)":"none"};display:flex;align-items:center;justify-content:center;font-size:11px;color:#1A1916">${sel?"✓":""}</div>
-      </div>`;
-    }).join("");
-    ap.querySelectorAll("[data-fil-pick]").forEach(row=>{
-      row.addEventListener("click",function(){
-        const id=this.dataset.filPick;
-        if(!state.actuFils) state.actuFils=["fr"];
-        if(state.actuFils.includes(id)) { if(state.actuFils.length>1) state.actuFils=state.actuFils.filter(x=>x!==id); }
-        else state.actuFils.push(id);
-        renderPerso();
-      });
-    });
-  }
+  // Fils d'actualités (Mon QG)
+  renderFilsPicker("teams-picker", "Choisis tes fils d'actualités (aussi modifiable directement dans l'onglet Média)");
+
   // Podcasts picker — caché (widget supprimé)
   const pp=document.getElementById("podcasts-picker");
   if(pp) pp.innerHTML="";
@@ -2469,6 +2606,7 @@ function backToPostit() {
   document.querySelectorAll("#view-postit [id^='module-']").forEach(el => el.style.display = "none");
   const home = document.getElementById("postit-home");
   if (home) home.style.display = "block";
+  editingPostitId = null;
 }
 
 // ── POST-IT NOTES ──
@@ -2479,34 +2617,77 @@ const POSTIT_COLORS = [
   { id:"green",  bg:"#1E3324", border:"#34C77B" },
 ];
 let selectedPostitColor = "yellow";
+let editingPostitId = null;
 
 function initPostitNotes() {
-  const picker = document.getElementById("postit-color-picker");
-  if (picker) {
-    picker.innerHTML = POSTIT_COLORS.map(c => `<button class="reco-chip postit-color-opt${c.id===selectedPostitColor?" sel":""}" data-color="${c.id}" style="width:28px;height:28px;border-radius:50%;background:${c.border};border:2px solid ${c.id===selectedPostitColor?"#fff":"transparent"};padding:0;"></button>`).join("");
-    picker.querySelectorAll(".postit-color-opt").forEach(btn => {
-      btn.addEventListener("click", function() {
-        selectedPostitColor = this.dataset.color;
-        initPostitNotes();
-      });
-    });
-  }
+  renderPostitColorPicker();
   document.getElementById("postit-save-btn")?.addEventListener("click", savePostit, { once: true });
   renderPostitList();
+}
+
+function renderPostitColorPicker() {
+  const picker = document.getElementById("postit-color-picker");
+  if (!picker) return;
+  picker.innerHTML = POSTIT_COLORS.map(c => `<button class="reco-chip postit-color-opt${c.id===selectedPostitColor?" sel":""}" data-color="${c.id}" style="width:28px;height:28px;border-radius:50%;background:${c.border};border:2px solid ${c.id===selectedPostitColor?"#fff":"transparent"};padding:0;"></button>`).join("");
+  picker.querySelectorAll(".postit-color-opt").forEach(btn => {
+    btn.addEventListener("click", function() {
+      selectedPostitColor = this.dataset.color;
+      renderPostitColorPicker();
+    });
+  });
 }
 
 function savePostit() {
   const title = document.getElementById("postit-title")?.value.trim();
   const text = document.getElementById("postit-text")?.value.trim();
-  if (!title) { showToast("Donne un nom à ton post-it !"); return; }
+  if (!title) { showToast("Donne un nom à ton post-it !"); document.getElementById("postit-save-btn")?.addEventListener("click", savePostit, { once: true }); return; }
   if (!state.postits) state.postits = [];
-  state.postits.unshift({ id: Date.now(), title, text, color: selectedPostitColor, ts: Date.now() });
+
+  if (editingPostitId) {
+    const p = state.postits.find(x => x.id === editingPostitId);
+    if (p) { p.title = title; p.text = text; p.color = selectedPostitColor; }
+    showToast("📌 Post-it modifié !");
+  } else {
+    state.postits.unshift({ id: Date.now(), title, text, color: selectedPostitColor, ts: Date.now() });
+    showToast("📌 Post-it épinglé !");
+  }
   saveState();
-  document.getElementById("postit-title").value = "";
-  document.getElementById("postit-text").value = "";
-  showToast("📌 Post-it épinglé !");
+  resetPostitForm();
   renderPostitList();
   document.getElementById("postit-save-btn")?.addEventListener("click", savePostit, { once: true });
+}
+
+function resetPostitForm() {
+  editingPostitId = null;
+  document.getElementById("postit-title").value = "";
+  document.getElementById("postit-text").value = "";
+  selectedPostitColor = "yellow";
+  renderPostitColorPicker();
+  const btn = document.getElementById("postit-save-btn");
+  if (btn) btn.textContent = "📌 Épingler";
+  document.getElementById("postit-cancel-edit")?.remove();
+}
+
+function editPostit(id) {
+  const p = (state.postits||[]).find(x => x.id === id);
+  if (!p) return;
+  editingPostitId = id;
+  document.getElementById("postit-title").value = p.title;
+  document.getElementById("postit-text").value = p.text || "";
+  selectedPostitColor = p.color || "yellow";
+  renderPostitColorPicker();
+  const btn = document.getElementById("postit-save-btn");
+  if (btn) btn.textContent = "💾 Enregistrer les modifications";
+  // Ajoute un bouton "Annuler" s'il n'existe pas déjà
+  if (!document.getElementById("postit-cancel-edit") && btn) {
+    const cancelBtn = document.createElement("button");
+    cancelBtn.id = "postit-cancel-edit";
+    cancelBtn.textContent = "Annuler";
+    cancelBtn.style.cssText = "width:100%;background:none;border:1px solid var(--border2);color:var(--muted);border-radius:var(--r-sm);padding:10px;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;margin-top:8px;";
+    cancelBtn.onclick = resetPostitForm;
+    btn.insertAdjacentElement("afterend", cancelBtn);
+  }
+  document.getElementById("postit-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function renderPostitList() {
@@ -2519,16 +2700,25 @@ function renderPostitList() {
   }
   el.innerHTML = postits.map(p => {
     const c = POSTIT_COLORS.find(x => x.id === p.color) || POSTIT_COLORS[0];
-    return `<div style="background:${c.bg};border:1px solid ${c.border};border-radius:var(--r-sm);padding:12px;position:relative;min-height:90px;">
-      <button data-del-postit="${p.id}" style="position:absolute;top:6px;right:6px;background:none;border:none;color:rgba(255,255,255,.4);font-size:14px;cursor:pointer;padding:2px 6px;">✕</button>
+    return `<div data-edit-postit="${p.id}" style="background:${c.bg};border:1px solid ${c.border};border-radius:var(--r-sm);padding:12px;position:relative;min-height:90px;cursor:pointer;">
+      <button data-del-postit="${p.id}" style="position:absolute;top:6px;right:6px;background:none;border:none;color:rgba(255,255,255,.4);font-size:14px;cursor:pointer;padding:2px 6px;z-index:1;">✕</button>
       <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:4px;padding-right:16px;">${p.title}</div>
       <div style="font-size:12px;color:rgba(255,255,255,.75);line-height:1.4;white-space:pre-wrap;">${p.text||""}</div>
     </div>`;
   }).join("");
+  el.querySelectorAll("[data-edit-postit]").forEach(card => {
+    card.addEventListener("click", function(e) {
+      if (e.target.closest("[data-del-postit]")) return; // le clic sur ✕ ne doit pas ouvrir l'édition
+      editPostit(+this.dataset.editPostit);
+    });
+  });
   el.querySelectorAll("[data-del-postit]").forEach(btn => {
-    btn.addEventListener("click", function() {
-      state.postits = state.postits.filter(p => p.id !== +this.dataset.delPostit);
+    btn.addEventListener("click", function(e) {
+      e.stopPropagation();
+      const id = +this.dataset.delPostit;
+      state.postits = state.postits.filter(p => p.id !== id);
       saveState();
+      if (editingPostitId === id) resetPostitForm();
       renderPostitList();
     });
   });
@@ -2889,6 +3079,10 @@ const QUIZ_THEMES = [
   { id:"sport",   label:"⚽ Sport",             emoji:"⚽" },
   { id:"cinema",  label:"🎬 Cinéma & Séries",   emoji:"🎬" },
   { id:"nature",  label:"🌿 Nature & Animaux",  emoji:"🌿" },
+  { id:"archi",   label:"🏗 Architecture",      emoji:"🏗" },
+  { id:"basket",  label:"🏀 Basket",            emoji:"🏀" },
+  { id:"judo",    label:"🥋 Judo",              emoji:"🥋" },
+  { id:"rugby",   label:"🏉 Rugby",             emoji:"🏉" },
 ];
 
 const QUIZ_QUESTIONS = [
@@ -3056,6 +3250,222 @@ const QUIZ_QUESTIONS = [
   {q:"Quel reptile peut changer de couleur ?",opts:["Le caméléon","Le gecko","L'iguane","Le varan"],a:0,t:"nature"},
   {q:"Quel arbre peut vivre plusieurs milliers d'années ?",opts:["Le séquoia","Le bouleau","Le peuplier","Le saule"],a:0,t:"nature"},
   {q:"Combien de temps vit en moyenne une abeille ouvrière en été ?",opts:["Environ 6 semaines","6 mois","2 ans","1 semaine"],a:0,t:"nature"},
+  // ─── Architecture ───
+  {q:"Qui a conçu la Tour Eiffel ?",opts:["Gustave Eiffel","Le Corbusier","Baron Haussmann","Auguste Perret"],a:0,t:"archi"},
+  {q:"Quel style architectural caractérise Notre-Dame de Paris ?",opts:["Gothique","Roman","Baroque","Renaissance"],a:0,t:"archi"},
+  {q:"Quel est le plus haut gratte-ciel du monde (2026) ?",opts:["Burj Khalifa","Shanghai Tower","One World Trade Center","Taipei 101"],a:0,t:"archi"},
+  {q:"Qui a conçu la Sagrada Família à Barcelone ?",opts:["Antoni Gaudí","Pablo Picasso","Salvador Dalí","Rafael Moneo"],a:0,t:"archi"},
+  {q:"Quel matériau moderne a révolutionné les gratte-ciel au 19e siècle ?",opts:["L'acier","Le bois","La pierre","Le verre"],a:0,t:"archi"},
+  {q:"Quel architecte a conçu la pyramide du Louvre ?",opts:["Ieoh Ming Pei","Frank Gehry","Norman Foster","Renzo Piano"],a:0,t:"archi"},
+  {q:"Dans quelle ville se trouve l'Opéra de Sydney ?",opts:["Sydney","Melbourne","Brisbane","Perth"],a:0,t:"archi"},
+  {q:"Quel style architectural est associé aux colonnes et frontons antiques ?",opts:["Néoclassique","Gothique","Baroque","Art déco"],a:0,t:"archi"},
+  {q:"Quel bâtiment parisien a une structure métallique apparente signée Rogers et Piano ?",opts:["Le Centre Pompidou","Le Grand Palais","La Bourse de Commerce","La Défense"],a:0,t:"archi"},
+  {q:"Qu'est-ce qu'un arc-boutant, typique du gothique ?",opts:["Un support extérieur qui soutient les murs","Une fenêtre ronde","Un type de toiture","Une colonne intérieure"],a:0,t:"archi"},
+  {q:"Quelle civilisation a construit le Colisée de Rome ?",opts:["Les Romains","Les Grecs","Les Étrusques","Les Byzantins"],a:0,t:"archi"},
+  {q:"Quel architecte est célèbre pour le concept d'\"habiter la machine\" et la Cité Radieuse ?",opts:["Le Corbusier","Mies van der Rohe","Walter Gropius","Frank Lloyd Wright"],a:0,t:"archi"},
+  {q:"Quel monument est entièrement construit en fer forgé à Paris ?",opts:["La Tour Eiffel","L'Arc de Triomphe","Le Panthéon","Les Invalides"],a:0,t:"archi"},
+  {q:"Quel style architectural est né dans les années 1920-30, associé aux formes géométriques et à la modernité ?",opts:["L'Art déco","Le baroque","Le roman","Le rococo"],a:0,t:"archi"},
+  {q:"Quel célèbre architecte américain a conçu la maison \"Falling Water\" ?",opts:["Frank Lloyd Wright","Frank Gehry","Philip Johnson","Louis Kahn"],a:0,t:"archi"},
+  // ─── Basket ───
+  {q:"Combien de joueurs par équipe sont sur le terrain au basket ?",opts:["5","6","7","4"],a:0,t:"basket"},
+  {q:"Combien de points vaut un panier à 3 points ?",opts:["3","2","1","4"],a:0,t:"basket"},
+  {q:"Dans quelle ville joue la franchise des Lakers ?",opts:["Los Angeles","New York","Chicago","Boston"],a:0,t:"basket"},
+  {q:"Quel joueur est surnommé \"His Airness\" ?",opts:["Michael Jordan","LeBron James","Kobe Bryant","Magic Johnson"],a:0,t:"basket"},
+  {q:"Combien de minutes dure un match NBA (hors prolongations) ?",opts:["48 minutes","40 minutes","45 minutes","60 minutes"],a:0,t:"basket"},
+  {q:"Quelle équipe française a remporté le plus de titres de champion de France ?",opts:["ASVEL Villeurbanne","Paris Basketball","Monaco","Le Mans"],a:0,t:"basket"},
+  {q:"Combien de temps dure un quart-temps en NBA ?",opts:["12 minutes","10 minutes","15 minutes","8 minutes"],a:0,t:"basket"},
+  {q:"Quel joueur détient le record de points marqués en carrière NBA ?",opts:["LeBron James","Kareem Abdul-Jabbar","Kobe Bryant","Michael Jordan"],a:0,t:"basket"},
+  {q:"Comment appelle-t-on un panier marqué sans toucher l'arceau ni la planche ?",opts:["Un swish","Un airball","Un alley-oop","Un dunk"],a:0,t:"basket"},
+  {q:"Quel pays a remporté le plus de titres olympiques de basket masculin ?",opts:["Les États-Unis","L'URSS/Russie","L'Espagne","L'Argentine"],a:0,t:"basket"},
+  {q:"Comment appelle-t-on une passe suivie d'un smash immédiat ?",opts:["Un alley-oop","Un pick and roll","Un fast break","Un crossover"],a:0,t:"basket"},
+  {q:"Quel joueur français a été 1er choix de la draft NBA en 2023 ?",opts:["Victor Wembanyama","Rudy Gobert","Tony Parker","Evan Fournier"],a:0,t:"basket"},
+  {q:"Combien de fautes personnelles entraînent l'exclusion d'un joueur en NBA ?",opts:["6","5","4","7"],a:0,t:"basket"},
+  {q:"Quelle équipe a remporté le plus de titres NBA ?",opts:["Boston Celtics","Los Angeles Lakers","Chicago Bulls","Golden State Warriors"],a:0,t:"basket"},
+  {q:"Comment appelle-t-on la ligne à partir de laquelle un panier vaut 3 points ?",opts:["La ligne à 3 points","La ligne des lancers francs","La ligne médiane","La ligne de fond"],a:0,t:"basket"},
+  // ─── Judo ───
+  {q:"Dans quel pays est né le judo ?",opts:["Japon","Chine","Corée du Sud","Thaïlande"],a:0,t:"judo"},
+  {q:"Qui a fondé le judo ?",opts:["Jigoro Kano","Bruce Lee","Morihei Ueshiba","Gichin Funakoshi"],a:0,t:"judo"},
+  {q:"Comment appelle-t-on la tenue portée en judo ?",opts:["Le judogi","Le kimono seulement","Le keikogi de karaté","Le hakama"],a:0,t:"judo"},
+  {q:"Quelle est la ceinture la plus haute en judo (hors grades honorifiques) ?",opts:["Noire","Rouge et blanche","Marron","Rouge"],a:0,t:"judo"},
+  {q:"Comment appelle-t-on une victoire totale et immédiate en judo ?",opts:["Ippon","Waza-ari","Yuko","Koka"],a:0,t:"judo"},
+  {q:"Quel est le nom de l'aire de combat en judo ?",opts:["Le tatami","Le dojo","Le ring","L'octogone"],a:0,t:"judo"},
+  {q:"Quelle judokate française a marqué l'histoire avec de multiples titres olympiques ?",opts:["Clarisse Agbegnenou","Laetitia Payet","Automne Pavia","Marie-Ève Gahié"],a:0,t:"judo"},
+  {q:"Comment salue-t-on son adversaire avant et après un combat de judo ?",opts:["Par un salut (rei)","Par une poignée de main","Par une accolade","Par un applaudissement"],a:0,t:"judo"},
+  {q:"Quel judoka français est triple champion olympique en catégorie lourds ?",opts:["Teddy Riner","David Douillet","Jean-Luc Rougé","Angelo Parisi"],a:0,t:"judo"},
+  {q:"Que signifie littéralement le mot \"judo\" en japonais ?",opts:["La voie de la souplesse","La voie du guerrier","L'art du combat","La force tranquille"],a:0,t:"judo"},
+  {q:"Combien de temps dure un combat de judo senior en compétition internationale ?",opts:["4 minutes","3 minutes","5 minutes","2 minutes"],a:0,t:"judo"},
+  {q:"Comment appelle-t-on une technique de projection en judo ?",opts:["Nage-waza","Katame-waza","Atemi-waza","Ukemi"],a:0,t:"judo"},
+  {q:"Le judo est-il devenu sport olympique en quelle année ?",opts:["1964","1972","1956","1980"],a:0,t:"judo"},
+  {q:"Comment appelle-t-on la technique de chute pour éviter de se blesser ?",opts:["Ukemi","Randori","Kata","Shiai"],a:0,t:"judo"},
+  {q:"Quel pays domine historiquement le judo aux Jeux Olympiques ?",opts:["Le Japon","La France","La Corée du Sud","La Russie"],a:0,t:"judo"},
+  // ─── Rugby ───
+  {q:"Combien de joueurs par équipe sur le terrain au rugby à XV ?",opts:["15","13","11","7"],a:0,t:"rugby"},
+  {q:"Combien de points vaut un essai au rugby à XV ?",opts:["5","3","7","6"],a:0,t:"rugby"},
+  {q:"Quel pays a remporté la première Coupe du monde de rugby en 1987 ?",opts:["Nouvelle-Zélande","Australie","Afrique du Sud","France"],a:0,t:"rugby"},
+  {q:"Comment appelle-t-on le tournoi annuel entre 6 nations européennes ?",opts:["Le Tournoi des 6 Nations","La Coupe d'Europe","Le Grand Chelem","Le Tri Nations"],a:0,t:"rugby"},
+  {q:"Combien de points rapporte une transformation réussie ?",opts:["2","3","5","1"],a:0,t:"rugby"},
+  {q:"Quel club français a remporté le plus de Champions Cup (Coupe d'Europe) ?",opts:["Toulouse","Toulon","Racing 92","La Rochelle"],a:0,t:"rugby"},
+  {q:"Comment appelle-t-on le geste rituel effectué par les All Blacks avant chaque match ?",opts:["Le haka","Le hongi","Le kapa haka","Le poi"],a:0,t:"rugby"},
+  {q:"Quel pays est surnommé \"les Springboks\" ?",opts:["L'Afrique du Sud","L'Australie","La Nouvelle-Zélande","Les Fidji"],a:0,t:"rugby"},
+  {q:"Combien de points vaut une pénalité réussie ?",opts:["3","2","5","1"],a:0,t:"rugby"},
+  {q:"Dans quelle ville se trouve le Stade de France, hôte des grands matchs de l'équipe de France ?",opts:["Saint-Denis","Paris","Marseille","Lyon"],a:0,t:"rugby"},
+  {q:"Quel est le surnom de l'équipe de France de rugby ?",opts:["Le XV de France","Les Bleus","Les Tricolores","Les Coqs"],a:0,t:"rugby"},
+  {q:"Comment appelle-t-on une remise en jeu suite à une sortie en touche ?",opts:["Un touche","Une mêlée","Un renvoi","Un drop"],a:0,t:"rugby"},
+  {q:"Quel pays a remporté le plus de Coupes du monde de rugby ?",opts:["Afrique du Sud","Nouvelle-Zélande","Australie","Angleterre"],a:0,t:"rugby"},
+  {q:"Comment appelle-t-on un coup de pied tombé qui rapporte 3 points ?",opts:["Un drop","Une pénalité","Un renvoi","Un coup franc"],a:0,t:"rugby"},
+  {q:"Combien de temps dure un match de rugby à XV (hors arrêts de jeu) ?",opts:["80 minutes","90 minutes","70 minutes","60 minutes"],a:0,t:"rugby"},
+  // ─── Rugby (suite) ───
+  {q:"Combien de joueurs de champ (hors remplaçants) une équipe peut-elle utiliser au maximum en Top 14 ?",opts:["8 remplaçants","6 remplaçants","10 remplaçants","5 remplaçants"],a:0,t:"rugby"},
+  {q:"Comment appelle-t-on la ligne où se regroupent les avants pour disputer le ballon au sol ?",opts:["Le ruck","Le maul","La mêlée","La touche"],a:0,t:"rugby"},
+  {q:"Quel pays a inventé le rugby, selon la légende de William Webb Ellis ?",opts:["L'Angleterre","L'Écosse","Le Pays de Galles","L'Irlande"],a:0,t:"rugby"},
+  {q:"Quelle compétition oppose les meilleurs clubs européens de rugby ?",opts:["La Champions Cup","La Coupe du Monde","Le Super Rugby","Le Tri Nations"],a:0,t:"rugby"},
+  {q:"Comment appelle-t-on un regroupement debout autour du ballon porté ?",opts:["Un maul","Un ruck","Une mêlée","Un plaquage"],a:0,t:"rugby"},
+  {q:"Quel joueur est le meilleur réalisateur (points) de l'histoire du Tournoi des 6 Nations ?",opts:["Jonny Wilkinson","Dan Carter","Ronan O'Gara","Owen Farrell"],a:0,t:"rugby"},
+  {q:"Combien d'essais rapportent un bonus offensif en Top 14 ?",opts:["4 essais","3 essais","5 essais","2 essais"],a:0,t:"rugby"},
+  {q:"Quelle nation domine le rugby féminin mondial ces dernières années ?",opts:["Nouvelle-Zélande","France","Angleterre","Afrique du Sud"],a:0,t:"rugby"},
+  {q:"Comment appelle-t-on l'action de plaquer un adversaire au-dessus des épaules (interdite) ?",opts:["Un plaquage haut","Un tampon","Un cadrage","Un raffut"],a:0,t:"rugby"},
+  {q:"Quel est le nom du maillot porté par le capitaine du XV de France ?",opts:["Il n'y a pas de maillot spécifique","Le maillot doré","Le maillot à galons","Le brassard bleu"],a:0,t:"rugby"},
+  {q:"Quelle ville accueille traditionnellement la finale du Top 14 ?",opts:["Paris (Stade de France)","Marseille","Toulouse","Lyon"],a:0,t:"rugby"},
+  {q:"Combien de temps dure la mi-temps au rugby ?",opts:["10 minutes","5 minutes","15 minutes","20 minutes"],a:0,t:"rugby"},
+  {q:"Quel pays a remporté la Coupe du monde de rugby 2023 ?",opts:["Afrique du Sud","Nouvelle-Zélande","France","Irlande"],a:0,t:"rugby"},
+  {q:"Comment appelle-t-on un joueur qui joue à l'arrière au rugby ?",opts:["L'arrière","Le pilier","Le talonneur","Le demi de mêlée"],a:0,t:"rugby"},
+  {q:"Quelle équipe est surnommée le \"XV du Chardon\" ?",opts:["L'Écosse","Le Pays de Galles","L'Irlande","L'Angleterre"],a:0,t:"rugby"},
+  // ─── Architecture (suite) ───
+  {q:"Quel style architectural est caractérisé par des arcs en plein cintre et des voûtes en berceau ?",opts:["Le roman","Le gothique","Le baroque","Le classique"],a:0,t:"archi"},
+  {q:"Quel ingénieur a conçu la structure du Golden Gate Bridge ?",opts:["Joseph Strauss","Gustave Eiffel","Isambard Brunel","John Roebling"],a:0,t:"archi"},
+  {q:"Quel bâtiment est célèbre pour son dôme conçu par Brunelleschi ?",opts:["La cathédrale de Florence","Saint-Pierre de Rome","Le Panthéon","Notre-Dame de Paris"],a:0,t:"archi"},
+  {q:"Quel mouvement architectural prône la fonction avant la décoration (\"form follows function\") ?",opts:["Le fonctionnalisme","Le baroque","L'Art nouveau","Le rococo"],a:0,t:"archi"},
+  {q:"Quelle ville abrite la Maison Loire de Frank Lloyd Wright, dite Falling Water ?",opts:["Mill Run (Pennsylvanie)","Chicago","New York","Los Angeles"],a:0,t:"archi"},
+  {q:"Quel élément architectural gothique permet de faire entrer plus de lumière dans les cathédrales ?",opts:["Le vitrail","Le pilier","Le dôme","Le clocher"],a:0,t:"archi"},
+  {q:"Quel est le nom du célèbre architecte brésilien qui a conçu Brasília ?",opts:["Oscar Niemeyer","Lúcio Costa","Roberto Burle Marx","Paulo Mendes"],a:0,t:"archi"},
+  {q:"Quel style architectural utilise des courbes organiques inspirées de la nature (ex : métro parisien) ?",opts:["L'Art nouveau","Le Bauhaus","Le brutalisme","Le classicisme"],a:0,t:"archi"},
+  {q:"Quel matériau caractérise le mouvement architectural \"brutaliste\" ?",opts:["Le béton brut","Le verre","L'acier inoxydable","Le bois"],a:0,t:"archi"},
+  {q:"Quelle structure parisienne a été construite pour l'Exposition universelle de 1889 ?",opts:["La Tour Eiffel","Le Grand Palais","Le Petit Palais","La gare d'Orsay"],a:0,t:"archi"},
+  {q:"Quel architecte a conçu le Guggenheim de Bilbao ?",opts:["Frank Gehry","Zaha Hadid","Rem Koolhaas","Renzo Piano"],a:0,t:"archi"},
+  {q:"Quelle est la fonction première d'un contrefort en architecture ?",opts:["Soutenir un mur","Décorer une façade","Éclairer l'intérieur","Ventiler un bâtiment"],a:0,t:"archi"},
+  {q:"Quel palais français est un exemple emblématique de l'architecture classique du 17e siècle ?",opts:["Le château de Versailles","Le Louvre médiéval","Le château de Chambord","Le Panthéon"],a:0,t:"archi"},
+  {q:"Quelle architecte irako-britannique est connue pour ses formes futuristes fluides ?",opts:["Zaha Hadid","Norman Foster","Renzo Piano","Tadao Ando"],a:0,t:"archi"},
+  {q:"Quel est le principal matériau de construction des pyramides égyptiennes ?",opts:["La pierre calcaire","La brique","Le granit uniquement","L'argile"],a:0,t:"archi"},
+  // ─── Basket (suite) ───
+  {q:"Quel joueur est surnommé \"The King\" ?",opts:["LeBron James","Kevin Durant","Stephen Curry","Kawhi Leonard"],a:0,t:"basket"},
+  {q:"Combien de temps dure la prolongation en NBA en cas d'égalité ?",opts:["5 minutes","10 minutes","3 minutes","15 minutes"],a:0,t:"basket"},
+  {q:"Quel joueur détient le record du plus grand nombre de passes décisives en carrière NBA ?",opts:["John Stockton","Magic Johnson","Chris Paul","Steve Nash"],a:0,t:"basket"},
+  {q:"Comment appelle-t-on un tir à trois points réussi consécutivement plusieurs fois de suite ?",opts:["Une série (streak)","Un combo","Un buzzer beater","Un clutch"],a:0,t:"basket"},
+  {q:"Quelle université américaine est réputée pour son programme de basket universitaire (NCAA), Duke ou Kentucky par exemple ?",opts:["Les deux sont réputées","Seule Duke l'est","Seule Kentucky l'est","Aucune des deux"],a:0,t:"basket"},
+  {q:"Quel pays a gagné la Coupe du monde de basket 2023 ?",opts:["Allemagne","États-Unis","Serbie","Canada"],a:0,t:"basket"},
+  {q:"Comment appelle-t-on la zone restrictive proche du panier ?",opts:["La raquette","La zone","Le cercle","Le corner"],a:0,t:"basket"},
+  {q:"Quel joueur a marqué 100 points dans un seul match NBA en 1962 ?",opts:["Wilt Chamberlain","Kobe Bryant","Michael Jordan","Elgin Baylor"],a:0,t:"basket"},
+  {q:"Quelle est la hauteur réglementaire d'un panier de basket ?",opts:["3,05 mètres","2,80 mètres","3,20 mètres","2,50 mètres"],a:0,t:"basket"},
+  {q:"Quel geste technique consiste à faire rebondir la balle en dribblant très bas et vite ?",opts:["Le crossover","Le fadeaway","Le pick and roll","Le screen"],a:0,t:"basket"},
+  {q:"Quelle équipe française a vu jouer Tony Parker en NBA ?",opts:["San Antonio Spurs","Los Angeles Lakers","Chicago Bulls","Boston Celtics"],a:0,t:"basket"},
+  {q:"Combien de fois Michael Jordan a-t-il été champion NBA ?",opts:["6 fois","5 fois","7 fois","4 fois"],a:0,t:"basket"},
+  {q:"Comment appelle-t-on un tir marqué juste avant la fin du temps réglementaire ?",opts:["Un buzzer beater","Un airball","Un alley-oop","Un fadeaway"],a:0,t:"basket"},
+  {q:"Quelle ligue est considérée comme le plus haut niveau de basket féminin aux États-Unis ?",opts:["La WNBA","La NCAA-W","La NBA-W","La FIBA-W"],a:0,t:"basket"},
+  {q:"Quel est le poste généralement le plus grand sur le terrain ?",opts:["Le pivot (centre)","Le meneur","L'arrière","L'ailier"],a:0,t:"basket"},
+  // ─── Judo (suite) ───
+  {q:"Combien existe-t-il de grades de ceintures colorées avant la ceinture noire (dans le système classique) ?",opts:["6","4","8","5"],a:0,t:"judo"},
+  {q:"Comment appelle-t-on une immobilisation au sol en judo ?",opts:["Osaekomi","Ippon","Randori","Ukemi"],a:0,t:"judo"},
+  {q:"Quel principe fondamental Jigoro Kano a-t-il inscrit au cœur du judo ?",opts:["L'entraide et le profit mutuel","La force brute","La vitesse pure","L'endurance"],a:0,t:"judo"},
+  {q:"Quelle technique de judo consiste à faire un balayage de jambe ?",opts:["Un ashi-waza","Un te-waza","Un koshi-waza","Un sutemi-waza"],a:0,t:"judo"},
+  {q:"Comment appelle-t-on l'entraînement libre en judo, sans combat formel ?",opts:["Le randori","Le kata","Le shiai","Le uchikomi"],a:0,t:"judo"},
+  {q:"Quel pays européen a une forte tradition judo, souvent médaillé olympique ?",opts:["La France","L'Espagne","L'Italie","Le Portugal"],a:0,t:"judo"},
+  {q:"Quelle judokate japonaise est une légende du judo féminin (multiples titres mondiaux) ?",opts:["Ryoko Tani","Ai Shishime","Uta Abe","Tsukasa Yoshida"],a:0,t:"judo"},
+  {q:"Comment appelle-t-on les katas, ces enchaînements codifiés du judo ?",opts:["Des formes préétablies de techniques","Des combats libres","Des compétitions officielles","Des exercices de musculation"],a:0,t:"judo"},
+  {q:"Quel pays organise les premiers championnats du monde de judo en 1956 ?",opts:["Japon","France","Brésil","États-Unis"],a:0,t:"judo"},
+  {q:"Comment appelle-t-on la ceinture d'un débutant en judo ?",opts:["La ceinture blanche","La ceinture jaune","La ceinture orange","La ceinture verte"],a:0,t:"judo"},
+  {q:"Quel judoka a remporté l'or olympique à Tokyo 2021 en plus de 100kg ?",opts:["Teddy Riner","Lukas Krpalek","Kim Min-jong","David Moura"],a:0,t:"judo"},
+  {q:"Que signifie le terme \"waza\" en judo ?",opts:["Technique","Combat","Ceinture","Salut"],a:0,t:"judo"},
+  {q:"Quel est le poids le plus léger en compétition masculine de judo (JO) ?",opts:["-60 kg","-66 kg","-73 kg","-55 kg"],a:0,t:"judo"},
+  {q:"Comment appelle-t-on une pénalité en judo qui peut mener à la disqualification ?",opts:["Un shido","Un ippon","Un yuko","Un koka"],a:0,t:"judo"},
+  {q:"Quel art martial japonais est à l'origine du judo, dont Kano s'est inspiré ?",opts:["Le jujitsu","Le karaté","L'aïkido","Le kendo"],a:0,t:"judo"},
+  // ─── Sciences (suite) ───
+  {q:"Quel scientifique a formulé la théorie de la relativité ?",opts:["Albert Einstein","Isaac Newton","Niels Bohr","Max Planck"],a:0,t:"science"},
+  {q:"Quel est le symbole chimique de l'or ?",opts:["Au","Ag","Or","Go"],a:0,t:"science"},
+  {q:"Combien de chromosomes possède l'être humain ?",opts:["46","44","48","42"],a:0,t:"science"},
+  {q:"Quelle est l'unité de mesure de la force ?",opts:["Le newton","Le watt","Le joule","Le pascal"],a:0,t:"science"},
+  {q:"Quel gaz les plantes absorbent-elles principalement pour la photosynthèse ?",opts:["Le dioxyde de carbone","L'oxygène","L'azote","L'hydrogène"],a:0,t:"science"},
+  {q:"Quelle particule subatomique porte une charge négative ?",opts:["L'électron","Le proton","Le neutron","Le photon"],a:0,t:"science"},
+  {q:"Quel savant a découvert la radioactivité naturelle ?",opts:["Henri Becquerel","Marie Curie","Pierre Curie","Ernest Rutherford"],a:0,t:"science"},
+  {q:"Quelle est la vitesse de la lumière dans le vide (arrondie) ?",opts:["300 000 km/s","150 000 km/s","1 million km/s","30 000 km/s"],a:0,t:"science"},
+  {q:"Quel organe humain produit l'insuline ?",opts:["Le pancréas","Le foie","Les reins","La rate"],a:0,t:"science"},
+  {q:"Quelle planète possède le plus grand nombre de lunes connues ?",opts:["Saturne","Jupiter","Uranus","Neptune"],a:0,t:"science"},
+  {q:"Quel est le nom du processus par lequel l'eau passe de l'état liquide à l'état gazeux ?",opts:["L'évaporation","La condensation","La sublimation","La fusion"],a:0,t:"science"},
+  {q:"Quel élément chimique a pour symbole \"Fe\" ?",opts:["Le fer","Le fluor","Le francium","Le fermium"],a:0,t:"science"},
+  {q:"Quel physicien a énoncé les trois lois du mouvement ?",opts:["Isaac Newton","Galilée","Einstein","Kepler"],a:0,t:"science"},
+  {q:"Quel pourcentage approximatif de l'atmosphère terrestre est composé d'azote ?",opts:["78%","50%","21%","90%"],a:0,t:"science"},
+  {q:"Quelle est la plus petite unité de vie autonome ?",opts:["La cellule","L'atome","La molécule","Le tissu"],a:0,t:"science"},
+  // ─── Culture (suite) ───
+  {q:"Qui a peint la Joconde ?",opts:["Léonard de Vinci","Michel-Ange","Raphaël","Botticelli"],a:0,t:"culture"},
+  {q:"Quel écrivain français a écrit \"Les Misérables\" ?",opts:["Victor Hugo","Émile Zola","Gustave Flaubert","Alexandre Dumas"],a:0,t:"culture"},
+  {q:"Quel compositeur allemand est devenu sourd et a continué à composer ?",opts:["Beethoven","Mozart","Bach","Brahms"],a:0,t:"culture"},
+  {q:"Dans quel musée parisien se trouve la Joconde ?",opts:["Le Louvre","Le musée d'Orsay","Le Centre Pompidou","Le Petit Palais"],a:0,t:"culture"},
+  {q:"Quel mouvement artistique est associé à Claude Monet et Renoir ?",opts:["L'impressionnisme","Le cubisme","Le surréalisme","Le fauvisme"],a:0,t:"culture"},
+  {q:"Qui a sculpté \"Le Penseur\" ?",opts:["Auguste Rodin","Camille Claudel","Antoine Bourdelle","Aristide Maillol"],a:0,t:"culture"},
+  {q:"Quel écrivain a créé le personnage de Sherlock Holmes ?",opts:["Arthur Conan Doyle","Agatha Christie","Charles Dickens","Oscar Wilde"],a:0,t:"culture"},
+  {q:"Quel peintre espagnol est célèbre pour le cubisme ?",opts:["Pablo Picasso","Salvador Dalí","Joan Miró","Diego Velázquez"],a:0,t:"culture"},
+  {q:"Quel opéra célèbre a été composé par Bizet ?",opts:["Carmen","La Traviata","Aïda","La Bohème"],a:0,t:"culture"},
+  {q:"Quel écrivain russe a écrit \"Guerre et Paix\" ?",opts:["Léon Tolstoï","Fiodor Dostoïevski","Anton Tchekhov","Nicolas Gogol"],a:0,t:"culture"},
+  {q:"Quel style musical est né à La Nouvelle-Orléans au début du 20e siècle ?",opts:["Le jazz","Le blues","Le rock","Le reggae"],a:0,t:"culture"},
+  {q:"Quel peintre néerlandais a peint \"La Nuit étoilée\" ?",opts:["Vincent van Gogh","Rembrandt","Vermeer","Bosch"],a:0,t:"culture"},
+  {q:"Quel est le nom du célèbre ballet de Tchaïkovski avec des cygnes ?",opts:["Le Lac des cygnes","Casse-Noisette","La Belle au bois dormant","Giselle"],a:0,t:"culture"},
+  // ─── Nature (suite) ───
+  {q:"Quel est le plus rapide des animaux terrestres ?",opts:["Le guépard","Le lion","L'antilope","Le lévrier"],a:0,t:"nature"},
+  {q:"Combien de cœurs possède une pieuvre ?",opts:["3","1","2","4"],a:0,t:"nature"},
+  {q:"Quel est le plus grand mammifère terrestre ?",opts:["L'éléphant d'Afrique","La girafe","Le rhinocéros","L'hippopotame"],a:0,t:"nature"},
+  {q:"Quelle plante carnivore referme ses feuilles pour capturer des insectes ?",opts:["La dionée attrape-mouche","Le nénuphar","Le cactus","La sensitive"],a:0,t:"nature"},
+  {q:"Quel animal hiberne pendant l'hiver dans les régions froides ?",opts:["L'ours","Le loup","Le renard","Le cerf"],a:0,t:"nature"},
+  {q:"Combien de temps dure la gestation d'un éléphant ?",opts:["Environ 22 mois","12 mois","6 mois","18 mois"],a:0,t:"nature"},
+  {q:"Quel est le seul mammifère capable de voler activement ?",opts:["La chauve-souris","L'écureuil volant","Le colugo","Aucun"],a:0,t:"nature"},
+  {q:"Quelle forêt tropicale est surnommée le \"poumon de la Terre\" ?",opts:["L'Amazonie","La forêt du Congo","La forêt boréale","La forêt de Bornéo"],a:0,t:"nature"},
+  {q:"Quel animal marin est capable de changer de sexe au cours de sa vie ?",opts:["Le poisson-clown","Le dauphin","Le requin","La baleine"],a:0,t:"nature"},
+  {q:"Quelle est la durée de vie moyenne d'une tortue géante des Galápagos ?",opts:["Plus de 100 ans","30 ans","50 ans","70 ans"],a:0,t:"nature"},
+  {q:"Quel oiseau est connu pour imiter les sons de son environnement ?",opts:["Le perroquet","L'aigle","Le pigeon","Le moineau"],a:0,t:"nature"},
+  // ─── Cinéma (suite) ───
+  {q:"Quel réalisateur a créé la saga \"Star Wars\" ?",opts:["George Lucas","Steven Spielberg","James Cameron","Christopher Nolan"],a:0,t:"cinema"},
+  {q:"Quel film a remporté l'Oscar du meilleur film en 2020, une première pour un film non anglophone ?",opts:["Parasite","1917","Joker","Once Upon a Time in Hollywood"],a:0,t:"cinema"},
+  {q:"Quel acteur incarne Iron Man dans le Marvel Cinematic Universe ?",opts:["Robert Downey Jr.","Chris Evans","Chris Hemsworth","Mark Ruffalo"],a:0,t:"cinema"},
+  {q:"Quel film culte se déroule dans une matrice virtuelle avec Keanu Reeves ?",opts:["Matrix","Inception","Blade Runner","Ex Machina"],a:0,t:"cinema"},
+  {q:"Quel studio japonais a produit \"Mon voisin Totoro\" et \"Le Voyage de Chihiro\" ?",opts:["Studio Ghibli","Toei Animation","Sunrise","Madhouse"],a:0,t:"cinema"},
+  {q:"Quel réalisateur est connu pour des films comme \"Pulp Fiction\" et \"Kill Bill\" ?",opts:["Quentin Tarantino","Martin Scorsese","David Fincher","Christopher Nolan"],a:0,t:"cinema"},
+  {q:"Dans quel film trouve-t-on la réplique \"Que la force soit avec toi\" ?",opts:["Star Wars","Le Seigneur des Anneaux","Star Trek","Dune"],a:0,t:"cinema"},
+  {q:"Quelle actrice a remporté un Oscar pour \"La Vie en Rose\" (rôle d'Édith Piaf) ?",opts:["Marion Cotillard","Juliette Binoche","Audrey Tautou","Léa Seydoux"],a:0,t:"cinema"},
+  {q:"Quel film d'animation Pixar raconte l'histoire d'un vieil homme et d'une maison volante ?",opts:["Là-haut","Wall-E","Vice-Versa","Coco"],a:0,t:"cinema"},
+  {q:"Quel réalisateur a mis en scène la trilogie \"Le Seigneur des Anneaux\" ?",opts:["Peter Jackson","James Cameron","Ridley Scott","Denis Villeneuve"],a:0,t:"cinema"},
+  // ─── Géographie (suite) ───
+  {q:"Quel est le plus long fleuve du monde ?",opts:["Le Nil (ou l'Amazone selon les mesures)","Le Mississippi","Le Yangtsé","Le Danube"],a:0,t:"geo"},
+  {q:"Quelle chaîne de montagnes sépare l'Europe de l'Asie ?",opts:["L'Oural","Les Alpes","Les Carpates","Le Caucase"],a:0,t:"geo"},
+  {q:"Quel est le pays le plus étendu du monde ?",opts:["La Russie","Le Canada","La Chine","Les États-Unis"],a:0,t:"geo"},
+  {q:"Quelle capitale européenne est traversée par le Danube ?",opts:["Budapest","Varsovie","Madrid","Rome"],a:0,t:"geo"},
+  {q:"Quel désert est le plus grand désert chaud du monde ?",opts:["Le Sahara","Le désert de Gobi","Le Kalahari","Le désert d'Arabie"],a:0,t:"geo"},
+  {q:"Quel pays compte le plus grand nombre de fuseaux horaires ?",opts:["La France (via ses territoires d'outre-mer)","La Russie","Les États-Unis","Le Royaume-Uni"],a:0,t:"geo"},
+  // ─── Histoire (suite) ───
+  {q:"Quelle bataille a marqué la défaite finale de Napoléon en 1815 ?",opts:["Waterloo","Austerlitz","Trafalgar","Iéna"],a:0,t:"histoire"},
+  {q:"Quel empire romain a chuté en 476 ?",opts:["L'Empire romain d'Occident","L'Empire romain d'Orient","L'Empire byzantin","L'Empire carolingien"],a:0,t:"histoire"},
+  {q:"Quel mur emblématique est tombé en 1989 ?",opts:["Le mur de Berlin","La Grande Muraille","Le mur d'Hadrien","Le mur de Chine"],a:0,t:"histoire"},
+  {q:"Qui a été le premier président des États-Unis ?",opts:["George Washington","Thomas Jefferson","Abraham Lincoln","John Adams"],a:0,t:"histoire"},
+  {q:"Quelle révolution a débuté en France en 1789 ?",opts:["La Révolution française","La Révolution industrielle","La Commune de Paris","La Fronde"],a:0,t:"histoire"},
+  {q:"Quel traité a mis fin à la Première Guerre mondiale ?",opts:["Le traité de Versailles","Le traité de Vienne","Le traité de Westphalie","Le traité de Rome"],a:0,t:"histoire"},
+  {q:"Quelle civilisation a construit Machu Picchu ?",opts:["Les Incas","Les Aztèques","Les Mayas","Les Olmèques"],a:0,t:"histoire"},
+  {q:"Qui était le pharaon associé à la légende de l'Exode biblique ?",opts:["Ramsès II (selon certaines traditions)","Toutânkhamon","Khéops","Akhenaton"],a:0,t:"histoire"},
+  {q:"Quelle reine d'Angleterre a régné plus de 60 ans jusqu'en 2022 ?",opts:["Élisabeth II","Victoria","Elizabeth I","Anne"],a:0,t:"histoire"},
+  {q:"Quel événement a déclenché la Première Guerre mondiale en 1914 ?",opts:["L'assassinat de l'archiduc François-Ferdinand","L'invasion de la Pologne","La crise de Cuba","Le naufrage du Lusitania"],a:0,t:"histoire"},
+  // ─── Sport (suite) ───
+  {q:"Tous les combien d'années se déroule la Coupe du monde de football ?",opts:["4 ans","2 ans","3 ans","5 ans"],a:0,t:"sport"},
+  {q:"Quel pays a organisé les Jeux Olympiques d'été de 2024 ?",opts:["La France","Le Japon","Les États-Unis","Le Brésil"],a:0,t:"sport"},
+  {q:"Quel sport voit s'affronter deux équipes avec un palet sur une patinoire ?",opts:["Le hockey sur glace","Le curling","Le patinage","Le bobsleigh"],a:0,t:"sport"},
+  {q:"Combien de sets faut-il gagner pour remporter un match de tennis en 5 sets (Grand Chelem messieurs) ?",opts:["3 sets","2 sets","4 sets","5 sets"],a:0,t:"sport"},
+  {q:"Quel nageur est le plus médaillé de l'histoire olympique ?",opts:["Michael Phelps","Mark Spitz","Katie Ledecky","Ian Thorpe"],a:0,t:"sport"},
+  {q:"Quel pays a inventé le tennis moderne au 19e siècle ?",opts:["L'Angleterre","La France","Les États-Unis","L'Australie"],a:0,t:"sport"},
+  {q:"Quelle distance représente un marathon ?",opts:["42,195 km","40 km","45 km","50 km"],a:0,t:"sport"},
+  {q:"Quel sport se joue avec des raquettes et un volant ?",opts:["Le badminton","Le squash","Le tennis de table","Le padel"],a:0,t:"sport"},
+  {q:"Quel pays a remporté le plus de médailles d'or aux JO d'été au total ?",opts:["Les États-Unis","L'URSS/Russie","La Chine","L'Allemagne"],a:0,t:"sport"},
+  {q:"Combien de joueurs compte une équipe de volley-ball sur le terrain ?",opts:["6","7","5","8"],a:0,t:"sport"},
+  {q:"Quel événement cycliste français a lieu chaque année en juillet ?",opts:["Le Tour de France","Le Giro d'Italia","La Vuelta","Paris-Roubaix"],a:0,t:"sport"},
+  // ─── Compléments finaux ───
+  {q:"Quel réalisateur a créé \"E.T. l'extra-terrestre\" ?",opts:["Steven Spielberg","George Lucas","Robert Zemeckis","Ron Howard"],a:0,t:"cinema"},
+  {q:"Quel film met en scène un naufrage sur le paquebot Titanic avec Leonardo DiCaprio ?",opts:["Titanic","Pearl Harbor","The Aviator","Master and Commander"],a:0,t:"cinema"},
+  {q:"Quel animal marin utilise l'écholocation pour se repérer, comme les dauphins ?",opts:["La chauve-souris (sur terre) et le dauphin (en mer)","Le requin","La méduse","Le poulpe"],a:0,t:"nature"},
+  {q:"Quelle est la plante terrestre la plus haute du monde ?",opts:["Le séquoia géant","Le baobab","Le chêne","L'eucalyptus"],a:0,t:"nature"},
 ];
 
 let quizState = { questions:[], idx:0, score:0, answered:false, wrong:[], theme:"all" };
@@ -3067,17 +3477,64 @@ function initQuiz() {
   renderThemePicker();
 }
 
+
+// ════════════════════════════════════════════
+// QUIZ — NIVEAUX DE DIFFICULTÉ PAR THÈME (1 à 5)
+// ════════════════════════════════════════════
+const QUIZ_LEVEL_LABELS = { 1:"Facile", 2:"Intermédiaire", 3:"Confirmé", 4:"Expert", 5:"Maître" };
+const QUIZ_LEVEL_WINDOW = 10; // nombre de questions pour évaluer le passage de niveau
+const QUIZ_LEVEL_THRESHOLD = 0.9; // 90% de réussite requis
+
+function getQuizLevel(theme) {
+  if (!state.quizLevels) state.quizLevels = {};
+  return state.quizLevels[theme]?.level || 1;
+}
+
+function getQuizLevelProgress(theme) {
+  if (!state.quizLevels) state.quizLevels = {};
+  const d = state.quizLevels[theme] || { level: 1, correct: 0, total: 0 };
+  return d;
+}
+
+// Enregistre une réponse (juste/faux) pour le thème en cours, et gère le passage de niveau
+function recordQuizAnswer(theme, isCorrect) {
+  if (!state.quizLevels) state.quizLevels = {};
+  if (!state.quizLevels[theme]) state.quizLevels[theme] = { level: 1, correct: 0, total: 0 };
+  const d = state.quizLevels[theme];
+  d.total++;
+  if (isCorrect) d.correct++;
+  let result = { leveledUp: false, windowClosed: false, correct: d.correct, total: d.total, level: d.level };
+  if (d.total >= QUIZ_LEVEL_WINDOW) {
+    result.windowClosed = true;
+    result.correct = d.correct;
+    result.total = d.total;
+    if (d.correct / d.total >= QUIZ_LEVEL_THRESHOLD && d.level < 5) {
+      d.level++;
+      result.leveledUp = true;
+    }
+    result.level = d.level;
+    // Fenêtre glissante : on repart à zéro pour réévaluer sur les 10 prochaines
+    d.correct = 0;
+    d.total = 0;
+  }
+  saveState();
+  return result;
+}
+
 function renderThemePicker() {
   document.getElementById("quiz-theme-picker").style.display = "block";
   document.getElementById("quiz-content").style.display = "none";
   document.getElementById("quiz-review").style.display = "none";
   const grid = document.getElementById("quiz-theme-grid");
   if (!grid) return;
-  grid.innerHTML = QUIZ_THEMES.map(t => `
-    <button style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;font-family:var(--font);transition:all .15s;" data-theme="${t.id}">
+  grid.innerHTML = QUIZ_THEMES.map(t => {
+    const lvl = getQuizLevel(t.id);
+    return `<button style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;font-family:var(--font);transition:all .15s;position:relative;" data-theme="${t.id}">
       <span style="font-size:22px;">${t.emoji}</span>
-      <span style="font-size:13px;font-weight:600;color:var(--text);text-align:left;">${t.label.replace(t.emoji+" ","")}</span>
-    </button>`).join("");
+      <span style="font-size:13px;font-weight:600;color:var(--text);text-align:left;flex:1;">${t.label.replace(t.emoji+" ","")}</span>
+      ${t.id!=="all"?`<span style="font-size:10px;font-weight:700;color:var(--yellow);background:rgba(247,193,4,.12);border-radius:8px;padding:2px 7px;white-space:nowrap;">Nv.${lvl}</span>`:""}
+    </button>`;
+  }).join("");
   grid.querySelectorAll("[data-theme]").forEach(btn => {
     btn.addEventListener("click", function() {
       startQuiz(this.dataset.theme);
@@ -3088,7 +3545,7 @@ function renderThemePicker() {
 async function startQuiz(theme, reviewWrong) {
   quizState.theme = theme || "all";
 
-  // Mode révision : questions ratées depuis localStorage
+  // Mode révision : questions ratées depuis localStorage — TOUJOURS les mêmes questions, volontairement
   const lsWrong = JSON.parse(localStorage.getItem("qg_quiz_wrong") || "[]");
   const allWrong = [...(quizState.wrong||[]), ...lsWrong.filter(w => !(quizState.wrong||[]).find(x=>x.q===w.q))];
   if (reviewWrong && allWrong.length) {
@@ -3098,57 +3555,152 @@ async function startQuiz(theme, reviewWrong) {
     return;
   }
 
+  const REAL_THEMES = QUIZ_THEMES.filter(t => t.id !== "all").map(t => t.id);
+  const normalize = s => (s||"").toLowerCase().trim().replace(/\s+/g," ");
+  const seenKeyFor = t => "qg_quiz_seen_" + t;
+  const getSeenSet = t => new Set(JSON.parse(localStorage.getItem(seenKeyFor(t)) || "[]").map(normalize));
+  const markSeen = (t, questionTexts) => {
+    const prev = JSON.parse(localStorage.getItem(seenKeyFor(t)) || "[]");
+    localStorage.setItem(seenKeyFor(t), JSON.stringify([...prev, ...questionTexts])); // historique complet, jamais tronqué
+  };
+
   // Génération IA via OpenRouter
   const orKey = localStorage.getItem("qg_or_key");
-  const themeLabel = QUIZ_THEMES.find(t=>t.id===quizState.theme)?.label?.replace(/^\S+ /,"") || "culture générale";
+  const isAll = quizState.theme === "all";
+  const themeLabel = isAll
+    ? "culture générale variée (mélange de plusieurs domaines différents)"
+    : (QUIZ_THEMES.find(t=>t.id===quizState.theme)?.label?.replace(/^\S+ /,"") || "culture générale");
 
   document.getElementById("quiz-theme-picker").style.display = "none";
   document.getElementById("quiz-content").style.display = "block";
   document.getElementById("quiz-review").style.display = "none";
   document.getElementById("quiz-content").innerHTML = `<div class="loading">✨ Génération de nouvelles questions...</div>`;
 
+  // Set combiné de tout ce qui a déjà été vu, tous thèmes concernés confondus
+  const relevantThemes = isAll ? REAL_THEMES : [quizState.theme];
+  const seenSet = new Set();
+  relevantThemes.forEach(t => getSeenSet(t).forEach(q => seenSet.add(q)));
+
   if (orKey) {
-    // Questions déjà vues récemment (pour demander à l'IA de les éviter)
-    const seenAll = JSON.parse(localStorage.getItem("qg_quiz_seen") || "[]");
-    const avoidList = seenAll.slice(-25);
-    const aiQuestions = await generateQuizAI(orKey, themeLabel, avoidList);
-    if (aiQuestions && aiQuestions.length >= 5) {
-      // Mémorise ces questions pour éviter les répétitions au prochain tour
-      const merged = [...seenAll, ...aiQuestions.map(q=>q.q)].slice(-80);
-      localStorage.setItem("qg_quiz_seen", JSON.stringify(merged));
+    const seenAllFlat = relevantThemes.flatMap(t => JSON.parse(localStorage.getItem(seenKeyFor(t)) || "[]"));
+    const avoidList = seenAllFlat.slice(-40);
+    const level = isAll ? 1 : getQuizLevel(quizState.theme);
+    const extraInstruction = isAll ? ` Varie fortement entre ces catégories différentes : ${REAL_THEMES.map(t=>QUIZ_THEMES.find(x=>x.id===t)?.label).join(", ")}.` : "";
+    const aiQuestionsRaw = await generateQuizAI(orKey, themeLabel, avoidList, level, extraInstruction);
+    const aiQuestions = (aiQuestionsRaw||[]).filter(q => !seenSet.has(normalize(q.q))).slice(0, 10);
+    if (aiQuestions.length >= 5) {
+      // Marque chaque question comme vue dans SON thème d'origine si connu, sinon dans tous les thèmes concernés (mode "all")
+      if (isAll) markSeen("all_mixed", aiQuestions.map(q=>q.q));
+      else markSeen(quizState.theme, aiQuestions.map(q=>q.q));
       quizState.aiMode = true;
       launchQuizWith(aiQuestions);
+      showToast("✨ Questions générées par IA");
       return;
     }
-    // Si l'IA a échoué, on prévient discrètement avant de basculer en local
-    console.log("Quiz IA indisponible → banque locale");
+    console.log("Quiz IA indisponible ou doublons → banque locale");
   }
 
-  // Fallback : banque locale avec tracking anti-répétition
+  // ── Fallback banque locale ──
   quizState.aiMode = false;
-  const allPool = quizState.theme && quizState.theme !== "all"
-    ? QUIZ_QUESTIONS.filter(q => q.t === quizState.theme)
-    : [...QUIZ_QUESTIONS];
-  const seenQs = JSON.parse(localStorage.getItem("qg_quiz_seen") || "[]");
-  const unseen = allPool.filter(q => !seenQs.includes(q.q));
-  const pool = unseen.length >= 5 ? unseen : allPool;
-  const shuffled = [...pool].sort(()=>Math.random()-.5).slice(0, Math.min(10, pool.length));
-  const prevSeen = JSON.parse(localStorage.getItem("qg_quiz_seen") || "[]");
-  localStorage.setItem("qg_quiz_seen", JSON.stringify([...prevSeen, ...shuffled.map(q=>q.q)].slice(-80)));
-  launchQuizWith(shuffled);
+
+  if (!isAll) {
+    // Thème unique : on exige un stock complet de 10 questions inédites, jamais de partie partielle
+    const pool = QUIZ_QUESTIONS.filter(q => q.t === quizState.theme);
+    const unseen = pool.filter(q => !seenSet.has(normalize(q.q)));
+    if (unseen.length < 10) {
+      showQuizExhausted(orKey);
+      return;
+    }
+    const picked = [...unseen].sort(()=>Math.random()-.5).slice(0, 10);
+    markSeen(quizState.theme, picked.map(q=>q.q));
+    launchQuizWith(picked);
+    showToast(orKey ? "📚 IA indisponible — mode hors-ligne" : "📚 Mode hors-ligne (pas de clé IA)");
+    return;
+  }
+
+  // ── Mode "Tous les thèmes" : tirage équilibré, 1 question par thème (rotation aléatoire) ──
+  const shuffledThemes = [...REAL_THEMES].sort(()=>Math.random()-.5);
+  const picked = [];
+  const usedThemesThisRound = [];
+  for (const t of shuffledThemes) {
+    if (picked.length >= 10) break;
+    const pool = QUIZ_QUESTIONS.filter(q => q.t === t);
+    const unseenForT = pool.filter(q => !getSeenSet(t).has(normalize(q.q)) && !picked.find(p=>p.q===q.q));
+    if (unseenForT.length) {
+      const pick = unseenForT[Math.floor(Math.random()*unseenForT.length)];
+      picked.push(pick);
+      usedThemesThisRound.push(t);
+    }
+  }
+  // S'il manque encore des questions (certains thèmes épuisés), complète en repassant sur les thèmes non encore épuisés
+  if (picked.length < 10) {
+    for (const t of shuffledThemes) {
+      if (picked.length >= 10) break;
+      const pool = QUIZ_QUESTIONS.filter(q => q.t === t);
+      const unseenForT = pool.filter(q => !getSeenSet(t).has(normalize(q.q)) && !picked.find(p=>p.q===q.q));
+      for (const q of unseenForT) {
+        if (picked.length >= 10) break;
+        picked.push(q);
+      }
+    }
+  }
+
+  if (picked.length < 10) {
+    showQuizExhausted(orKey);
+    return;
+  }
+
+  // Marque chaque question comme vue dans SON PROPRE thème (cohérence entre mode "all" et thème individuel)
+  const byTheme = {};
+  picked.forEach(q => { if (!byTheme[q.t]) byTheme[q.t] = []; byTheme[q.t].push(q.q); });
+  Object.entries(byTheme).forEach(([t, qs]) => markSeen(t, qs));
+
+  launchQuizWith(picked.sort(()=>Math.random()-.5));
+  showToast(orKey ? "📚 IA indisponible — mode hors-ligne (mélange équilibré)" : "📚 Mode hors-ligne — mélange équilibré");
+}
+
+function showQuizExhausted(orKey) {
+  document.getElementById("quiz-content").innerHTML = `<div style="text-align:center;padding:40px 20px;">
+    <div style="font-size:40px;margin-bottom:12px;">🏆</div>
+    <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px;">Toutes les questions faites !</div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px;">Tu as épuisé les questions disponibles sur ce thème en mode hors-ligne.${orKey ? " Réessaie un peu plus tard : l'IA générera de nouvelles questions dès qu'elle sera disponible." : " Ajoute une clé IA dans Mon QG pour un stock de questions illimité."}</div>
+    <button onclick="backToQuizThemes()" style="background:var(--yellow);color:#1A1916;border:none;border-radius:20px;padding:10px 24px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;">← Choisir un autre thème</button>
+  </div>`;
+}
+
+function backToQuizThemes() {
+  document.getElementById("quiz-content").style.display = "none";
+  document.getElementById("quiz-theme-picker").style.display = "block";
 }
 
 // Génère un quiz via IA, avec 2 modèles gratuits en secours + décodage tolérant
-async function generateQuizAI(orKey, themeLabel, avoidList) {
+async function generateQuizAI(orKey, themeLabel, avoidList, level, extraInstruction) {
   const MODELS = [
     "meta-llama/llama-3.3-70b-instruct:free",
     "google/gemma-3-12b-it:free",
   ];
   const avoidTxt = (avoidList && avoidList.length)
-    ? " ÉVITE ABSOLUMENT ces questions déjà posées : " + avoidList.map(q=>`"${q}"`).join(", ") + "."
+    ? ` ÉVITE ABSOLUMENT ces questions déjà posées (et évite aussi de reposer la même info/anecdote reformulée différemment) : ` + avoidList.map(q=>`"${q}"`).join(", ") + "."
     : "";
-  const sysPrompt = `Tu es un créateur de quiz de culture générale en français. Génère EXACTEMENT 10 questions variées, originales et intéressantes sur le thème "${themeLabel}". Niveau grand public. Réponds UNIQUEMENT avec un tableau JSON valide, sans texte avant/après, sans markdown. Format strict: [{"q":"question","opts":["bonne réponse","mauvaise 1","mauvaise 2","mauvaise 3"],"a":0}]. La bonne réponse est TOUJOURS en position 0.`;
+  const lvl = level || 1;
+  const DIFFICULTY_DESC = {
+    1: "très facile, niveau grand public, réponses évidentes pour la plupart des gens",
+    2: "facile à intermédiaire, culture générale courante",
+    3: "intermédiaire à confirmé, demande de bonnes connaissances générales",
+    4: "difficile, niveau expert, questions pointues et détails précis",
+    5: "très difficile, niveau spécialiste/passionné, questions rares et exigeantes"
+  };
+  // Angles aléatoires pour forcer la diversité des sujets abordés (au-delà de ce que la température seule permet)
+  const ANGLES = [
+    "des faits historiques peu connus", "des records et superlatifs", "des inventions et découvertes",
+    "des personnalités marquantes", "des lieux et monuments", "des chiffres et statistiques surprenants",
+    "des anecdotes insolites", "des œuvres et créations", "des événements récents (2020-2026)",
+    "des origines et étymologies", "des comparaisons internationales", "des premières fois historiques"
+  ];
+  const shuffledAngles = [...ANGLES].sort(()=>Math.random()-.5).slice(0,4);
+  const sysPrompt = `Tu es un créateur de quiz de culture générale en français. Génère EXACTEMENT 10 questions variées, originales et intéressantes sur le thème "${themeLabel}", de difficulté ${lvl}/5 (${DIFFICULTY_DESC[lvl]}). Pour garantir la diversité, base des questions sur ces angles différents : ${shuffledAngles.join(", ")}.${extraInstruction||""} Ne recycle pas les questions les plus classiques/évidentes du thème si possible. Réponds UNIQUEMENT avec un tableau JSON valide, sans texte avant/après, sans markdown. Format strict: [{"q":"question","opts":["bonne réponse","mauvaise 1","mauvaise 2","mauvaise 3"],"a":0}]. La bonne réponse est TOUJOURS en position 0.`;
 
+  let collected = [];
   for (const model of MODELS) {
     try {
       const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -3174,13 +3726,13 @@ async function generateQuizAI(orKey, themeLabel, avoidList) {
       const text = data.choices?.[0]?.message?.content || "";
       const parsed = parseQuizJSON(text);
       const valid = parsed.filter(q => q.q && Array.isArray(q.opts) && q.opts.length === 4 && Number.isInteger(q.a));
-      if (valid.length >= 5) return valid;
-      console.log("Quiz IA:", model, "format insuffisant (", valid.length, "questions )");
+      collected = collected.concat(valid);
+      if (collected.length >= 10) break; // assez de matière, pas besoin du 2e modèle
     } catch(e) {
       console.log("Quiz IA:", model, "erreur", e.message);
     }
   }
-  return null;
+  return collected.length ? collected : null;
 }
 
 // Décodage tolérant : extrait le tableau JSON même s'il y a du texte autour
@@ -3245,9 +3797,22 @@ function renderQuiz() {
   const modeBadge = quizState.aiMode
     ? `<span style="color:var(--yellow);">✨ IA</span>`
     : `<span style="color:var(--muted2);">📚 hors-ligne</span>`;
+  const lvlProgress = getQuizLevelProgress(quizState.theme);
+  const lvlBar = quizState.theme !== "all"
+    ? `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <span style="font-size:13px;font-weight:800;color:var(--yellow);">🎯 Niveau ${lvlProgress.level} — ${QUIZ_LEVEL_LABELS[lvlProgress.level]}</span>
+          <span style="font-size:11px;color:var(--muted);font-weight:600;">${lvlProgress.total}/${QUIZ_LEVEL_WINDOW} avant le prochain palier</span>
+        </div>
+        <div style="background:var(--surface2);border-radius:10px;height:8px;overflow:hidden;">
+          <div style="background:var(--yellow);height:100%;width:${lvlProgress.total/QUIZ_LEVEL_WINDOW*100}%;border-radius:10px;transition:width .3s;"></div>
+        </div>
+      </div>`
+    : "";
   el.innerHTML = `
     <div class="quiz-progress"><div class="quiz-prog-fill" style="width:${idx/questions.length*100}%"></div></div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:12px;display:flex;justify-content:space-between;"><span>Question ${idx+1} / ${questions.length} · Score : ${score}</span>${modeBadge}</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;display:flex;justify-content:space-between;gap:8px;"><span>Question ${idx+1} / ${questions.length} · Score : ${score}</span>${modeBadge}</div>
+    ${lvlBar}
     <div class="quiz-q">${q.q}</div>
     <div class="quiz-opts">${q.opts.map((opt,i)=>`<button class="quiz-opt" data-opt="${i}">${opt}</button>`).join("")}</div>`;
   el.querySelectorAll(".quiz-opt").forEach(btn => {
@@ -3260,6 +3825,8 @@ function renderQuiz() {
         if (i===correct) b.classList.add("correct");
         else if (i===chosen && chosen!==correct) b.classList.add("wrong");
       });
+      let levelResult = null;
+      if (quizState.theme !== "all") levelResult = recordQuizAnswer(quizState.theme, chosen===correct);
       if (chosen===correct) {
         quizState.score++;
       } else {
@@ -3274,8 +3841,42 @@ function renderQuiz() {
           }
         } catch(e) {}
       }
-      setTimeout(() => { quizState.idx++; quizState.answered=false; renderQuiz(); }, 1200);
+      if (levelResult && levelResult.windowClosed) {
+        // Palier atteint : on montre un écran dédié (félicitations ou encouragement) avant de continuer
+        setTimeout(() => showLevelCheckpoint(levelResult), 1200);
+      } else {
+        setTimeout(() => { quizState.idx++; quizState.answered=false; renderQuiz(); }, 1200);
+      }
     });
+  });
+}
+
+function showLevelCheckpoint(result) {
+  const el = document.getElementById("quiz-content");
+  if (!el) return;
+  const pct = Math.round(result.correct/result.total*100);
+  const ENCOURAGEMENTS = [
+    "Continue comme ça, tu progresses !", "Pas loin ! La prochaine série sera la bonne.",
+    "Chaque question compte, tu t'améliores !", "Belle énergie, garde le rythme !"
+  ];
+  const encourageMsg = ENCOURAGEMENTS[Math.floor(Math.random()*ENCOURAGEMENTS.length)];
+  el.innerHTML = result.leveledUp
+    ? `<div style="text-align:center;padding:40px 20px;">
+        <div style="font-size:56px;margin-bottom:12px;">🎉</div>
+        <div style="font-size:19px;font-weight:800;color:var(--yellow);margin-bottom:6px;">Niveau ${result.level} débloqué !</div>
+        <div style="font-size:14px;color:var(--text);margin-bottom:4px;">${QUIZ_LEVEL_LABELS[result.level]}</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:24px;">${result.correct}/${result.total} bonnes réponses (${pct}%) — bravo !</div>
+        <button id="quiz-checkpoint-continue" style="background:var(--yellow);color:#1A1916;border:none;border-radius:20px;padding:12px 28px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">Continuer →</button>
+      </div>`
+    : `<div style="text-align:center;padding:40px 20px;">
+        <div style="font-size:56px;margin-bottom:12px;">💪</div>
+        <div style="font-size:17px;font-weight:800;color:var(--text);margin-bottom:6px;">${result.correct}/${result.total} bonnes réponses (${pct}%)</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:4px;">Il fallait 90% pour passer niveau ${result.level+1}</div>
+        <div style="font-size:13px;color:var(--yellow);font-weight:600;margin-bottom:24px;">${encourageMsg}</div>
+        <button id="quiz-checkpoint-continue" style="background:var(--yellow);color:#1A1916;border:none;border-radius:20px;padding:12px 28px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">Continuer →</button>
+      </div>`;
+  document.getElementById("quiz-checkpoint-continue")?.addEventListener("click", () => {
+    quizState.idx++; quizState.answered=false; renderQuiz();
   });
 }
 
@@ -3533,7 +4134,7 @@ function renderBandeau() {
     html += `<div style="margin-bottom:8px;">
       <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
         ⭐ Mes tâches importantes
-        <button onclick="showView('modules');openModule('taches_perso')" style="background:none;border:none;color:var(--yellow);font-size:11px;font-weight:700;cursor:pointer;margin-left:auto;font-family:var(--font);">Voir tout →</button>
+        <button onclick="showView('postit');backToPostit();openPostitModule('taches_perso')" style="background:none;border:none;color:var(--yellow);font-size:11px;font-weight:700;cursor:pointer;margin-left:auto;font-family:var(--font);">Voir tout →</button>
       </div>`;
     starTaches.forEach(t => {
       const dateStr = t.date ? new Date(t.date+"T00:00:00").toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"short"}) : "";
@@ -4063,34 +4664,72 @@ const NEWS_FILS = [
   { id:"sport",   label:"⚽ Sport",     country:"",  language:"fr", q:"sport" },
   { id:"tech",    label:"💻 Tech",      country:"",  language:"fr", q:"technology" },
   { id:"science", label:"🔬 Science",   country:"",  language:"fr", q:"science" },
+  { id:"usatoday",label:"🇺🇸 USA Today",country:"",  language:"en", q:"", domain:"usatoday.com" },
 ];
 let actuCache = {}, currentFil = null;
 
-function initActu() {
+function renderFilsPicker(containerId, introText) {
+  const ap = document.getElementById(containerId);
+  if (!ap) return;
+  ap.innerHTML = `<p style="font-size:12px;color:var(--muted);margin-bottom:10px;">${introText}</p>` +
+    NEWS_FILS.map(f=>{
+      const sel=(state.actuFils||["fr"]).includes(f.id);
+      return `<div onclick="toggleFilPick('${f.id}')" style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--surface);border-radius:var(--r-sm);border:1px solid ${sel?"var(--yellow)":"var(--border)"};margin-bottom:6px;cursor:pointer;">
+        <div style="font-size:20px">${f.label.split(" ")[0]}</div>
+        <div style="flex:1;font-size:13px;font-weight:600;color:var(--text)">${f.label}</div>
+        <div style="width:20px;height:20px;border-radius:50%;border:2px solid ${sel?"var(--yellow)":"var(--border2)"};background:${sel?"var(--yellow)":"none"};display:flex;align-items:center;justify-content:center;font-size:11px;color:#1A1916">${sel?"✓":""}</div>
+      </div>`;
+    }).join("");
+}
+
+function toggleFilPick(id) {
   if (!state.actuFils) state.actuFils = ["fr"];
-  currentFil = state.actuFils[0] || "fr";
-  renderActuFils();
-  fetchActu(currentFil);
+  if (state.actuFils.includes(id)) { if (state.actuFils.length>1) state.actuFils = state.actuFils.filter(x=>x!==id); }
+  else state.actuFils.push(id);
+  saveState();
+  // Rafraîchit tous les sélecteurs + grilles visibles à l'écran
+  renderFilsPicker("teams-picker", "Choisis tes fils d'actualités (aussi modifiable directement dans l'onglet Média)");
+  renderFilsPicker("media-fils-picker", "Coche les sources à afficher :");
+  renderMediaHome();
 }
 
-function renderActuFils() {
-  const el = document.getElementById("actu-fil-btns");
+function renderMediaHome() {
+  if (!state.actuFils) state.actuFils = ["fr"];
+  const el = document.getElementById("media-grid");
   if (!el) return;
-  const enabled = state.actuFils || ["fr"];
-  el.innerHTML = NEWS_FILS.filter(f => enabled.includes(f.id)).map(f =>
-    `<button style="background:${f.id===currentFil?"var(--yellow)":"var(--surface2)"};color:${f.id===currentFil?"#1A1916":"var(--muted)"};border:1px solid ${f.id===currentFil?"var(--yellow)":"var(--border2)"};border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--font);" data-fil="${f.id}">${f.label}</button>`
-  ).join("");
-  el.querySelectorAll("[data-fil]").forEach(b => {
-    b.addEventListener("click", () => { currentFil = b.dataset.fil; renderActuFils(); fetchActu(currentFil); });
-  });
+  const enabled = NEWS_FILS.filter(f => state.actuFils.includes(f.id));
+  if (!enabled.length) {
+    el.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:13px;padding:20px 0;">Aucun fil sélectionné — choisis tes fils dans Mon QG</div>`;
+    return;
+  }
+  el.innerHTML = enabled.map(f => `<div class="module-card" onclick="openMediaFil('${f.id}')" style="display:block;min-height:110px;cursor:pointer;">
+    <div class="module-icon" style="font-size:32px;margin-bottom:8px;">${f.label.split(" ")[0]}</div>
+    <div class="module-name" style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;">${f.label.split(" ").slice(1).join(" ")}</div>
+    <div class="module-desc" style="font-size:12px;color:var(--muted);">Voir les articles</div>
+  </div>`).join("");
 }
 
-async function fetchActu(filId, force=false) {
+function openMediaFil(filId) {
+  const fil = NEWS_FILS.find(f => f.id === filId);
+  if (!fil) return;
+  document.getElementById("media-home").style.display = "none";
+  document.getElementById("module-media-detail").style.display = "block";
+  document.getElementById("media-detail-title").textContent = fil.label;
+  fetchActu(filId, false, "media-detail-zone", 10);
+}
+
+function backToMedia() {
+  document.getElementById("module-media-detail").style.display = "none";
+  const home = document.getElementById("media-home");
+  if (home) home.style.display = "block";
+}
+
+async function fetchActu(filId, force=false, targetId="media-detail-zone", limit=8) {
   const now = Date.now();
+  const el = document.getElementById(targetId);
   if (!force && actuCache[filId] && (now - actuCache[filId].ts) < 30*60*1000) {
-    renderActu(actuCache[filId].articles); return;
+    renderActu(actuCache[filId].articles.slice(0, limit), targetId); return;
   }
-  const el = document.getElementById("actu-zone");
   const fil = NEWS_FILS.find(f => f.id===filId);
   if (!fil) return;
 
@@ -4100,21 +4739,35 @@ async function fetchActu(filId, force=false) {
   if (lsCached) {
     try {
       const parsed = JSON.parse(lsCached);
-      if (el) el.innerHTML = `<div style="font-size:11px;color:var(--muted);margin-bottom:8px;padding:0 2px;">📦 Dernière mise à jour : ${parsed.dateLabel||"—"}</div>`;
-      renderActu(parsed.articles, true);
+      renderActu(parsed.articles.slice(0, limit), targetId);
     } catch(e) {}
   } else {
     if (el) el.innerHTML = `<div class="loading">Chargement...</div>`;
   }
 
-  try {
+  const buildUrl = (withDomain) => {
     let url = `https://newsdata.io/api/1/latest?apikey=${NEWS_KEY}&size=8`;
     if (fil.country) url += `&country=${fil.country}`;
     if (fil.language) url += `&language=${fil.language}`;
     if (fil.q) url += `&q=${encodeURIComponent(fil.q)}`;
+    if (fil.domain && withDomain) {
+      // newsdata.io a utilisé différents noms de paramètre selon les versions de son API —
+      // on envoie les deux pour maximiser la compatibilité.
+      url += `&domainurl=${encodeURIComponent(fil.domain)}&domain=${encodeURIComponent(fil.domain.replace(/\.com$|\.org$|\.net$/,""))}`;
+    }
     url += "&category=top";
-    const res = await fetch(url);
-    const data = await res.json();
+    return url;
+  };
+
+  try {
+    let res = await fetch(buildUrl(true));
+    let data = await res.json();
+    // Repli sans filtre de domaine si : erreur API, OU réponse vide (le filtre ne matche rien)
+    if (fil.domain && (data.status !== "success" || !(data.results||[]).length)) {
+      console.log("fetchActu: filtre domaine sans résultat/en erreur, repli général:", data.message||"résultats vides");
+      res = await fetch(buildUrl(false));
+      data = await res.json();
+    }
     if (data.status !== "success") throw new Error(data.message||"API error");
     const articles = (data.results||[]).map(a => ({
       title: a.title||"",
@@ -4125,26 +4778,23 @@ async function fetchActu(filId, force=false) {
       date: a.pubDate ? new Date(a.pubDate).toLocaleDateString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}) : "",
     }));
     actuCache[filId] = { ts: now, articles };
-    // Sauvegarde dans localStorage avec date
     const dateLabel = new Date().toLocaleString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
     localStorage.setItem(lsKey, JSON.stringify({ articles, dateLabel }));
-    // Efface le bandeau "dernière mise à jour" et affiche les vrais articles
-    if (el) el.innerHTML = "";
-    renderActu(articles);
+    renderActu(articles.slice(0, limit), targetId);
   } catch(e) {
     console.log("fetchActu error:", e.message);
-    // Si pas de cache, affiche un message
     if (!lsCached) {
-      const el2 = document.getElementById("actu-zone");
+      const el2 = document.getElementById(targetId);
       if (el2) el2.innerHTML = `<div class="loading">Actualités indisponibles — réessaie dans un moment</div>`;
     }
     // Sinon garde le cache déjà affiché
   }
 }
 
-function renderActu(articles) {
-  const el = document.getElementById("actu-zone");
+function renderActu(articles, targetId="actu-zone-home") {
+  const el = document.getElementById(targetId);
   if (!el) return;
+  if (!articles.length) { el.innerHTML = `<div style="text-align:center;color:var(--muted);font-size:12px;padding:14px 0;">Aucun article pour l'instant</div>`; return; }
   el.innerHTML = articles.map(a => `
     <div onclick="window.open('${a.url}','_blank')" style="display:flex;gap:12px;background:var(--surface);border-radius:var(--r-sm);border:1px solid var(--border);padding:12px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;">
       ${a.image ? `<img src="${a.image}" style="width:72px;height:72px;border-radius:var(--r-sm);object-fit:cover;flex-shrink:0;" onerror="this.style.display='none'">` : `<div style="width:72px;height:72px;border-radius:var(--r-sm);background:var(--surface2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:28px;">📰</div>`}
@@ -4366,7 +5016,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.2.1";
+const APP_VERSION = "3.3.6";
 async function checkForUpdate() {
   try {
     const res = await fetch("version.json?t=" + Date.now(), { cache: "no-store" });
@@ -4451,6 +5101,16 @@ document.addEventListener("DOMContentLoaded", function() {
   } else {
     document.getElementById("ob-invite")?.classList.add("hidden");
     initOnboarding();
+  }
+
+  // Masque l'écran de démarrage maintenant que l'app a décidé quoi afficher
+  const splash = document.getElementById("app-splash");
+  if (splash) {
+    setTimeout(() => {
+      splash.style.transition = "opacity .35s";
+      splash.style.opacity = "0";
+      setTimeout(() => splash.remove(), 350);
+    }, 300);
   }
 });
 </script>
