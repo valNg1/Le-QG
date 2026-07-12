@@ -1335,7 +1335,17 @@ document.getElementById("member-chip").addEventListener("click", () => {
 });
 
 
+function checkDinerNotifReset() {
+  const today = getDinerKey();
+  if (state.dinerNotifDate !== today) {
+    state.dinerNotif = 0;
+    state.dinerNotifDate = today;
+    saveState();
+  }
+}
+
 function updateDinerBadge() {
+  checkDinerNotifReset();
   const count = state.dinerNotif || 0;
   // Pastille sur l'onglet Accueil
   const accueilBtn = document.querySelector('.nav-btn[data-view="accueil"]');
@@ -1363,6 +1373,7 @@ function updateDinerBadge() {
 
 function clearDinerNotif() {
   state.dinerNotif = 0;
+  state.dinerNotifDate = getDinerKey();
   // Mémorise l'état vu
   const seen = JSON.parse(localStorage.getItem("qg_diner_seen")||"{}");
   seen[getDinerKey()] = state.diner[getDinerKey()] || {};
@@ -4866,7 +4877,9 @@ function loadGroupData() {
         }
       });
       if (newResponders.length > 0) {
+        checkDinerNotifReset();
         state.dinerNotif = (state.dinerNotif||0) + newResponders.length;
+        state.dinerNotifDate = seenKey;
       }
       state.diner[seenKey]=newChoices;
       saveState();
