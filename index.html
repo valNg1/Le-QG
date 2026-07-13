@@ -4676,7 +4676,8 @@ const NEWS_FILS = [
   { id:"science", label:"🔬 Science",   country:"",  language:"fr", q:"science" },
   { id:"usatoday",label:"🇺🇸 USA Today",country:"",  language:"en", q:"", domain:"usatoday.com" },
   { id:"cna",     label:"🇸🇬 CNA",       country:"sg", language:"en", q:"", domain:"channelnewsasia.com" },
-  { id:"ids",     label:"🎓 IU Bloomington", country:"us", language:"en", q:"", domain:"idsnews.com" },
+  { id:"mass",    label:"🦞 Massachusetts", country:"us", language:"en", q:"", domain:"masslive.com" },
+  { id:"indiana", label:"🌽 Indiana",    country:"us", language:"en", q:"", domain:"indystar.com" },
 ];
 let actuCache = {}, currentFil = null;
 
@@ -5030,7 +5031,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.18";
+const APP_VERSION = "3.3.19";
 console.log("📦 Le Général v" + APP_VERSION);
 const footerVersionEl = document.getElementById("footer-version");
 if (footerVersionEl) footerVersionEl.textContent = "Le Général v" + APP_VERSION;
