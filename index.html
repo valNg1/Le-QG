@@ -5029,7 +5029,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.11";
+const APP_VERSION = "3.3.12";
 async function checkForUpdate() {
   try {
     const res = await fetch("version.json?t=" + Date.now(), { cache: "no-store" });
