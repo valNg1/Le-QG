@@ -118,10 +118,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     <div class="hero-title">Finale : Espagne 🇪🇸 vs 🇦🇷 Argentine</div>
     <div class="hero-sub">Dimanche 19 juillet · 21h (FR) · MetLife Stadium, New York</div>
     <div class="stats-grid">
-      <div class="stat-box"><div class="stat-val">🇪🇸🇦🇷</div><div class="stat-lbl">Finalistes</div></div>
+      <div class="stat-box"><div class="stat-val">21h</div><div class="stat-lbl">Finale ce soir</div></div>
       <div class="stat-box"><div class="stat-val">🏴󠁧󠁢󠁥󠁮󠁧󠁿</div><div class="stat-lbl">3e place</div></div>
       <div class="stat-box"><div class="stat-val">🇫🇷</div><div class="stat-lbl">4e place</div></div>
-      <div class="stat-box"><div class="stat-val">19 juil</div><div class="stat-lbl">Finale</div></div>
+      <div class="stat-box"><div class="stat-val">Mbappé</div><div class="stat-lbl">Soulier d'or (10)</div></div>
     </div>
   </div>
 
@@ -132,7 +132,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
       <div style="font-size:16px;font-weight:800;color:#fff;">Angleterre 6 – 4 France</div>
     </div>
     <div style="font-size:12px;color:rgba(255,255,255,.7);margin-bottom:10px;">Miami · 18 juillet · Petite finale (3e place)</div>
-    <div style="font-size:13px;color:rgba(255,255,255,.85);line-height:1.6;">Match totalement fou : l'Angleterre menait 4-0 à la pause, la France est revenue à 4-3 en 2e période avant de céder 6-4. L'Angleterre termine 3e, la France 4e. C'était le dernier match de Didier Deschamps après 14 ans à la tête des Bleus.</div>
+    <div style="font-size:13px;color:rgba(255,255,255,.85);line-height:1.6;">Match totalement fou : l'Angleterre menait 4-0 à la pause, la France est revenue à 4-3 en 2e période avant de céder 6-4. L'Angleterre termine 3e, la France 4e. C'était le dernier match de Didier Deschamps après 14 ans à la tête des Bleus. Mbappé, buteur à deux reprises, prend la tête du classement des buteurs avec 10 réalisations, devant Messi (8).</div>
     <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.12);font-size:12px;color:var(--gold);line-height:1.6;">💡 <strong>Fun fact</strong> — En 1958, lors d'une petite finale déjà, Just Fontaine avait planté 4 buts contre la RFA, portant son total à 13 sur une seule édition : un record toujours debout aujourd'hui.</div>
   </div>
 
@@ -224,12 +224,12 @@ const R16_MATCHES = [
 
 // Classement des buteurs (après les 2 premiers 8es)
 const BUTEURS = [
-  {p:1,nom:"Lionel Messi",pays:"🇦🇷",buts:8,note:"Argentine en finale vs l'Espagne (2 passes déc. face à l'Angleterre)"},
-  {p:1,nom:"Kylian Mbappé",pays:"🇫🇷",buts:8,note:"Petite finale vs l'Angleterre samedi"},
+  {p:1,nom:"Kylian Mbappé",pays:"🇫🇷",buts:10,note:"Meilleur buteur du Mondial, doublé en petite finale"},
+  {p:2,nom:"Lionel Messi",pays:"🇦🇷",buts:8,note:"Argentine en finale vs l'Espagne"},
   {p:3,nom:"Erling Haaland",pays:"🇳🇴",buts:7,note:"Éliminé en quarts vs l'Angleterre"},
-  {p:4,nom:"Jude Bellingham",pays:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",buts:6,note:"Éliminé en demies vs l'Argentine"},
-  {p:4,nom:"Harry Kane",pays:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",buts:6,note:"Petite finale vs la France samedi"},
-  {p:6,nom:"Ousmane Dembélé",pays:"🇫🇷",buts:5,note:"Petite finale vs l'Angleterre samedi"},
+  {p:4,nom:"Jude Bellingham",pays:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",buts:6,note:"Angleterre 3e, petite finale face à la France"},
+  {p:4,nom:"Harry Kane",pays:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",buts:6,note:"Angleterre 3e, petite finale face à la France"},
+  {p:6,nom:"Ousmane Dembélé",pays:"🇫🇷",buts:5,note:"France 4e, petite finale perdue vs l'Angleterre"},
   {p:6,nom:"Mikel Oyarzabal",pays:"🇪🇸",buts:5,note:"Espagne en finale vs l'Argentine"},
   {p:8,nom:"Ismaïla Sarr",pays:"🇸🇳",buts:4,note:"Éliminé"},
 ];
