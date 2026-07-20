@@ -2056,7 +2056,7 @@ function renderWidgetsZone() {
   // Widget Actualités retiré de l'accueil — accessible via l'onglet Média dédié
   const sportApps = [
     {id:"tdf",   emoji:"🚴", nom:"Tour de France 2026",    sub:"4–26 juillet",      url:"tdf2026.html",   color:"#ED2939"},
-    {id:"cdm",   emoji:"⚽", nom:"Coupe du Monde 2026",    sub:"Finale",     url:"cdm2026.html",   color:"#34C77B"},
+    {id:"cdm",   emoji:"⚽", nom:"Coupe du Monde 2026",    sub:"🇪🇸 Championne du monde",     url:"cdm2026.html",   color:"#34C77B"},
     {id:"rugby", emoji:"🏉", nom:"Top 14 2026-2027",       sub:"Dès le 5 sept.",    url:"rugby2026.html", color:"#C9A84C"},
   ];
   sportApps.forEach(a => {
@@ -5031,7 +5031,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.28";
+const APP_VERSION = "3.3.29";
 console.log("📦 Le Général v" + APP_VERSION);
 const footerVersionEl = document.getElementById("footer-version");
 if (footerVersionEl) footerVersionEl.textContent = "Le Général v" + APP_VERSION;
