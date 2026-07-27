@@ -1085,10 +1085,12 @@ function initFirebase() {
     db = firebase.firestore();
     firebaseReady = true;
     console.log("✅ Firebase OK");
-    renderBandeau();
-  // Sync anniversaires → événements
-  (state.annivs||[]).forEach(a => addAnnivToEvents(a));
-  if (state.groupCode) loadGroupData();
+    // NB: la sync anniversaires → événements, le rendu du bandeau et le
+    // chargement des données du groupe (loadGroupData, qui attache les
+    // listeners Firestore events/mur/diner) sont gérés une seule fois
+    // dans startApp() — les dupliquer ici attachait deux jeux de
+    // listeners et provoquait des événements affichés en double dans
+    // l'agenda.
   } catch(e) { console.log("Firebase error", e); }
 }
 
@@ -5047,7 +5049,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.35";
+const APP_VERSION = "3.3.36";
 console.log("📦 Le Général v" + APP_VERSION);
 const footerVersionEl = document.getElementById("footer-version");
 if (footerVersionEl) footerVersionEl.textContent = "Le Général v" + APP_VERSION;
