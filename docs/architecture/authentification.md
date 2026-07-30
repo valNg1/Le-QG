@@ -53,35 +53,40 @@ authentification et n'ont plus aucun rôle dans le contrôle d'accès.
 |---|---|
 | `auth-logic.js` | Logique de décision pure (quel écran afficher, validation du formulaire, messages d'erreur). Zéro dépendance Firebase/DOM — testable avec Node seul. Chargé à la fois dans `index.html` et dans les tests. |
 | `index.html` | Écrans `#login-screen` / `#access-denied-screen`, `wireLoginForm()`, `handleAuthStateChange()`, `proceedAfterAuth()` (ancien bootstrap, inchangé, simplement déplacé derrière la vérification d'auth), `initAdminSection()` (espace admin, désormais gardé par `state.isSuperAdmin` au lieu d'un mot de passe). |
-| `firestore.rules` | Règles serveur : refus par défaut, isolation stricte par foyer, `users/` et `superadmins/` en lecture seule (soi-même uniquement), jamais d'écriture client sur ces deux collections. |
+| `firestore.rules` | Règles serveur : refus par défaut, isolation stricte par foyer, `users/{uid}` en lecture seule (soi-même uniquement), jamais d'écriture client dessus. |
 | `tests/auth-logic.test.js` | Couverture de `auth-logic.js` (Node natif, `node --test`, zéro dépendance). |
 
 ## Modèle de données Firestore
 
-### `users/{uid}` (nouveau)
+### `users/{uid}` (nouveau — source de vérité unique)
 
 ```jsonc
 {
   "email": "val@example.com",
   "householdId": "ABC123",   // = l'ancien groupCode
-  "role": "admin",           // "admin" | "member"
+  "role": "admin",           // "admin" | "member" — scopé au foyer
   "status": "active",        // "active" | "disabled"
+  "isSuperAdmin": true,      // optionnel, false/absent par défaut — axe
+                              // global indépendant du rôle de foyer (voir
+                              // ADR pour la justification du modèle)
   "name": "Val",             // optionnel, informatif
   "createdAt": <timestamp>
 }
 ```
+
+Un seul document par utilisateur, une seule source de vérité : le rôle de
+foyer (`role`) et le statut super-admin global (`isSuperAdmin`) sont deux
+champs indépendants du même document, pas deux collections séparées.
 
 Créé et modifié **uniquement à la main dans la Firebase Console** (ou via
 l'onglet Firestore de la console). Aucune écriture client autorisée
 (`firestore.rules`). Lecture limitée au propriétaire (`request.auth.uid ==
 uid`).
 
-### `superadmins/{uid}` (nouveau)
-
-Document vide ou `{ "since": <timestamp> }` — seule son **existence**
-compte. Remplace le mot de passe `"2601"` codé en dur pour l'accès au
+Remplace l'ancien mot de passe `"2601"` codé en dur pour l'accès au
 panneau d'administration global (liste de tous les foyers, suspension,
-lien Stripe). Lecture limitée au propriétaire, aucune écriture client.
+lien Stripe) : ce panneau n'est visible que si `isSuperAdmin === true` sur
+son propre document, vérifié à la fois côté UI et côté règles Firestore.
 
 ### `groupes/{code}` (existant, inchangé dans sa forme)
 

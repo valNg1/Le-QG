@@ -2341,9 +2341,10 @@ document.getElementById("mur-input").addEventListener("keydown",e=>{if(e.key==="
 // ════════════════════════════════════════════
 // ESPACE ADMIN (Val uniquement)
 // ════════════════════════════════════════════
-// Le statut super-admin est vérifié côté serveur (document Firestore
-// superadmins/{uid}, lu dans handleAuthStateChange) et reflété dans
-// state.isSuperAdmin. Il n'y a plus de mot de passe côté client : même si
+// Le statut super-admin est vérifié côté serveur (champ isSuperAdmin sur
+// le document Firestore users/{uid}, lu dans handleAuthStateChange) et
+// reflété dans state.isSuperAdmin. Il n'y a plus de mot de passe côté
+// client : même si
 // quelqu'un modifiait ce JS dans son navigateur, les règles Firestore
 // refusent de toute façon la lecture de la collection "groupes" (utilisée
 // par ce panneau) à qui n'a pas ce document. Voir firestore.rules et
@@ -5073,7 +5074,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.37";
+const APP_VERSION = "3.3.38";
 console.log("📦 Le Général v" + APP_VERSION);
 const footerVersionEl = document.getElementById("footer-version");
 if (footerVersionEl) footerVersionEl.textContent = "Le Général v" + APP_VERSION;
@@ -5250,20 +5251,14 @@ async function handleAuthStateChange(user) {
     return;
   }
 
-  // Autorisé : le foyer et le rôle viennent du compte Firebase (source de
-  // vérité serveur), pas d'un code saisi ou créé localement.
+  // Autorisé : le foyer, le rôle de foyer ET le statut super-admin
+  // viennent tous du même document Firestore users/{uid} — source de
+  // vérité unique, une seule lecture réseau.
   state.groupCode = userDoc.householdId;
   state.groupName = state.groupName || null;
   state.isAdmin = AuthLogic.isHouseholdAdmin(userDoc);
+  state.isSuperAdmin = AuthLogic.isSuperAdmin(userDoc);
   saveState();
-
-  // Vérifie le statut super-admin (espace admin global) une fois authentifié.
-  try {
-    const saSnap = await db.collection("superadmins").doc(user.uid).get();
-    state.isSuperAdmin = AuthLogic.isSuperAdmin(saSnap.exists);
-  } catch (e) {
-    state.isSuperAdmin = false;
-  }
 
   showAuthScreen(null); // masque login/access-denied
   proceedAfterAuth();

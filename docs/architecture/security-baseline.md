@@ -33,7 +33,7 @@
 | Accès aux données d'un foyer sans compte | Oui (code seul) | Non — `firestore.rules` exige `request.auth != null` + `users/{uid}.householdId == code` + `status == "active"` |
 | Lister tous les foyers | Oui, si les règles Firestore actuelles l'autorisent | Non — réservé à `isSuperAdmin()` |
 | Devenir admin d'un foyer en changeant son prénom | Oui | Non — le rôle vient de `users/{uid}.role`, en lecture seule, non modifiable côté client |
-| Accéder au panneau admin global sans y être autorisé | Mot de passe unique visible dans le code source | Existence d'un document `superadmins/{uid}` vérifiée côté serveur (règles) et côté client (UI) |
+| Accéder au panneau admin global sans y être autorisé | Mot de passe unique visible dans le code source | Champ `isSuperAdmin` sur son propre document `users/{uid}` vérifié côté serveur (règles) et côté client (UI) |
 | Secret exposé côté client | `ADMIN_PASS_HASH` en clair | Aucun secret dans le client ; `firebaseConfig` reste public (ce n'est pas un secret — c'est la protection par Auth + règles qui compte) |
 
 ## Principes appliqués

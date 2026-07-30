@@ -33,10 +33,20 @@ sans migration de backend.
    uniquement par son propriétaire, est la solution la moins invasive
    compatible avec l'existant.
 
-3. **Panneau d'administration global** (aujourd'hui protégé par un mot de
-   passe `"2601"` codé en dur) devient conditionné à l'existence d'un
-   document `superadmins/{uid}` — même logique que ci-dessus, pour la
-   même raison (pas d'Admin SDK disponible depuis un site statique).
+3. **Un seul champ `isSuperAdmin` sur ce même document `users/{uid}`**
+   pour le panneau d'administration global (aujourd'hui protégé par un
+   mot de passe `"2601"` codé en dur) — **pas** de collection
+   `superadmins` séparée. Première version de ce chantier introduisait
+   une collection dédiée ; en la justifiant, aucune raison technique ne
+   la distinguait d'un champ booléen sur le document existant : côté
+   règles Firestore, `exists(/superadmins/$(uid))` et
+   `get(/users/$(uid)).data.isSuperAdmin == true` coûtent la même chose
+   (une lecture), offrent le même niveau de protection (écriture
+   interdite au client dans les deux cas), et un utilisateur peut très
+   bien être à la fois admin de son propre foyer et super-admin global
+   (cas de Val) — deux axes orthogonaux, mais un seul document reste la
+   source de vérité la plus simple. Corrigé sur relecture du directeur
+   technique.
 
 4. **`groupes/{code}` conservé tel quel** dans sa structure — seul l'accès
    change (voir `firestore.rules`). Aucune migration de données
@@ -61,9 +71,10 @@ ne reprendre de Hazumi que le *principe* du parcours d'authentification.
   nécessite une action manuelle de Val (créer le compte Auth + le
   document `users/{uid}`). Acceptable pour un foyer, documenté dans le
   runbook pour que ça reste rapide à refaire.
-- Le contrôle d'autorisation dépend de deux lectures Firestore
-  supplémentaires au démarrage (`users/{uid}`, `superadmins/{uid}`) —
-  impact négligeable (lecture unique, mise en cache SDK).
+- Le contrôle d'autorisation dépend d'une lecture Firestore
+  supplémentaire au démarrage (`users/{uid}`, qui porte à la fois le
+  rôle de foyer et le statut super-admin) — impact négligeable (lecture
+  unique, mise en cache SDK).
 - `createGroup()` / `joinGroup()` restent dans le code par compatibilité
   mais ne sont plus le chemin principal : à documenter clairement pour
   ne pas dérouter un futur développeur qui les retrouverait.

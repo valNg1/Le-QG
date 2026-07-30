@@ -64,13 +64,24 @@ test("rôle admin de foyer détecté correctement", () => {
 });
 
 // ─── Super-admin (espace admin global, remplace le mot de passe 2601) ─
-test("super-admin dépend uniquement de l'existence du document superadmins/{uid}", () => {
-  assert.equal(isSuperAdmin(true), true);
-  assert.equal(isSuperAdmin(false), false);
+test("super-admin dépend du champ isSuperAdmin sur le même document users/{uid}", () => {
+  assert.equal(isSuperAdmin({ role: "admin", status: "active", isSuperAdmin: true }), true);
+  assert.equal(isSuperAdmin({ role: "admin", status: "active", isSuperAdmin: false }), false);
+  assert.equal(isSuperAdmin({ role: "admin", status: "active" }), false);
+  assert.equal(isSuperAdmin(null), false);
   assert.equal(isSuperAdmin(undefined), false);
 });
 
-// ─── Validation du formulaire de connexion ─────────────────────────
+test("rôle de foyer et statut super-admin sont des axes indépendants sur le même document", () => {
+  // Admin de son foyer ET super-admin global (cas de Val) :
+  assert.equal(isHouseholdAdmin({ role: "admin", isSuperAdmin: true }), true);
+  assert.equal(isSuperAdmin({ role: "admin", isSuperAdmin: true }), true);
+  // Simple membre d'un foyer mais quand même super-admin (cas théorique futur) :
+  assert.equal(isHouseholdAdmin({ role: "member", isSuperAdmin: true }), false);
+  assert.equal(isSuperAdmin({ role: "member", isSuperAdmin: true }), true);
+});
+
+
 test("formulaire de connexion : champs vides invalides", () => {
   const r = validateLoginForm("", "");
   assert.equal(r.valid, false);

@@ -34,12 +34,14 @@
     return !!userDoc && userDoc.role === "admin";
   }
 
-  // Un utilisateur est super-admin (espace admin global, ex-mot de passe
-  // "2601") si un document superadmins/{uid} existe côté Firestore.
-  // La lecture Firestore elle-même est un détail d'implémentation ;
-  // ici on ne modélise que la décision à partir de son existence.
-  function isSuperAdmin(superadminDocExists) {
-    return !!superadminDocExists;
+  // Un utilisateur est super-admin (espace admin global, remplace l'ancien
+  // mot de passe "2601") si SON PROPRE document users/{uid} porte le champ
+  // isSuperAdmin: true. Un seul document, une seule source de vérité : pas
+  // de collection séparée. "role" est scopé au foyer (household admin),
+  // isSuperAdmin est un axe orthogonal et global — les deux vivent dans le
+  // même document utilisateur.
+  function isSuperAdmin(userDoc) {
+    return !!userDoc && userDoc.isSuperAdmin === true;
   }
 
   // Valide un formulaire de connexion email/mot de passe avant d'appeler

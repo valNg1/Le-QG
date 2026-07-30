@@ -9,21 +9,15 @@ service cloud.firestore {
     }
 
     // ─── users/{uid} ───────────────────────────────────────────────
-    // Rattachement compte Firebase -> foyer. Un utilisateur ne peut lire
-    // QUE son propre document. Écriture interdite depuis le client : les
-    // comptes et leur rattachement au foyer sont créés manuellement par
-    // l'administrateur dans la Firebase Console (aucune inscription
-    // publique en V1 — voir docs/architecture/authentification.md).
+    // Source de vérité unique : rattachement compte Firebase -> foyer,
+    // rôle de foyer (admin/member) ET statut super-admin global
+    // (isSuperAdmin, remplace l'ancien mot de passe "2601" côté client).
+    // Un utilisateur ne peut lire QUE son propre document. Écriture
+    // interdite depuis le client : les comptes et leur rattachement au
+    // foyer sont créés manuellement par l'administrateur dans la
+    // Firebase Console (aucune inscription publique en V1 — voir
+    // docs/architecture/authentification.md).
     match /users/{uid} {
-      allow read: if request.auth != null && request.auth.uid == uid;
-      allow write: if false;
-    }
-
-    // ─── superadmins/{uid} ─────────────────────────────────────────
-    // L'existence du document = statut super-admin (espace admin global,
-    // remplace l'ancien mot de passe "2601" côté client). Écriture
-    // interdite depuis le client.
-    match /superadmins/{uid} {
       allow read: if request.auth != null && request.auth.uid == uid;
       allow write: if false;
     }
@@ -36,9 +30,12 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'active';
     }
 
+    // Le champ isSuperAdmin vit sur le même document users/{uid} — une
+    // seule lecture suffit, pas de collection séparée à interroger.
     function isSuperAdmin() {
       return request.auth != null &&
-        exists(/databases/$(database)/documents/superadmins/$(request.auth.uid));
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isSuperAdmin == true;
     }
 
     // ─── groupes/{code} ──────────────────────────────────────────────

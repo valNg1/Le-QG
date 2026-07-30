@@ -19,8 +19,8 @@ puis une seconde fois après publication des règles Firestore (étape P).
 | 4 | Rafraîchir la page une fois connecté | Reste connecté, pas de retour à l'écran de connexion |
 | 5 | Cliquer "Se déconnecter" (Mon QG) | Retour à l'écran de connexion, plus d'accès à l'app tant qu'on ne se reconnecte pas |
 | 6 | Modifier l'URL pour tenter d'accéder directement à une vue (ex. `#agenda`) sans être connecté | Toujours l'écran de connexion (aucune vue de l'app visible en arrière-plan) |
-| 7 | Panneau admin (Mon QG) si `superadmins/{tonUID}` existe | Section visible, plus de prompt mot de passe |
-| 8 | Panneau admin si `superadmins/{uid}` n'existe PAS pour le compte connecté | Section totalement invisible |
+| 7 | Panneau admin (Mon QG) si `isSuperAdmin: true` sur ton document `users/{uid}` | Section visible, plus de prompt mot de passe |
+| 8 | Panneau admin si `isSuperAdmin` absent/false pour le compte connecté | Section totalement invisible |
 
 ## Manuel — après publication des règles Firestore
 

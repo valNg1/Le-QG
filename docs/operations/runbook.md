@@ -16,6 +16,7 @@
      | `role` | string | `"admin"` ou `"member"` |
      | `status` | string | `"active"` |
      | `name` | string | (optionnel, informatif) |
+     | `isSuperAdmin` | boolean | (optionnel, uniquement pour un accès admin global — voir plus bas) |
 5. Communiquer email + mot de passe temporaire à la personne (elle pourra
    le changer une fois connectée — pas encore de self-service en V1, à
    faire manuellement si besoin de reset).
@@ -28,9 +29,9 @@ règles Firestore — pas besoin de toucher Firebase Auth lui-même.
 
 ## Donner/retirer le statut super-admin (panneau global)
 
-- Donner : Firestore → collection `superadmins` → **Add document**, ID =
-  l'UID de la personne, contenu libre (ex. `{}` ou `{"since": <date>}`).
-- Retirer : supprimer ce document.
+- Donner : Firestore → `users/{uid}` → ajouter/modifier le champ
+  `isSuperAdmin` → valeur `true` (booléen).
+- Retirer : repasser ce champ à `false` (ou le supprimer).
 
 ## Activer Email/Password (à faire une seule fois, avant tout le reste)
 
@@ -46,7 +47,7 @@ règles Firestore — pas besoin de toucher Firebase Auth lui-même.
 1. Activer Email/Password (ci-dessus).
 2. Créer TON compte admin (section "Créer un nouveau compte utilisateur",
    avec `role: "admin"` et le `householdId` de ton foyer existant).
-3. Créer ton document `superadmins/{tonUID}`.
+3. Sur ce même document `users/{tonUID}`, ajouter le champ `isSuperAdmin: true`.
 4. Tester la connexion sur le site **avant** de publier les règles
    Firestore restrictives (les règles actuelles, quelles qu'elles soient
    en Console, restent en place jusque-là).
