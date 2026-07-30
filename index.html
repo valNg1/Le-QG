@@ -16,7 +16,9 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="auth-logic.js"></script>
 <style>
 :root {
   --fs-base: 16px;
@@ -380,6 +382,29 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
 
 <body>
 
+<!-- ÉCRAN DE CONNEXION (Firebase Auth email/mot de passe) -->
+<div id="login-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:6000;flex-direction:column;align-items:center;justify-content:center;padding:32px;">
+  <div style="width:72px;height:72px;border-radius:18px;background:#1A1916;display:flex;align-items:center;justify-content:center;margin-bottom:20px;flex-shrink:0;">
+    <span style="font-family:var(--serif);font-size:26px;font-weight:700;color:#F7C104;">QG</span>
+  </div>
+  <div style="font-size:20px;font-weight:800;color:var(--text);margin-bottom:4px;">Le Général</div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:28px;">Connecte-toi pour accéder à ton foyer</div>
+  <form id="login-form" style="width:100%;max-width:320px;" autocomplete="on">
+    <input id="login-email" type="email" inputmode="email" autocomplete="username" placeholder="Email" style="width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;font-family:var(--font);font-size:15px;color:var(--text);margin-bottom:10px;">
+    <input id="login-password" type="password" autocomplete="current-password" placeholder="Mot de passe" style="width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;font-family:var(--font);font-size:15px;color:var(--text);margin-bottom:14px;">
+    <div id="login-error" style="display:none;color:var(--red);font-size:13px;margin-bottom:12px;text-align:center;"></div>
+    <button id="login-submit-btn" type="submit" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:14px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;">Se connecter</button>
+  </form>
+</div>
+
+<!-- ÉCRAN ACCÈS REFUSÉ (connecté sur Firebase mais pas autorisé / compte désactivé) -->
+<div id="access-denied-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:6000;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;">
+  <div style="font-size:56px;margin-bottom:20px;">🚫</div>
+  <div style="font-size:22px;font-weight:800;color:var(--text);margin-bottom:12px;">Accès non autorisé</div>
+  <div style="font-size:15px;color:var(--muted);line-height:1.6;max-width:320px;margin-bottom:24px;">Ton compte n'est pas encore rattaché à un foyer, ou ton accès a été désactivé. Contacte l'administrateur pour en savoir plus.</div>
+  <button id="access-denied-logout-btn" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:20px;padding:12px 24px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">Se déconnecter</button>
+</div>
+
 <div id="app-splash" style="position:fixed;inset:0;z-index:99999;background:#F7C104;display:flex;flex-direction:column;align-items:center;justify-content:center;-webkit-text-size-adjust:none;text-size-adjust:none;">
   <div style="width:96px;height:96px;border-radius:24px;background:#1A1916;display:flex;align-items:center;justify-content:center;margin-bottom:22px;flex-shrink:0;">
     <span style="font-family:var(--serif);font-size:34px;font-weight:700;color:#F7C104;-webkit-text-size-adjust:none;">QG</span>
@@ -600,7 +625,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
       style="font-family:monospace;font-size:13px;">
     <div id="or-key-status" style="font-size:12px;margin-top:6px;"></div>
   </div>
-  <button id="reset-app-btn" style="width:100%;background:rgba(232,56,79,.08);border:1px solid rgba(232,56,79,.25);color:var(--red);border-radius:var(--r-sm);padding:12px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;margin:20px 0 4px;">🗑 Réinitialiser l'application</button>
+  <button id="logout-btn" style="width:100%;background:none;border:1px solid var(--border2);color:var(--muted2);border-radius:var(--r-sm);padding:12px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;margin:20px 0 8px;">🔓 Se déconnecter</button>
+  <button id="reset-app-btn" style="width:100%;background:rgba(232,56,79,.08);border:1px solid rgba(232,56,79,.25);color:var(--red);border-radius:var(--r-sm);padding:12px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;margin-bottom:4px;">🗑 Réinitialiser l'application</button>
 <p style="font-size:11px;color:var(--muted2);text-align:center;margin-bottom:8px;">Efface toutes les données locales de cet appareil (profil, tâches, réglages)</p>
 <button id="save-perso-btn" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:13px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;margin-top:16px;">💾 Enregistrer</button>
 
@@ -1099,7 +1125,7 @@ function initFirebase() {
 // ════════════════════════════════════════════
 const STORAGE_KEY = "legeneral_state_v2";
 let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null") || {
-  name: null, avatar: "🧑", groupCode: null, groupName: null, isAdmin: false,
+  name: null, avatar: "🧑", groupCode: null, groupName: null, isAdmin: false, isSuperAdmin: false,
   widgets: { meteo:true, env:true, transport:true, sports:true, podcasts:true, tdf:true },
   teamIds: ["133604","133919","133601"],
   podcastIds: ["judoka","gdiy","thinker"],
@@ -2315,34 +2341,27 @@ document.getElementById("mur-input").addEventListener("keydown",e=>{if(e.key==="
 // ════════════════════════════════════════════
 // ESPACE ADMIN (Val uniquement)
 // ════════════════════════════════════════════
-// Note : mot de passe côté client = protège des curieux, pas des experts.
-// Pour un vrai verrouillage il faudra des règles Firestore côté serveur.
-const ADMIN_PASS_HASH = "2601"; // change-le quand tu veux
+// Le statut super-admin est vérifié côté serveur (document Firestore
+// superadmins/{uid}, lu dans handleAuthStateChange) et reflété dans
+// state.isSuperAdmin. Il n'y a plus de mot de passe côté client : même si
+// quelqu'un modifiait ce JS dans son navigateur, les règles Firestore
+// refusent de toute façon la lecture de la collection "groupes" (utilisée
+// par ce panneau) à qui n'a pas ce document. Voir firestore.rules et
+// docs/architecture/authentification.md.
 
 function initAdminSection() {
+  const section = document.getElementById("admin-section");
+  if (!section) return;
+  if (!state.isSuperAdmin) { section.style.display = "none"; return; }
+  section.style.display = "block";
+
   document.getElementById("admin-unlock-btn")?.addEventListener("click", () => {
-    const pass = prompt("Mot de passe administrateur :");
-    if (pass === null) return;
-    if (pass === ADMIN_PASS_HASH) {
-      document.getElementById("admin-unlock-btn").style.display = "none";
-      document.getElementById("admin-panel").style.display = "block";
-      sessionStorage.setItem("qg_admin_ok", "1");
-      loadAdminData();
-    } else {
-      showToast("Mot de passe incorrect");
-    }
+    document.getElementById("admin-unlock-btn").style.display = "none";
+    document.getElementById("admin-panel").style.display = "block";
+    loadAdminData();
   });
 
-  // Reste déverrouillé le temps de la session
-  if (sessionStorage.getItem("qg_admin_ok") === "1") {
-    const ub = document.getElementById("admin-unlock-btn");
-    const ap = document.getElementById("admin-panel");
-    if (ub) ub.style.display = "none";
-    if (ap) ap.style.display = "block";
-  }
-
   document.getElementById("admin-lock-btn")?.addEventListener("click", () => {
-    sessionStorage.removeItem("qg_admin_ok");
     document.getElementById("admin-panel").style.display = "none";
     document.getElementById("admin-unlock-btn").style.display = "block";
   });
@@ -5026,6 +5045,11 @@ document.addEventListener("click", function(e) {
       location.reload();
     }
   }
+  if (e.target.closest && e.target.closest("#logout-btn")) {
+    if (confirm("Se déconnecter de Le Général ?")) {
+      firebase.auth().signOut().catch(err => console.log("signOut error:", err.message));
+    }
+  }
 });
 
 
@@ -5049,7 +5073,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.36";
+const APP_VERSION = "3.3.37";
 console.log("📦 Le Général v" + APP_VERSION);
 const footerVersionEl = document.getElementById("footer-version");
 if (footerVersionEl) footerVersionEl.textContent = "Le Général v" + APP_VERSION;
@@ -5072,8 +5096,10 @@ setTimeout(checkForUpdate, 3000);
 setInterval(checkForUpdate, 120000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) checkForUpdate(); });
 
-document.addEventListener("DOMContentLoaded", function() {
-  initFirebase();
+// Corps historique du bootstrap de l'app (onboarding, invitations, startApp).
+// Inchangé — extrait tel quel de l'ancien DOMContentLoaded pour être appelé
+// uniquement une fois l'utilisateur authentifié ET autorisé (voir plus bas).
+function proceedAfterAuth() {
   updateHeader();
   setInterval(updateHeader, 60000);
 
@@ -5139,7 +5165,10 @@ document.addEventListener("DOMContentLoaded", function() {
     initOnboarding();
   }
 
-  // Masque l'écran de démarrage maintenant que l'app a décidé quoi afficher
+  hideSplash();
+}
+
+function hideSplash() {
   const splash = document.getElementById("app-splash");
   if (splash) {
     setTimeout(() => {
@@ -5148,7 +5177,104 @@ document.addEventListener("DOMContentLoaded", function() {
       setTimeout(() => splash.remove(), 350);
     }, 300);
   }
+}
+
+// ════════════════════════════════════════════
+// AUTHENTIFICATION (Firebase Auth email/mot de passe)
+// ════════════════════════════════════════════
+// Aucune inscription publique : les comptes sont créés manuellement dans la
+// Firebase Console par l'administrateur, avec un document users/{uid}
+// correspondant (householdId, role, status). Voir docs/architecture/authentification.md.
+
+function showAuthScreen(name) {
+  ["login-screen", "access-denied-screen"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = (id === name ? "flex" : "none");
+  });
+  if (name) hideSplash();
+}
+
+function wireLoginForm() {
+  const form = document.getElementById("login-form");
+  const errEl = document.getElementById("login-error");
+  if (!form) return;
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (errEl) errEl.style.display = "none";
+    const email = document.getElementById("login-email")?.value || "";
+    const password = document.getElementById("login-password")?.value || "";
+    const check = AuthLogic.validateLoginForm(email, password);
+    if (!check.valid) {
+      if (errEl) { errEl.textContent = "Email et mot de passe requis."; errEl.style.display = "block"; }
+      return;
+    }
+    const btn = document.getElementById("login-submit-btn");
+    if (btn) { btn.disabled = true; btn.textContent = "Connexion..."; }
+    try {
+      await firebase.auth().signInWithEmailAndPassword(email.trim(), password);
+      // onAuthStateChanged prend le relais automatiquement.
+    } catch (err) {
+      if (errEl) { errEl.textContent = AuthLogic.loginErrorMessage(err.code); errEl.style.display = "block"; }
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = "Se connecter"; }
+    }
+  });
+  document.getElementById("access-denied-logout-btn")?.addEventListener("click", () => {
+    firebase.auth().signOut().catch(e => console.log("signOut error:", e.message));
+  });
+}
+
+// Appelé à chaque changement d'état d'authentification Firebase (connexion,
+// déconnexion, restauration de session au rafraîchissement, expiration).
+async function handleAuthStateChange(user) {
+  if (!user) {
+    state.groupCode = null; state.isAdmin = false; state.isSuperAdmin = false;
+    showAuthScreen("login-screen");
+    return;
+  }
+
+  let userDoc = null;
+  try {
+    const snap = await db.collection("users").doc(user.uid).get();
+    userDoc = snap.exists ? snap.data() : null;
+  } catch (e) {
+    console.log("users lookup error:", e.message);
+  }
+
+  const hasProfile = !!(state.name && state.onboarded);
+  const screen = AuthLogic.resolveScreen({ uid: user.uid }, userDoc, hasProfile);
+
+  if (screen === "access-denied") {
+    state.groupCode = null; state.isAdmin = false; state.isSuperAdmin = false;
+    showAuthScreen("access-denied-screen");
+    return;
+  }
+
+  // Autorisé : le foyer et le rôle viennent du compte Firebase (source de
+  // vérité serveur), pas d'un code saisi ou créé localement.
+  state.groupCode = userDoc.householdId;
+  state.groupName = state.groupName || null;
+  state.isAdmin = AuthLogic.isHouseholdAdmin(userDoc);
+  saveState();
+
+  // Vérifie le statut super-admin (espace admin global) une fois authentifié.
+  try {
+    const saSnap = await db.collection("superadmins").doc(user.uid).get();
+    state.isSuperAdmin = AuthLogic.isSuperAdmin(saSnap.exists);
+  } catch (e) {
+    state.isSuperAdmin = false;
+  }
+
+  showAuthScreen(null); // masque login/access-denied
+  proceedAfterAuth();
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  initFirebase();
+  wireLoginForm();
+  firebase.auth().onAuthStateChanged(handleAuthStateChange);
 });
+
 </script>
 
 <!-- ERUDA DEBUG CONSOLE -->

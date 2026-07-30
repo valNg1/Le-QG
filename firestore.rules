@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Refus par défaut : toute collection non explicitement autorisée
+    // ci-dessous est inaccessible, y compris en lecture.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ─── users/{uid} ───────────────────────────────────────────────
+    // Rattachement compte Firebase -> foyer. Un utilisateur ne peut lire
+    // QUE son propre document. Écriture interdite depuis le client : les
+    // comptes et leur rattachement au foyer sont créés manuellement par
+    // l'administrateur dans la Firebase Console (aucune inscription
+    // publique en V1 — voir docs/architecture/authentification.md).
+    match /users/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // ─── superadmins/{uid} ─────────────────────────────────────────
+    // L'existence du document = statut super-admin (espace admin global,
+    // remplace l'ancien mot de passe "2601" côté client). Écriture
+    // interdite depuis le client.
+    match /superadmins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // Un utilisateur connecté est-il membre actif du foyer "code" ?
+    function isActiveHouseholdMember(code) {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.householdId == code &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'active';
+    }
+
+    function isSuperAdmin() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/superadmins/$(request.auth.uid));
+    }
+
+    // ─── groupes/{code} ──────────────────────────────────────────────
+    match /groupes/{code} {
+      // Un membre actif du foyer peut lire/modifier son propre foyer.
+      // Le super-admin peut lire n'importe quel foyer (panneau
+      // d'administration global) et le suspendre/réactiver.
+      allow get: if isActiveHouseholdMember(code) || isSuperAdmin();
+      allow list: if isSuperAdmin(); // liste complète réservée au panneau admin global
+      allow update: if isActiveHouseholdMember(code) || isSuperAdmin();
+      allow create, delete: if false; // création/suppression de foyer : Console uniquement
+
+      match /events/{eventId} {
+        allow read, write: if isActiveHouseholdMember(code);
+      }
+      match /mur/{msgId} {
+        allow read, write: if isActiveHouseholdMember(code);
+      }
+      match /diner/{dateKey} {
+        allow read, write: if isActiveHouseholdMember(code);
+      }
+    }
+  }
+}

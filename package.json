@@ -1,0 +1,8 @@
+{
+  "name": "le-general",
+  "private": true,
+  "description": "Le Général (legeneral.org) — tests de la logique d'authentification. Aucune dépendance externe : utilise le test runner intégré à Node (>=18).",
+  "scripts": {
+    "test": "node --test \"tests/**/*.test.js\""
+  }
+}
