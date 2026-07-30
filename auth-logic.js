@@ -44,13 +44,18 @@
     return !!userDoc && userDoc.isSuperAdmin === true;
   }
 
+  // Validation d'un email seul (réutilisée par le formulaire de connexion
+  // et par la récupération de mot de passe).
+  function isValidEmail(email) {
+    return !!email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).trim());
+  }
+
   // Valide un formulaire de connexion email/mot de passe avant d'appeler
   // Firebase (retour rapide, message d'erreur clair, pas d'appel réseau
   // inutile sur un champ vide).
   function validateLoginForm(email, password) {
     const errors = [];
-    const emailOk = !!email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).trim());
-    if (!emailOk) errors.push("email");
+    if (!isValidEmail(email)) errors.push("email");
     if (!password || String(password).length < 1) errors.push("password");
     return { valid: errors.length === 0, errors };
   }
@@ -72,5 +77,5 @@
     return map[errorCode] || generic;
   }
 
-  return { resolveScreen, isHouseholdAdmin, isSuperAdmin, validateLoginForm, loginErrorMessage };
+  return { resolveScreen, isHouseholdAdmin, isSuperAdmin, isValidEmail, validateLoginForm, loginErrorMessage };
 });

@@ -393,7 +393,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     <input id="login-email" type="email" inputmode="email" autocomplete="username" placeholder="Email" style="width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;font-family:var(--font);font-size:15px;color:var(--text);margin-bottom:10px;">
     <input id="login-password" type="password" autocomplete="current-password" placeholder="Mot de passe" style="width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;font-family:var(--font);font-size:15px;color:var(--text);margin-bottom:14px;">
     <div id="login-error" style="display:none;color:var(--red);font-size:13px;margin-bottom:12px;text-align:center;"></div>
+    <div id="login-reset-msg" style="display:none;color:var(--green);font-size:13px;margin-bottom:12px;text-align:center;"></div>
     <button id="login-submit-btn" type="submit" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:14px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;">Se connecter</button>
+    <button id="login-forgot-btn" type="button" style="width:100%;background:none;border:none;color:var(--muted);font-family:var(--font);font-size:13px;cursor:pointer;padding:14px 0 0;">Mot de passe oublié ?</button>
   </form>
 </div>
 
@@ -5074,7 +5076,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.38";
+const APP_VERSION = "3.3.39";
 console.log("📦 Le Général v" + APP_VERSION);
 const footerVersionEl = document.getElementById("footer-version");
 if (footerVersionEl) footerVersionEl.textContent = "Le Général v" + APP_VERSION;
@@ -5222,6 +5224,34 @@ function wireLoginForm() {
   });
   document.getElementById("access-denied-logout-btn")?.addEventListener("click", () => {
     firebase.auth().signOut().catch(e => console.log("signOut error:", e.message));
+  });
+
+  const resetMsgEl = document.getElementById("login-reset-msg");
+  document.getElementById("login-forgot-btn")?.addEventListener("click", async () => {
+    if (errEl) errEl.style.display = "none";
+    if (resetMsgEl) resetMsgEl.style.display = "none";
+    const email = document.getElementById("login-email")?.value || "";
+    if (!AuthLogic.isValidEmail(email)) {
+      if (errEl) { errEl.textContent = "Renseigne d'abord ton email ci-dessus, puis clique sur \"Mot de passe oublié ?\"."; errEl.style.display = "block"; }
+      return;
+    }
+    const btn = document.getElementById("login-forgot-btn");
+    if (btn) { btn.disabled = true; }
+    try {
+      await firebase.auth().sendPasswordResetEmail(email.trim());
+      if (resetMsgEl) { resetMsgEl.textContent = "Email envoyé (si ce compte existe) — vérifie ta boîte de réception."; resetMsgEl.style.display = "block"; }
+    } catch (err) {
+      // Même message qu'un succès si le compte n'existe pas, pour ne pas
+      // permettre l'énumération de comptes existants.
+      if (err.code === "auth/user-not-found") {
+        if (resetMsgEl) { resetMsgEl.textContent = "Email envoyé (si ce compte existe) — vérifie ta boîte de réception."; resetMsgEl.style.display = "block"; }
+      } else if (errEl) {
+        errEl.textContent = AuthLogic.loginErrorMessage(err.code);
+        errEl.style.display = "block";
+      }
+    } finally {
+      if (btn) { btn.disabled = false; }
+    }
   });
 }
 

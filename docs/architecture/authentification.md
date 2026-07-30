@@ -96,6 +96,14 @@ suspended? }`. Ce qui change, c'est **qui peut y accéder** (voir
 connaît le code", mais "un membre authentifié dont `users/{uid}.householdId
 == code`", ou un super-admin.
 
+## Récupération de mot de passe
+
+Bouton "Mot de passe oublié ?" sur l'écran de connexion → appelle
+`firebase.auth().sendPasswordResetEmail(email)` (mécanisme standard
+Firebase, aucune infrastructure email à gérer côté Le Général). Le même
+message de confirmation s'affiche que le compte existe ou non (protection
+contre l'énumération de comptes, cohérent avec `loginErrorMessage`).
+
 ## Session
 
 - Persistance : comportement par défaut du SDK Firebase Auth web

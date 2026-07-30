@@ -12,6 +12,7 @@ const {
   resolveScreen,
   isHouseholdAdmin,
   isSuperAdmin,
+  isValidEmail,
   validateLoginForm,
   loginErrorMessage,
 } = require("../auth-logic.js");
@@ -79,6 +80,15 @@ test("rôle de foyer et statut super-admin sont des axes indépendants sur le m�
   // Simple membre d'un foyer mais quand même super-admin (cas théorique futur) :
   assert.equal(isHouseholdAdmin({ role: "member", isSuperAdmin: true }), false);
   assert.equal(isSuperAdmin({ role: "member", isSuperAdmin: true }), true);
+});
+
+
+test("isValidEmail valide/rejette correctement", () => {
+  assert.equal(isValidEmail("val@legeneral.org"), true);
+  assert.equal(isValidEmail("pas-un-email"), false);
+  assert.equal(isValidEmail(""), false);
+  assert.equal(isValidEmail(undefined), false);
+  assert.equal(isValidEmail("  val@legeneral.org  "), true);
 });
 
 
