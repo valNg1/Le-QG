@@ -18,6 +18,7 @@ const {
   canApproveRequest,
   buildJoinRequestPayload,
   buildApprovedMembershipPayload,
+  buildRequestStatusUpdate,
   isValidEmail,
   validateLoginForm,
   validateSignupForm,
@@ -217,4 +218,47 @@ test("messages d'erreur de connexion traduits sans énumération de compte", () 
 test("messages d'erreur d'inscription distincts et informatifs", () => {
   assert.equal(signupErrorMessage("auth/email-already-in-use"), "Un compte existe déjà avec cet email — connecte-toi plutôt.");
   assert.equal(signupErrorMessage("auth/weak-password"), "Mot de passe trop faible (6 caractères minimum).");
+});
+
+// ─── Revue sécurité du 27/07/2026 (suite) : chemin strict, immutabilité, atomicité ───
+
+test("une demande d'adhésion ne référence jamais un uid ou un code différents de ceux fournis (cohérence chemin/contenu)", () => {
+  const payload = buildJoinRequestPayload("u1", "ABC123");
+  // Le document est écrit à users/{uid}/membershipRequests/{code} — ces
+  // deux champs DOIVENT correspondre exactement aux segments du chemin
+  // (imposé aussi côté firestore.rules : request.resource.data.uid == uid
+  // et request.resource.data.code == code, variables de CHEMIN).
+  assert.equal(payload.uid, "u1");
+  assert.equal(payload.code, "ABC123");
+});
+
+test("le traitement d'une demande (approbation/refus) ne modifie JAMAIS uid, code ou requestedAt", () => {
+  const approvedUpdate = buildRequestStatusUpdate("approved");
+  const rejectedUpdate = buildRequestStatusUpdate("rejected");
+  assert.deepEqual(Object.keys(approvedUpdate), ["status"]);
+  assert.deepEqual(Object.keys(rejectedUpdate), ["status"]);
+  assert.equal("uid" in approvedUpdate, false);
+  assert.equal("code" in approvedUpdate, false);
+  assert.equal("requestedAt" in approvedUpdate, false);
+});
+
+test("approuver une demande ET créer l'adhésion produisent des payloads cohérents entre eux (base de l'écriture atomique par batch)", () => {
+  // Ces deux payloads sont ceux écrits ENSEMBLE dans le même batch
+  // Firestore (voir handleRequestDecision dans index.html — db.batch()) :
+  // le statut passe à "approved" en même temps que l'adhésion "member"
+  // est créée. Aucun état intermédiaire où l'un existe sans l'autre.
+  const statusUpdate = buildRequestStatusUpdate("approved");
+  const membershipPayload = buildApprovedMembershipPayload();
+  assert.equal(statusUpdate.status, "approved");
+  assert.equal(membershipPayload.status, "active");
+  assert.equal(membershipPayload.role, "member");
+});
+
+test("refuser une demande ne construit aucun payload d'adhésion (pas de membership créée)", () => {
+  const statusUpdate = buildRequestStatusUpdate("rejected");
+  assert.equal(statusUpdate.status, "rejected");
+  // buildApprovedMembershipPayload() n'est appelée nulle part dans le
+  // chemin "rejected" du code réel (index.html, handleRequestDecision) —
+  // vérifié par lecture directe du code, pas testable en pur ici sans
+  // émulateur Firestore.
 });

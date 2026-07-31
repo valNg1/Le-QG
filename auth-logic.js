@@ -103,6 +103,15 @@
     return { role: "member", status: "active" };
   }
 
+  // Construit le payload de traitement d'une demande (approbation ou
+  // refus). Ne contient JAMAIS uid/code/requestedAt — seul le statut
+  // change. C'est cette même fonction qui est utilisée par le code réel
+  // (pas seulement testée en théorie), donc il est structurellement
+  // impossible d'y glisser une modification de l'identité de la demande.
+  function buildRequestStatusUpdate(decision) {
+    return { status: decision };
+  }
+
   // Validation d'un email seul (réutilisée par la connexion, l'inscription
   // et la récupération de mot de passe).
   function isValidEmail(email) {
@@ -172,6 +181,7 @@
     canApproveRequest,
     buildJoinRequestPayload,
     buildApprovedMembershipPayload,
+    buildRequestStatusUpdate,
     isValidEmail,
     validateLoginForm,
     validateSignupForm,

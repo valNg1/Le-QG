@@ -2280,11 +2280,17 @@ async function handleRequestDecision(requesterUid, code, decision) {
     return;
   }
   try {
+    // Batch atomique : soit les deux écritures réussissent ensemble,
+    // soit aucune n'est appliquée. Empêche un état incohérent (adhésion
+    // créée sans que la demande passe à "approved", ou l'inverse).
+    const batch = db.batch();
+    const requestRef = db.collection("users").doc(requesterUid).collection("membershipRequests").doc(code);
+    batch.update(requestRef, AuthLogic.buildRequestStatusUpdate(decision));
     if (decision === "approved") {
-      const payload = AuthLogic.buildApprovedMembershipPayload();
-      await db.collection("users").doc(requesterUid).collection("memberships").doc(code).set(payload);
+      const membershipRef = db.collection("users").doc(requesterUid).collection("memberships").doc(code);
+      batch.set(membershipRef, AuthLogic.buildApprovedMembershipPayload());
     }
-    await db.collection("users").doc(requesterUid).collection("membershipRequests").doc(code).update({ status: decision });
+    await batch.commit();
     showToast(decision === "approved" ? "Demande approuvée" : "Demande refusée");
     const myAdminCodes = AuthLogic.activeMemberships(state.memberships).filter(m => m.role === "admin").map(m => m.code);
     loadPendingRequests(myAdminCodes);
@@ -5111,7 +5117,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.42";
+const APP_VERSION = "3.3.43";
 console.log("📦 Le Général v" + APP_VERSION);
 const footerVersionEl = document.getElementById("footer-version");
 if (footerVersionEl) footerVersionEl.textContent = "Le Général v" + APP_VERSION;

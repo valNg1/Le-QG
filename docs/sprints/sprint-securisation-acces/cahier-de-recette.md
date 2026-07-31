@@ -39,6 +39,15 @@
 | 17 | Depuis devtools, un admin tente d'écrire `role: "admin"` via une approbation | Refusé par les règles (`request.resource.data.role == 'member'` uniquement) |
 | 18 | Un admin clique ✕ (refuser) une demande | La demande passe à `"rejected"`, aucune adhésion créée, le demandeur reste bloqué sur "Rejoindre un foyer" |
 
+## Manuel — durcissement post-revue (chemin, immutabilité, atomicité)
+
+| # | Scénario | Résultat attendu |
+|---|---|---|
+| 18b | Depuis devtools, tenter de créer un document à un chemin arbitraire se terminant par `membershipRequests/{x}` hors de `users/{sonUID}/membershipRequests/{code}` | Refusé (permission-denied) |
+| 18c | Depuis devtools, tenter de créer une demande avec `uid` différent de son propre uid, ou `code` différent du segment de chemin | Refusé (permission-denied) |
+| 18d | Depuis devtools, un admin tente de modifier `uid`, `code` ou `requestedAt` d'une demande en même temps que son statut | Refusé (permission-denied) |
+| 18e | Simuler une coupure réseau juste après le clic "Approuver" (devtools → offline pendant le batch) | Ni la demande ni l'adhésion ne changent (le batch échoue en bloc, pas d'état à moitié appliqué) |
+
 ## Manuel — modification du foyer
 
 | # | Scénario | Résultat attendu |
