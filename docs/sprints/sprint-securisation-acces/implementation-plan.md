@@ -1,5 +1,13 @@
 # Sprint sécurisation de l'accès — Plan d'implémentation
 
+> **Note (27/07/2026)** : ce document décrit la V1 initiale (comptes créés
+> par l'admin, un foyer par compte). Le modèle a depuis évolué vers
+> l'inscription libre + multi-foyers — voir la section "Révision" de
+> `docs/decisions/ADR-authentification.md` et la version à jour de
+> `docs/architecture/authentification.md`. Conservé ici pour l'historique
+> des étapes A à H, toujours valides pour l'essentiel (audit, tests,
+> Firebase Auth, règles Firestore).
+
 ## Ordre suivi (repris du cadrage du directeur technique)
 
 - [x] A. Audit complet et identification des données existantes

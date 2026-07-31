@@ -41,14 +41,10 @@ connexion fonctionne (voir `runbook.md` — ordre d'exécution). Publier les
 règles restrictives avant que ton compte existe te couperait l'accès à
 toi-même.
 
-## Comptes utilisateurs (nouveau)
+## Comptes utilisateurs (self-service depuis le pivot du 27/07/2026)
 
-Aucune inscription publique. Pour ajouter une personne :
-1. Firebase Console → Authentication → Users → **Add user** (email +
-   mot de passe).
-2. Note son **UID** généré.
-3. Firestore Database → collection `users` → **Add document**, avec
-   l'UID comme ID de document, et les champs `householdId`, `role`,
-   `status`, `email` (voir `authentification.md` pour le schéma exact).
-
-Détail pas-à-pas dans `runbook.md`.
+Inscription libre depuis l'écran de connexion — rien à faire côté
+Console pour un nouveau compte ou pour rejoindre un foyer existant.
+Voir `runbook.md` uniquement pour : créer un nouveau foyer, promouvoir
+quelqu'un admin d'un foyer, ou donner le statut super-admin — ces
+actions-là restent manuelles (Console).

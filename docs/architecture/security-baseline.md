@@ -30,9 +30,9 @@
 
 | Risque | Avant | Après |
 |---|---|---|
-| Accès aux données d'un foyer sans compte | Oui (code seul) | Non — `firestore.rules` exige `request.auth != null` + `users/{uid}.householdId == code` + `status == "active"` |
+| Accès aux données d'un foyer sans compte | Oui (code seul) | Non — `firestore.rules` exige `request.auth != null` + un document `users/{uid}/memberships/{code}` actif |
 | Lister tous les foyers | Oui, si les règles Firestore actuelles l'autorisent | Non — réservé à `isSuperAdmin()` |
-| Devenir admin d'un foyer en changeant son prénom | Oui | Non — le rôle vient de `users/{uid}.role`, en lecture seule, non modifiable côté client |
+| Devenir admin d'un foyer en changeant son prénom, ou en le rejoignant | Oui (avant) / self-service donnerait admin (v1 mal cadrée) | Non — rejoindre un foyer en self-service donne toujours `role: "member"`, jamais modifiable par le client |
 | Accéder au panneau admin global sans y être autorisé | Mot de passe unique visible dans le code source | Champ `isSuperAdmin` sur son propre document `users/{uid}` vérifié côté serveur (règles) et côté client (UI) |
 | Secret exposé côté client | `ADMIN_PASS_HASH` en clair | Aucun secret dans le client ; `firebaseConfig` reste public (ce n'est pas un secret — c'est la protection par Auth + règles qui compte) |
 
@@ -44,8 +44,9 @@
   Firebase (Admin SDK / service account JSON) n'existe dans ce
   repository, et ce chantier n'en introduit aucune.
 - **Séparation stricte des foyers** : toute règle d'accès à
-  `groupes/{code}` passe par la vérification `users/{uid}.householdId ==
-  code`, jamais par une simple connaissance du code.
+  `groupes/{code}` passe par la vérification d'un document
+  `users/{uid}/memberships/{code}` actif, jamais par une simple
+  connaissance du code.
 - **Contrôle serveur, pas seulement frontend** : chaque décision UI
   (afficher le panneau admin, afficher tel foyer) est redondante avec une
   règle Firestore équivalente — si le JS client est modifié ou contourné,

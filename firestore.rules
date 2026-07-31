@@ -9,21 +9,21 @@ service cloud.firestore {
     }
 
     // Un utilisateur connecté est-il membre actif du foyer "code" ?
+    // Chaque adhésion est un document séparé (users/{uid}/memberships/{code})
+    // plutôt qu'un champ dans une map : plus simple et plus sûr à
+    // raisonner dans des règles (pas de diff de map à valider).
     function isActiveHouseholdMember(code) {
       return request.auth != null &&
-        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.householdId == code &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'active';
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)/memberships/$(code)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)/memberships/$(code)).data.status == 'active';
     }
 
     // Un utilisateur connecté est-il ADMIN actif du foyer "code" ?
-    // (utilisé pour autoriser la création de nouveaux membres)
     function isActiveHouseholdAdmin(code) {
       return request.auth != null &&
-        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.householdId == code &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'active' &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)/memberships/$(code)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)/memberships/$(code)).data.status == 'active' &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)/memberships/$(code)).data.role == 'admin';
     }
 
     // Le champ isSuperAdmin vit sur le document users/{uid} — une seule
@@ -35,29 +35,41 @@ service cloud.firestore {
     }
 
     // ─── users/{uid} ───────────────────────────────────────────────
-    // Source de vérité unique : rattachement compte Firebase -> foyer,
-    // rôle de foyer (admin/member) ET statut super-admin global
-    // (isSuperAdmin, remplace l'ancien mot de passe "2601" côté client).
-    // Un utilisateur ne peut lire QUE son propre document.
-    //
-    // Écriture : aucune inscription publique (un visiteur ne peut jamais
-    // créer son propre document — request.auth.uid != uid l'interdit).
-    // Seul un admin de foyer déjà actif peut provisionner un NOUVEAU
-    // membre pour SON PROPRE foyer — jamais un autre foyer, jamais avec
-    // role != "member", jamais super-admin. Le compte admin lui-même
-    // (premier compte de chaque foyer) reste créé à la main dans la
-    // Firebase Console (voir runbook.md).
+    // Profil de base : email, statut super-admin global. Un utilisateur
+    // ne peut lire/créer/modifier QUE son propre document. Inscription
+    // libre (self-service) autorisée, mais impossible de s'auto-déclarer
+    // super-admin, et impossible de modifier email/isSuperAdmin après
+    // création via ce chemin.
     match /users/{uid} {
       allow read: if request.auth != null && request.auth.uid == uid;
 
-      allow create: if request.auth != null &&
-        request.auth.uid != uid &&
-        isActiveHouseholdAdmin(request.resource.data.householdId) &&
-        request.resource.data.role == 'member' &&
-        request.resource.data.status == 'active' &&
+      allow create: if request.auth != null && request.auth.uid == uid &&
         request.resource.data.isSuperAdmin != true;
 
-      allow update, delete: if false;
+      allow update: if request.auth != null && request.auth.uid == uid &&
+        request.resource.data.email == resource.data.email &&
+        request.resource.data.isSuperAdmin == resource.data.isSuperAdmin;
+
+      allow delete: if false;
+
+      // ─── users/{uid}/memberships/{code} ──────────────────────────
+      // Une adhésion à un foyer = un document. Rejoindre un foyer
+      // EXISTANT est self-service, mais toujours en tant que "member" —
+      // impossible de s'auto-attribuer "admin" par ce chemin (le rôle
+      // admin d'un foyer reste attribué à la main, Firestore Console,
+      // ou par un futur flux dédié). Aucune modification ni suppression
+      // client une fois créée (quitter un groupe = hors périmètre de ce
+      // sprint).
+      match /memberships/{code} {
+        allow read: if request.auth != null && request.auth.uid == uid;
+
+        allow create: if request.auth != null && request.auth.uid == uid &&
+          exists(/databases/$(database)/documents/groupes/$(code)) &&
+          request.resource.data.role == 'member' &&
+          request.resource.data.status == 'active';
+
+        allow update, delete: if false;
+      }
     }
 
     // ─── groupes/{code} ──────────────────────────────────────────────
@@ -68,7 +80,7 @@ service cloud.firestore {
       allow get: if isActiveHouseholdMember(code) || isSuperAdmin();
       allow list: if isSuperAdmin(); // liste complète réservée au panneau admin global
       allow update: if isActiveHouseholdMember(code) || isSuperAdmin();
-      allow create, delete: if false; // création/suppression de foyer : Console uniquement
+      allow create, delete: if false; // création de foyer : hors périmètre de ce sprint (Console)
 
       match /events/{eventId} {
         allow read, write: if isActiveHouseholdMember(code);

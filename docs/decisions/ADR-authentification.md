@@ -78,3 +78,35 @@ ne reprendre de Hazumi que le *principe* du parcours d'authentification.
 - `createGroup()` / `joinGroup()` restent dans le code par compatibilité
   mais ne sont plus le chemin principal : à documenter clairement pour
   ne pas dérouter un futur développeur qui les retrouverait.
+
+## Révision — 27/07/2026 : inscription libre + multi-foyers
+
+**Contexte** : la v1 (comptes créés par l'admin via Console ou via un
+formulaire "Ajouter un membre" dans l'app, un seul foyer par compte)
+correspondait à une mauvaise lecture du besoin. Le directeur technique a
+précisé : les gens s'inscrivent eux-mêmes, et le rattachement à un foyer
+n'est pas unique (quelqu'un doit pouvoir rejoindre plusieurs foyers —
+cohérent avec le modèle SaaS visé, où une même personne peut faire partie
+de plusieurs "Général" différents).
+
+**Décision** :
+1. Inscription self-service (email + mot de passe), sans validation
+   admin préalable — le foyer reste la barrière (connaître le code),
+   pas le compte.
+2. Une adhésion à un foyer = un document séparé
+   (`users/{uid}/memberships/{code}`) plutôt qu'un champ unique
+   `householdId`, pour permettre plusieurs foyers par compte SANS
+   fragiliser les règles Firestore (pas de diff de map à valider — un
+   `allow create` standard suffit).
+3. Rejoindre un foyer en self-service donne toujours `role: "member"` —
+   jamais `admin`, jamais super-admin. Devenir admin d'un foyer reste un
+   geste manuel (Console) pour l'instant ; un flux dédié pourra être
+   ajouté plus tard si le besoin se confirme.
+4. Le formulaire "Ajouter un membre" piloté par l'admin (introduit puis
+   retiré dans la foulée) est entièrement supprimé du code — remplacé par
+   l'inscription libre + le fait de rejoindre un foyer avec son code.
+5. La création de NOUVEAUX foyers reste hors périmètre : seuls des foyers
+   déjà existants (Console) peuvent être rejoints en self-service. Un
+   flux de création de foyer en self-service (avec attribution automatique
+   du rôle admin au créateur) est une extension naturelle mais non
+   demandée à ce stade.

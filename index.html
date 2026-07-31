@@ -383,12 +383,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
 <body>
 
 <!-- ÉCRAN DE CONNEXION (Firebase Auth email/mot de passe) -->
-<div id="login-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:6000;flex-direction:column;align-items:center;justify-content:center;padding:32px;">
+<div id="login-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:6000;flex-direction:column;align-items:center;justify-content:center;padding:32px;overflow-y:auto;">
   <div style="width:72px;height:72px;border-radius:18px;background:#1A1916;display:flex;align-items:center;justify-content:center;margin-bottom:20px;flex-shrink:0;">
     <span style="font-family:var(--serif);font-size:26px;font-weight:700;color:#F7C104;">QG</span>
   </div>
   <div style="font-size:20px;font-weight:800;color:var(--text);margin-bottom:4px;">Le Général</div>
-  <div style="font-size:13px;color:var(--muted);margin-bottom:28px;">Connecte-toi pour accéder à ton foyer</div>
+  <div id="login-subtitle" style="font-size:13px;color:var(--muted);margin-bottom:28px;">Connecte-toi pour accéder à tes foyers</div>
   <form id="login-form" style="width:100%;max-width:320px;" autocomplete="on">
     <input id="login-email" type="email" inputmode="email" autocomplete="username" placeholder="Email" style="width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;font-family:var(--font);font-size:15px;color:var(--text);margin-bottom:10px;">
     <input id="login-password" type="password" autocomplete="current-password" placeholder="Mot de passe" style="width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;font-family:var(--font);font-size:15px;color:var(--text);margin-bottom:14px;">
@@ -396,15 +396,21 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
     <div id="login-reset-msg" style="display:none;color:var(--green);font-size:13px;margin-bottom:12px;text-align:center;"></div>
     <button id="login-submit-btn" type="submit" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:14px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;">Se connecter</button>
     <button id="login-forgot-btn" type="button" style="width:100%;background:none;border:none;color:var(--muted);font-family:var(--font);font-size:13px;cursor:pointer;padding:14px 0 0;">Mot de passe oublié ?</button>
+    <button id="login-mode-toggle-btn" type="button" style="width:100%;background:none;border:none;color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;padding:10px 0 0;text-decoration:underline;">Pas encore de compte ? Crée-toi en un</button>
   </form>
 </div>
 
-<!-- ÉCRAN ACCÈS REFUSÉ (connecté sur Firebase mais pas autorisé / compte désactivé) -->
-<div id="access-denied-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:6000;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;">
-  <div style="font-size:56px;margin-bottom:20px;">🚫</div>
-  <div style="font-size:22px;font-weight:800;color:var(--text);margin-bottom:12px;">Accès non autorisé</div>
-  <div style="font-size:15px;color:var(--muted);line-height:1.6;max-width:320px;margin-bottom:24px;">Ton compte n'est pas encore rattaché à un foyer, ou ton accès a été désactivé. Contacte l'administrateur pour en savoir plus.</div>
-  <button id="access-denied-logout-btn" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:20px;padding:12px 24px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">Se déconnecter</button>
+<!-- ÉCRAN REJOINDRE UN FOYER (connecté, mais aucune adhésion active) -->
+<div id="join-household-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:6000;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;">
+  <div style="font-size:44px;margin-bottom:16px;">🏠</div>
+  <div style="font-size:20px;font-weight:800;color:var(--text);margin-bottom:8px;">Rejoins un foyer</div>
+  <div style="font-size:14px;color:var(--muted);line-height:1.5;max-width:300px;margin-bottom:24px;">Demande le code à 6 caractères à un membre déjà présent dans le foyer.</div>
+  <form id="join-household-form" style="width:100%;max-width:280px;">
+    <input id="join-household-code" type="text" maxlength="6" placeholder="Ex: 8W5D2B" style="width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;font-family:var(--font);font-size:16px;letter-spacing:.1em;text-align:center;text-transform:uppercase;color:var(--text);margin-bottom:10px;">
+    <div id="join-household-error" style="display:none;color:var(--red);font-size:13px;margin-bottom:12px;"></div>
+    <button id="join-household-submit-btn" type="submit" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:14px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;">Rejoindre</button>
+  </form>
+  <button id="join-household-logout-btn" style="background:none;border:none;color:var(--muted);font-family:var(--font);font-size:13px;cursor:pointer;padding:16px 0 0;">Se déconnecter</button>
 </div>
 
 <div id="app-splash" style="position:fixed;inset:0;z-index:99999;background:#F7C104;display:flex;flex-direction:column;align-items:center;justify-content:center;-webkit-text-size-adjust:none;text-size-adjust:none;">
@@ -1199,20 +1205,13 @@ function obNext() {
     localStorage.removeItem("qg_quiz_wrong");
   }
   state.name = name; state.avatar = obAvatar || "🧑";
-  saveState();
-  document.getElementById("ob-step1")?.classList.add("hidden");
-  document.getElementById("ob-step2")?.classList.remove("hidden");
+  finishOnboarding();
 }
 
+// Le choix du foyer se fait désormais AVANT cet écran (voir l'écran
+// "rejoindre un foyer" dans le bootstrap d'authentification) : cette
+// étape ne gère plus que le prénom/avatar.
 function initOnboarding() {
-  // Check URL param ?g=CODE pour invitation
-  const urlParams = new URLSearchParams(window.location.search);
-  const inviteCode = urlParams.get("g");
-  if (inviteCode) {
-    document.getElementById("ob-code").value = inviteCode.toUpperCase();
-  }
-
-  // Avatar picker
   document.querySelectorAll(".ob-av").forEach(btn => {
     btn.addEventListener("click", function() {
       document.querySelectorAll(".ob-av").forEach(b => b.classList.remove("sel"));
@@ -1225,102 +1224,17 @@ function initOnboarding() {
     const name = document.getElementById("ob-name").value.trim();
     if (!name || name.length < 2) { document.getElementById("ob-err").textContent = "Prénom trop court"; return; }
     state.name = name; state.avatar = obAvatar;
-    saveState();
-    document.getElementById("ob-step1")?.classList.add("hidden");
-    document.getElementById("ob-step2")?.classList.remove("hidden");
-  });
-
-  document.getElementById("ob-join-btn")?.addEventListener("click", () => joinGroup(document.getElementById("ob-code")?.value||""));
-  document.getElementById("ob-create-btn")?.addEventListener("click", () => {
-    const n = document.getElementById("ob-group-name")?.value.trim()||"";
-    if (!n) { document.getElementById("ob-err2").textContent = "Entre un nom de groupe"; return; }
-    createGroup(n);
-  });
-
-  document.getElementById("ob-finish-btn")?.addEventListener("click", finishOnboarding);
-  document.getElementById("ob-solo-btn")?.addEventListener("click", () => {
-    state.onboarded = true; saveState();
-    // Mode solo : pas de groupe, on passe directement
-    state.groupCode = null;
-    state.groupName = null;
-    saveState();
-    document.getElementById("ob-step2")?.classList.add("hidden");
     finishOnboarding();
-    showToast("Mode solo activé — tu pourras rejoindre un groupe plus tard !");
-  });
-}
-
-async function createGroup(name) {
-  const code = Array.from({length:6}, () => "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random()*32)]).join("");
-  if (firebaseReady) {
-    try {
-      await db.collection("groupes").doc(code).set({
-        code, name, admin: state.name,
-        members: [{ name: state.name, avatar: state.avatar }],
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    } catch(e) { console.log(e); }
-  }
-  state.groupCode = code; state.groupName = name; state.isAdmin = true;
-  saveState();
-  showStep3(code, name, true);
-}
-
-async function joinGroup(code, silent) {
-  code = code.toUpperCase().trim();
-  if (!code) { document.getElementById("ob-err2").textContent = "Entre un code"; return; }
-  if (firebaseReady) {
-    try {
-      const doc = await db.collection("groupes").doc(code).get();
-      if (!doc.exists) { document.getElementById("ob-err2").textContent = "Code invalide"; return; }
-      const data = doc.data();
-      const members = data.members || [];
-      if (!members.find(m => m.name === state.name)) {
-        members.push({ name: state.name, avatar: state.avatar });
-        await db.collection("groupes").doc(code).update({ members });
-      }
-      state.groupCode = code; state.groupName = data.name; state.isAdmin = (data.admin === state.name);
-      saveState();
-      if (silent) { showToast("Groupe " + data.name + " rejoint !"); loadGroupData(); renderGroupe(); }
-      else showStep3(code, data.name, false);
-      return;
-    } catch(e) { console.log(e); }
-  }
-  // Mode offline
-  state.groupCode = code; state.groupName = "Mon groupe"; state.isAdmin = false;
-  saveState();
-  if (silent) { showToast("Groupe rejoint !"); }
-  else showStep3(code, "Mon groupe", false);
-}
-
-function showStep3(code, name, isNew) {
-  document.getElementById("ob-step2")?.classList.add("hidden");
-  document.getElementById("ob-step3")?.classList.remove("hidden");
-  document.getElementById("ob-welcome-name").textContent = "Bienvenue " + state.name + " ! 👋";
-  const inviteUrl = "https://legeneral.org?g=" + code + "&from=" + encodeURIComponent(state.name||"quelqu'un");
-  document.getElementById("ob-invite-content").innerHTML = `
-    <div class="ob-invite-box">
-      <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">${isNew ? "Ton groupe" : "Groupe rejoint"}</div>
-      <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px;">${name}</div>
-      <div class="ob-invite-code">${code}</div>
-      <div class="ob-invite-sub">Partage ce lien à tes proches :</div>
-      <div style="font-size:11px;color:var(--yellow);margin-top:4px;word-break:break-all;">${inviteUrl}</div>
-    </div>
-    <button class="ob-btn" id="ob-copy-btn" style="margin-bottom:8px;">📤 Partager l'invitation</button>
-  `;
-  const prenom2 = state.name || "moi";
-  const obShareMsg = prenom2 + " t'invite sur Le General ! Meteo, agenda partage, qui dine ce soir et bien plus. Rejoins ici : " + inviteUrl;
-  document.getElementById("ob-copy-btn").addEventListener("click", () => {
-    openShareMenu(obShareMsg, inviteUrl);
   });
 }
 
 function finishOnboarding() {
   state.onboarded = true;
   saveState();
-  document.getElementById("ob-step3")?.classList.add("hidden");
+  document.getElementById("ob-step1")?.classList.add("hidden");
   startApp();
 }
+
 
 // ════════════════════════════════════════════
 // APP START
@@ -2231,41 +2145,73 @@ async function fetchPodcasts() {
 function renderGroupe() {
   const el = document.getElementById("groupe-panel");
   if(!el) return;
+  const memberships = AuthLogic.activeMemberships(state.memberships);
   const inviteUrl = "https://legeneral.org?g="+(state.groupCode||"")+"&from="+encodeURIComponent(state.name||"quelqu'un");
-  el.innerHTML = state.groupCode ? `
+
+  const householdsListHtml = memberships.length ? memberships.map(m => `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
+      <div style="flex:1;">
+        <div style="font-size:14px;font-weight:700;color:var(--text);">${m.code===state.groupCode?"🟢 ":""}${m.code}</div>
+        <div style="font-size:11px;color:var(--muted);">${m.role==="admin"?"Admin":"Membre"}</div>
+      </div>
+      ${m.code!==state.groupCode?`<button class="switch-household-btn" data-code="${m.code}" style="background:none;border:1px solid var(--border2);color:var(--muted);border-radius:16px;padding:6px 14px;font-family:var(--font);font-size:12px;cursor:pointer;">Basculer</button>`:""}
+    </div>`).join("") : `<div class="loading">Aucun foyer</div>`;
+
+  el.innerHTML = `
     <div class="groupe-card">
-      <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Groupe actif</div>
-      <div style="font-size:20px;font-weight:800;color:var(--text);margin-bottom:4px;">${state.groupName||"—"}</div>
+      <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Tes foyers</div>
+      ${householdsListHtml}
+    </div>
+    <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-top:12px;">
+      <div class="info-label">➕ Rejoindre un autre foyer</div>
+      <input id="join-other-code" type="text" maxlength="6" placeholder="Code du foyer (ex. 8W5D2B)" style="width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;font-family:var(--font);font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--text);margin-bottom:8px;">
+      <div id="join-other-msg" style="display:none;font-size:12px;margin-bottom:8px;"></div>
+      <button id="join-other-btn" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:12px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">Rejoindre</button>
+    </div>
+    ${state.groupCode ? `
+    <div class="groupe-card" style="margin-top:12px;">
+      <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Foyer affiché</div>
       <div style="font-size:18px;font-weight:800;color:var(--yellow);letter-spacing:.12em;margin-bottom:6px;">${state.groupCode}</div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Lien d'invitation :<br><span style="color:var(--yellow);font-size:11px;word-break:break-all;">${inviteUrl}</span></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <button id="copy-invite-btn" style="background:var(--yellow-light);border:1px solid rgba(247,193,4,.3);color:var(--yellow);border-radius:20px;padding:7px 16px;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;">📋 Copier le lien</button>
-        <button id="leave-group-btn" style="background:none;border:1px solid var(--border2);color:var(--muted);border-radius:20px;padding:7px 16px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;">Quitter</button>
       </div>
     </div>
-    <div id="membres-liste" style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;"><div class="info-label">Membres</div><div class="loading">Chargement...</div></div>
-    ${state.isAdmin ? `
-    <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-top:12px;">
-      <div class="info-label">➕ Ajouter un membre</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Crée un compte pour un proche — communique-lui ensuite l'email et le mot de passe toi-même.</div>
-      <input id="new-member-email" type="email" inputmode="email" placeholder="Email" style="width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;font-family:var(--font);font-size:14px;color:var(--text);margin-bottom:8px;">
-      <input id="new-member-password" type="text" placeholder="Mot de passe (6 caractères min.)" style="width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;font-family:var(--font);font-size:14px;color:var(--text);margin-bottom:8px;">
-      <div id="new-member-msg" style="display:none;font-size:12px;margin-bottom:8px;"></div>
-      <button id="add-member-btn" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:12px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">Créer le compte</button>
-    </div>` : ""}` 
-  : `<div class="groupe-card"><div class="loading">Aucun groupe — crée-en un lors de l'inscription</div></div>`;
+    <div id="membres-liste" style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-top:12px;"><div class="info-label">Membres</div><div class="loading">Chargement...</div></div>` : ""}`;
 
   setTimeout(()=>{
     const sb=document.getElementById("share-invite-btn");
     const cb=document.getElementById("copy-invite-btn");
-    const lb=document.getElementById("leave-group-btn");
     const prenom = state.name || "moi";
     const shareText = prenom + " t'invite sur Le General ! Metro, agenda partage, qui dine ce soir et bien plus. Rejoins ici : " + inviteUrl;
     if(sb) sb.onclick=()=>openShareMenu(shareText, inviteUrl);
     if(cb) cb.onclick=()=>navigator.clipboard.writeText(inviteUrl).then(()=>showToast("Lien copié !"));
-    if(lb) lb.onclick=()=>{if(confirm("Quitter le groupe ?")){state.groupCode=null;state.groupName=null;saveState();renderGroupe();}};
-    const amb = document.getElementById("add-member-btn");
-    if (amb) amb.onclick = handleAddMemberClick;
+
+    document.querySelectorAll(".switch-household-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        state.groupCode = btn.dataset.code;
+        state.isAdmin = AuthLogic.isHouseholdAdmin(state.memberships, state.groupCode);
+        saveState();
+        renderGroupe();
+        if (firebaseReady) loadGroupData();
+      });
+    });
+
+    const joinBtn = document.getElementById("join-other-btn");
+    if (joinBtn) joinBtn.onclick = async () => {
+      const codeEl = document.getElementById("join-other-code");
+      const msgEl = document.getElementById("join-other-msg");
+      const ok = await joinHouseholdByCode(codeEl?.value, msgEl, joinBtn);
+      if (ok) {
+        // Recharge les adhésions depuis Firestore pour refléter le nouveau foyer.
+        const memSnap = await db.collection("users").doc(firebase.auth().currentUser.uid).collection("memberships").get();
+        state.memberships = memSnap.docs.map(d => ({ code: d.id, ...d.data() }));
+        if (codeEl) codeEl.value = "";
+        if (msgEl) { msgEl.style.color = "var(--green)"; msgEl.textContent = "Foyer rejoint !"; msgEl.style.display = "block"; }
+        renderGroupe();
+      }
+    };
+
     if(state.groupCode&&firebaseReady) loadGroupMembers();
   },50);
 }
@@ -2282,83 +2228,6 @@ async function loadGroupMembers() {
       renderDiner();
     }
   } catch(e) { console.log(e); }
-}
-
-// ────────────────────────────────────────────
-// CRÉATION DE COMPTE MEMBRE (par un admin de foyer)
-// ────────────────────────────────────────────
-// Aucune inscription publique : c'est toujours un admin de foyer déjà
-// connecté qui saisit email + mot de passe pour un proche, puis les lui
-// communique lui-même (SMS, en personne...). Le foyer (householdId) est
-// pris automatiquement sur l'admin qui crée le compte — jamais choisi
-// par un tiers.
-//
-// Astuce technique : firebase.auth().createUserWithEmailAndPassword()
-// connecte automatiquement le nouveau compte sur l'app QUI L'APPELLE, ce
-// qui déconnecterait l'admin en train de créer le compte. On utilise donc
-// une 2e instance Firebase ("secondary"), isolée, pour créer le compte
-// sans jamais toucher à la session de l'admin sur l'instance principale.
-async function createMemberAccount(email, password) {
-  let secondaryApp = firebase.apps.find(a => a.name === "secondary");
-  if (!secondaryApp) secondaryApp = firebase.initializeApp(FB_CONFIG, "secondary");
-  const secondaryAuth = secondaryApp.auth();
-  try {
-    const cred = await secondaryAuth.createUserWithEmailAndPassword(email.trim(), password);
-    const newUid = cred.user.uid;
-    await secondaryAuth.signOut();
-    // Écriture faite depuis l'instance PRINCIPALE (db), donc avec la
-    // session de l'admin (request.auth.uid = l'admin) — c'est ce que
-    // vérifient les règles Firestore (isActiveHouseholdAdmin).
-    await db.collection("users").doc(newUid).set({
-      email: email.trim(),
-      householdId: state.groupCode,
-      role: "member",
-      status: "active",
-      isSuperAdmin: false,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-    });
-    return { ok: true, uid: newUid };
-  } catch (err) {
-    return { ok: false, error: err };
-  }
-}
-
-async function handleAddMemberClick() {
-  const emailEl = document.getElementById("new-member-email");
-  const passEl = document.getElementById("new-member-password");
-  const msgEl = document.getElementById("new-member-msg");
-  const btn = document.getElementById("add-member-btn");
-  const email = emailEl?.value || "";
-  const password = passEl?.value || "";
-
-  const check = AuthLogic.validateNewMemberForm(email, password);
-  if (msgEl) { msgEl.style.display = "none"; }
-  if (!check.valid) {
-    if (msgEl) {
-      msgEl.style.color = "var(--red)";
-      msgEl.textContent = check.errors.includes("email") ? "Email invalide." : "Mot de passe trop court (6 caractères minimum).";
-      msgEl.style.display = "block";
-    }
-    return;
-  }
-
-  if (btn) { btn.disabled = true; btn.textContent = "Création..."; }
-  const result = await createMemberAccount(email, password);
-  if (btn) { btn.disabled = false; btn.textContent = "Créer le compte"; }
-
-  if (result.ok) {
-    if (msgEl) {
-      msgEl.style.color = "var(--green)";
-      msgEl.textContent = `Compte créé ! Communique-lui : ${email.trim()} / ${password}`;
-      msgEl.style.display = "block";
-    }
-    if (emailEl) emailEl.value = "";
-    if (passEl) passEl.value = "";
-  } else if (msgEl) {
-    msgEl.style.color = "var(--red)";
-    msgEl.textContent = AuthLogic.createAccountErrorMessage(result.error?.code);
-    msgEl.style.display = "block";
-  }
 }
 
 // ════════════════════════════════════════════
@@ -5164,7 +5033,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.40";
+const APP_VERSION = "3.3.41";
 console.log("📦 Le Général v" + APP_VERSION);
 const footerVersionEl = document.getElementById("footer-version");
 if (footerVersionEl) footerVersionEl.textContent = "Le Général v" + APP_VERSION;
@@ -5194,9 +5063,9 @@ function proceedAfterAuth() {
   updateHeader();
   setInterval(updateHeader, 60000);
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const inviteCode = urlParams.get("g");
-  const inviteFrom = urlParams.get("from");
+  document.getElementById("ob-step2")?.classList.add("hidden");
+  document.getElementById("ob-step3")?.classList.add("hidden");
+  document.getElementById("ob-invite")?.classList.add("hidden");
 
   // Migration : les utilisateurs existants avec un nom sont considérés onboardés
   if (state.name && state.onboarded === undefined) {
@@ -5205,54 +5074,10 @@ function proceedAfterAuth() {
   }
 
   if (state.name && state.onboarded) {
-    // Utilisateur complet
     document.getElementById("ob-step1")?.classList.add("hidden");
-    document.getElementById("ob-step2")?.classList.add("hidden");
-    document.getElementById("ob-step3")?.classList.add("hidden");
-    document.getElementById("ob-invite")?.classList.add("hidden");
-    if (inviteCode && state.groupCode !== inviteCode.toUpperCase()) {
-      if (confirm((inviteFrom ? decodeURIComponent(inviteFrom) : "Quelqu\'un") + " t\'invite à rejoindre un groupe. Rejoindre ?")) {
-        joinGroup(inviteCode, true); // silencieux — pas d'écran onboarding
-      }
-    }
     startApp();
-  } else if (state.name && !state.onboarded) {
-    // Onboarding interrompu — reprend à l'étape 2 (groupe)
-    document.getElementById("ob-step1")?.classList.add("hidden");
-    document.getElementById("ob-invite")?.classList.add("hidden");
-    document.getElementById("ob-step2")?.classList.remove("hidden");
-    if (inviteCode) {
-      const codeEl = document.getElementById("ob-code");
-      if (codeEl) codeEl.value = inviteCode.toUpperCase();
-    }
-    initOnboarding();
-  } else if (inviteCode) {
-    // Nouvel utilisateur avec lien d'invitation
-    const from = inviteFrom ? decodeURIComponent(inviteFrom) : "quelqu\'un";
-    const inviteEl = document.getElementById("ob-invite");
-    const msgEl = document.getElementById("invite-msg");
-    const subEl = document.getElementById("invite-sub");
-    const codeEl = document.getElementById("ob-code");
-    const joinBtn = document.getElementById("invite-join-btn");
-
-    if (msgEl) msgEl.textContent = from + " t\'invite à rejoindre Le QG !";
-    if (subEl) subEl.innerHTML = `<strong>${from}</strong> partage avec toi son QG — agenda, météo, dîner du soir, et bien plus.<br><br>Crée ton profil en 30 secondes.`;
-    if (codeEl) codeEl.value = inviteCode.toUpperCase();
-
-    if (inviteEl) {
-      document.getElementById("ob-step1")?.classList.add("hidden");
-      inviteEl.classList.remove("hidden");
-      if (joinBtn) joinBtn.addEventListener("click", () => {
-        inviteEl.classList.add("hidden");
-        document.getElementById("ob-step1")?.classList.remove("hidden");
-        initOnboarding();
-      });
-    } else {
-      document.getElementById("ob-step1")?.classList.remove("hidden");
-      initOnboarding();
-    }
   } else {
-    document.getElementById("ob-invite")?.classList.add("hidden");
+    document.getElementById("ob-step1")?.classList.remove("hidden");
     initOnboarding();
   }
 
@@ -5273,33 +5098,93 @@ function hideSplash() {
 // ════════════════════════════════════════════
 // AUTHENTIFICATION (Firebase Auth email/mot de passe)
 // ════════════════════════════════════════════
-// Aucune inscription publique : les comptes sont créés manuellement dans la
-// Firebase Console par l'administrateur, avec un document users/{uid}
-// correspondant (householdId, role, status). Voir docs/architecture/authentification.md.
+// Inscription libre (self-service) : n'importe qui peut créer son compte,
+// mais rejoindre un foyer nécessite toujours d'en connaître le code à 6
+// caractères (barrière fonctionnelle, comme avant la sécurisation — ce
+// qui change, c'est que chaque personne a désormais une vraie identité).
+// Un même compte peut rejoindre PLUSIEURS foyers. Voir
+// docs/architecture/authentification.md et firestore.rules.
 
 function showAuthScreen(name) {
-  ["login-screen", "access-denied-screen"].forEach(id => {
+  ["login-screen", "join-household-screen"].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = (id === name ? "flex" : "none");
   });
   if (name) hideSplash();
 }
 
+let loginMode = "login"; // "login" | "signup"
+
+function setLoginMode(mode) {
+  loginMode = mode;
+  const subtitle = document.getElementById("login-subtitle");
+  const submitBtn = document.getElementById("login-submit-btn");
+  const toggleBtn = document.getElementById("login-mode-toggle-btn");
+  const forgotBtn = document.getElementById("login-forgot-btn");
+  if (mode === "signup") {
+    if (subtitle) subtitle.textContent = "Crée ton compte pour rejoindre un foyer";
+    if (submitBtn) submitBtn.textContent = "Créer mon compte";
+    if (toggleBtn) toggleBtn.textContent = "Déjà un compte ? Connecte-toi";
+    if (forgotBtn) forgotBtn.style.display = "none";
+  } else {
+    if (subtitle) subtitle.textContent = "Connecte-toi pour accéder à tes foyers";
+    if (submitBtn) submitBtn.textContent = "Se connecter";
+    if (toggleBtn) toggleBtn.textContent = "Pas encore de compte ? Crée-toi en un";
+    if (forgotBtn) forgotBtn.style.display = "block";
+  }
+  const errEl = document.getElementById("login-error");
+  const resetMsgEl = document.getElementById("login-reset-msg");
+  if (errEl) errEl.style.display = "none";
+  if (resetMsgEl) resetMsgEl.style.display = "none";
+}
+
 function wireLoginForm() {
   const form = document.getElementById("login-form");
   const errEl = document.getElementById("login-error");
   if (!form) return;
+
+  document.getElementById("login-mode-toggle-btn")?.addEventListener("click", () => {
+    setLoginMode(loginMode === "login" ? "signup" : "login");
+  });
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (errEl) errEl.style.display = "none";
     const email = document.getElementById("login-email")?.value || "";
     const password = document.getElementById("login-password")?.value || "";
+    const btn = document.getElementById("login-submit-btn");
+
+    if (loginMode === "signup") {
+      const check = AuthLogic.validateSignupForm(email, password);
+      if (!check.valid) {
+        if (errEl) {
+          errEl.textContent = check.errors.includes("email") ? "Email invalide." : "Mot de passe trop court (6 caractères minimum).";
+          errEl.style.display = "block";
+        }
+        return;
+      }
+      if (btn) { btn.disabled = true; btn.textContent = "Création..."; }
+      try {
+        const cred = await firebase.auth().createUserWithEmailAndPassword(email.trim(), password);
+        await db.collection("users").doc(cred.user.uid).set({
+          email: email.trim(),
+          isSuperAdmin: false,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+        // onAuthStateChanged prend le relais automatiquement (écran "rejoindre un foyer").
+      } catch (err) {
+        if (errEl) { errEl.textContent = AuthLogic.signupErrorMessage(err.code); errEl.style.display = "block"; }
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = "Créer mon compte"; }
+      }
+      return;
+    }
+
     const check = AuthLogic.validateLoginForm(email, password);
     if (!check.valid) {
       if (errEl) { errEl.textContent = "Email et mot de passe requis."; errEl.style.display = "block"; }
       return;
     }
-    const btn = document.getElementById("login-submit-btn");
     if (btn) { btn.disabled = true; btn.textContent = "Connexion..."; }
     try {
       await firebase.auth().signInWithEmailAndPassword(email.trim(), password);
@@ -5309,9 +5194,6 @@ function wireLoginForm() {
     } finally {
       if (btn) { btn.disabled = false; btn.textContent = "Se connecter"; }
     }
-  });
-  document.getElementById("access-denied-logout-btn")?.addEventListener("click", () => {
-    firebase.auth().signOut().catch(e => console.log("signOut error:", e.message));
   });
 
   const resetMsgEl = document.getElementById("login-reset-msg");
@@ -5323,14 +5205,12 @@ function wireLoginForm() {
       if (errEl) { errEl.textContent = "Renseigne d'abord ton email ci-dessus, puis clique sur \"Mot de passe oublié ?\"."; errEl.style.display = "block"; }
       return;
     }
-    const btn = document.getElementById("login-forgot-btn");
-    if (btn) { btn.disabled = true; }
+    const fbtn = document.getElementById("login-forgot-btn");
+    if (fbtn) { fbtn.disabled = true; }
     try {
       await firebase.auth().sendPasswordResetEmail(email.trim());
       if (resetMsgEl) { resetMsgEl.textContent = "Email envoyé (si ce compte existe) — vérifie ta boîte de réception."; resetMsgEl.style.display = "block"; }
     } catch (err) {
-      // Même message qu'un succès si le compte n'existe pas, pour ne pas
-      // permettre l'énumération de comptes existants.
       if (err.code === "auth/user-not-found") {
         if (resetMsgEl) { resetMsgEl.textContent = "Email envoyé (si ce compte existe) — vérifie ta boîte de réception."; resetMsgEl.style.display = "block"; }
       } else if (errEl) {
@@ -5338,53 +5218,117 @@ function wireLoginForm() {
         errEl.style.display = "block";
       }
     } finally {
-      if (btn) { btn.disabled = false; }
+      if (fbtn) { fbtn.disabled = false; }
     }
   });
 }
 
+// Rejoint un foyer existant en créant users/{uid}/memberships/{code}
+// (toujours role: "member" — voir firestore.rules). Réutilisé par
+// l'écran "rejoindre un foyer" (aucune adhésion active) ET par le
+// sélecteur de foyers dans Mon QG (rejoindre un foyer SUPPLÉMENTAIRE).
+async function joinHouseholdByCode(rawCode, msgEl, btn) {
+  const code = String(rawCode || "").trim().toUpperCase();
+  if (msgEl) msgEl.style.display = "none";
+  if (!AuthLogic.isValidHouseholdCode(code)) {
+    if (msgEl) { msgEl.style.color = "var(--red)"; msgEl.textContent = "Code invalide (6 caractères attendus)."; msgEl.style.display = "block"; }
+    return false;
+  }
+  if (btn) { btn.disabled = true; }
+  try {
+    const groupDoc = await db.collection("groupes").doc(code).get();
+    if (!groupDoc.exists) {
+      if (msgEl) { msgEl.style.color = "var(--red)"; msgEl.textContent = "Aucun foyer ne correspond à ce code."; msgEl.style.display = "block"; }
+      return false;
+    }
+    const uid = firebase.auth().currentUser.uid;
+    await db.collection("users").doc(uid).collection("memberships").doc(code).set({
+      role: "member",
+      status: "active",
+      joinedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    return true;
+  } catch (err) {
+    if (msgEl) { msgEl.style.color = "var(--red)"; msgEl.textContent = "Erreur — réessaie dans un instant."; msgEl.style.display = "block"; }
+    console.log("joinHouseholdByCode error:", err.message);
+    return false;
+  } finally {
+    if (btn) { btn.disabled = false; }
+  }
+}
+
+function wireJoinHouseholdForm() {
+  const form = document.getElementById("join-household-form");
+  if (!form) return;
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const codeEl = document.getElementById("join-household-code");
+    const msgEl = document.getElementById("join-household-error");
+    const btn = document.getElementById("join-household-submit-btn");
+    const ok = await joinHouseholdByCode(codeEl?.value, msgEl, btn);
+    if (ok) {
+      handleAuthStateChange(firebase.auth().currentUser);
+    }
+  });
+  document.getElementById("join-household-logout-btn")?.addEventListener("click", () => {
+    firebase.auth().signOut().catch(e => console.log("signOut error:", e.message));
+  });
+
+  const urlCode = new URLSearchParams(window.location.search).get("g");
+  if (urlCode) {
+    const codeEl = document.getElementById("join-household-code");
+    if (codeEl) codeEl.value = urlCode.toUpperCase();
+  }
+}
+
 // Appelé à chaque changement d'état d'authentification Firebase (connexion,
-// déconnexion, restauration de session au rafraîchissement, expiration).
+// inscription, déconnexion, restauration de session, expiration), et
+// rejoué manuellement après avoir rejoint un foyer.
 async function handleAuthStateChange(user) {
   if (!user) {
-    state.groupCode = null; state.isAdmin = false; state.isSuperAdmin = false;
+    state.groupCode = null; state.isAdmin = false; state.isSuperAdmin = false; state.memberships = [];
+    setLoginMode("login");
     showAuthScreen("login-screen");
     return;
   }
 
   let userDoc = null;
+  let memberships = [];
   try {
     const snap = await db.collection("users").doc(user.uid).get();
     userDoc = snap.exists ? snap.data() : null;
+    const memSnap = await db.collection("users").doc(user.uid).collection("memberships").get();
+    memberships = memSnap.docs.map(d => ({ code: d.id, ...d.data() }));
   } catch (e) {
-    console.log("users lookup error:", e.message);
+    console.log("users/memberships lookup error:", e.message);
   }
 
   const hasProfile = !!(state.name && state.onboarded);
-  const screen = AuthLogic.resolveScreen({ uid: user.uid }, userDoc, hasProfile);
+  const screen = AuthLogic.resolveScreen({ uid: user.uid }, userDoc, memberships, hasProfile);
 
-  if (screen === "access-denied") {
-    state.groupCode = null; state.isAdmin = false; state.isSuperAdmin = false;
-    showAuthScreen("access-denied-screen");
+  state.memberships = memberships;
+  state.isSuperAdmin = AuthLogic.isSuperAdmin(userDoc);
+
+  if (screen === "join-household") {
+    state.groupCode = null; state.isAdmin = false;
+    saveState();
+    showAuthScreen("join-household-screen");
     return;
   }
 
-  // Autorisé : le foyer, le rôle de foyer ET le statut super-admin
-  // viennent tous du même document Firestore users/{uid} — source de
-  // vérité unique, une seule lecture réseau.
-  state.groupCode = userDoc.householdId;
-  state.groupName = state.groupName || null;
-  state.isAdmin = AuthLogic.isHouseholdAdmin(userDoc);
-  state.isSuperAdmin = AuthLogic.isSuperAdmin(userDoc);
+  const activeCode = AuthLogic.pickActiveHousehold(memberships, state.groupCode);
+  state.groupCode = activeCode;
+  state.isAdmin = AuthLogic.isHouseholdAdmin(memberships, activeCode);
   saveState();
 
-  showAuthScreen(null); // masque login/access-denied
+  showAuthScreen(null);
   proceedAfterAuth();
 }
 
 document.addEventListener("DOMContentLoaded", function() {
   initFirebase();
   wireLoginForm();
+  wireJoinHouseholdForm();
   firebase.auth().onAuthStateChanged(handleAuthStateChange);
 });
 
