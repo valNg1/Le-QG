@@ -9,9 +9,6 @@ service cloud.firestore {
     }
 
     // Un utilisateur connecté est-il membre actif du foyer "code" ?
-    // Chaque adhésion est un document séparé (users/{uid}/memberships/{code})
-    // plutôt qu'un champ dans une map : plus simple et plus sûr à
-    // raisonner dans des règles (pas de diff de map à valider).
     function isActiveHouseholdMember(code) {
       return request.auth != null &&
         exists(/databases/$(database)/documents/users/$(request.auth.uid)/memberships/$(code)) &&
@@ -53,35 +50,81 @@ service cloud.firestore {
       allow delete: if false;
 
       // ─── users/{uid}/memberships/{code} ──────────────────────────
-      // Une adhésion à un foyer = un document. Rejoindre un foyer
-      // EXISTANT est self-service, mais toujours en tant que "member" —
-      // impossible de s'auto-attribuer "admin" par ce chemin (le rôle
-      // admin d'un foyer reste attribué à la main, Firestore Console,
-      // ou par un futur flux dédié). Aucune modification ni suppression
-      // client une fois créée (quitter un groupe = hors périmètre de ce
-      // sprint).
+      // Une adhésion active à un foyer = un document. AUCUNE création ni
+      // modification directe par le titulaire ou un tiers quelconque :
+      // seule l'approbation d'une demande (par un admin du foyer
+      // concerné) peut créer ou activer une adhésion, et toujours avec
+      // role "member" — jamais "admin" par ce chemin (attribution admin
+      // = geste manuel Console, voir runbook.md). Le titulaire peut
+      // seulement LIRE ses propres adhésions.
       match /memberships/{code} {
         allow read: if request.auth != null && request.auth.uid == uid;
 
-        allow create: if request.auth != null && request.auth.uid == uid &&
-          exists(/databases/$(database)/documents/groupes/$(code)) &&
+        allow create, update: if request.auth != null &&
+          isActiveHouseholdAdmin(code) &&
           request.resource.data.role == 'member' &&
-          request.resource.data.status == 'active';
+          (request.resource.data.status == 'active' || request.resource.data.status == 'disabled');
 
-        allow update, delete: if false;
+        allow delete: if false;
       }
+    }
+
+    // ─── {any}/membershipRequests/{code} (collection group) ─────────
+    // Une demande d'adhésion = un document sous users/{uid}/membershipRequests/{code},
+    // mais interrogée en "collection group" (tous utilisateurs confondus)
+    // par un admin de foyer qui doit voir les demandes le concernant.
+    // Champs attendus : { uid, code, status: "pending"|"approved"|"rejected", requestedAt }.
+    // uid et code sont dupliqués dans le document (en plus du chemin) car
+    // une requête "collection group" ne peut pas facilement filtrer sur
+    // les segments du chemin — seulement sur des champs.
+    match /{path=**}/membershipRequests/{reqId} {
+      // Le demandeur peut lire ses propres demandes (statut de sa demande).
+      allow read: if request.auth != null && request.auth.uid == resource.data.uid;
+      // Un admin (ou super-admin) du foyer concerné peut lire les
+      // demandes qui LUI sont adressées (liste des demandes en attente).
+      allow read: if isActiveHouseholdAdmin(resource.data.code) || isSuperAdmin();
+
+      // Créer sa PROPRE demande, uniquement "pending", uniquement pour un
+      // foyer qui existe déjà, uniquement si on n'a pas déjà une adhésion
+      // active pour ce foyer (évite les demandes redondantes), et l'ID du
+      // document doit correspondre au code visé (cohérence chemin/champ).
+      allow create: if request.auth != null &&
+        request.auth.uid == request.resource.data.uid &&
+        reqId == request.resource.data.code &&
+        request.resource.data.status == 'pending' &&
+        exists(/databases/$(database)/documents/groupes/$(request.resource.data.code)) &&
+        !isActiveHouseholdMember(request.resource.data.code);
+
+      // Faire évoluer une demande (accepter/refuser) : réservé à un admin
+      // du foyer concerné — JAMAIS le demandeur lui-même, même s'il
+      // devient admin par ailleurs entre-temps (uid/code ne peuvent pas
+      // changer, seul le statut peut passer à approved/rejected).
+      allow update: if isActiveHouseholdAdmin(resource.data.code) &&
+        request.auth.uid != resource.data.uid &&
+        request.resource.data.uid == resource.data.uid &&
+        request.resource.data.code == resource.data.code &&
+        request.resource.data.status in ['approved', 'rejected'];
+
+      allow delete: if isActiveHouseholdAdmin(resource.data.code) || isSuperAdmin();
     }
 
     // ─── groupes/{code} ──────────────────────────────────────────────
     match /groupes/{code} {
-      // Un membre actif du foyer peut lire/modifier son propre foyer.
-      // Le super-admin peut lire n'importe quel foyer (panneau
-      // d'administration global) et le suspendre/réactiver.
+      // Un membre actif du foyer peut LIRE son propre foyer. Le
+      // super-admin peut lire n'importe quel foyer (panneau global).
       allow get: if isActiveHouseholdMember(code) || isSuperAdmin();
       allow list: if isSuperAdmin(); // liste complète réservée au panneau admin global
-      allow update: if isActiveHouseholdMember(code) || isSuperAdmin();
+
+      // MODIFIER le document principal du foyer : réservé à un admin
+      // actif de CE foyer, ou au super-admin. Un simple membre ne peut
+      // plus écrire dessus (durci suite à revue sécurité).
+      allow update: if isActiveHouseholdAdmin(code) || isSuperAdmin();
+
       allow create, delete: if false; // création de foyer : hors périmètre de ce sprint (Console)
 
+      // Sous-collections métier : accessibles à tout membre actif
+      // (lecture ET écriture), inchangé — c'est là que vit l'usage
+      // quotidien (agenda, mur, dîner), pas sur le document principal.
       match /events/{eventId} {
         allow read, write: if isActiveHouseholdMember(code);
       }

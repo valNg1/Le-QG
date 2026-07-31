@@ -404,13 +404,21 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
 <div id="join-household-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:6000;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;">
   <div style="font-size:44px;margin-bottom:16px;">🏠</div>
   <div style="font-size:20px;font-weight:800;color:var(--text);margin-bottom:8px;">Rejoins un foyer</div>
-  <div style="font-size:14px;color:var(--muted);line-height:1.5;max-width:300px;margin-bottom:24px;">Demande le code à 6 caractères à un membre déjà présent dans le foyer.</div>
+  <div style="font-size:14px;color:var(--muted);line-height:1.5;max-width:300px;margin-bottom:24px;">Demande le code à 6 caractères à un membre déjà présent dans le foyer. Un admin devra approuver ta demande.</div>
   <form id="join-household-form" style="width:100%;max-width:280px;">
     <input id="join-household-code" type="text" maxlength="6" placeholder="Ex: 8W5D2B" style="width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;font-family:var(--font);font-size:16px;letter-spacing:.1em;text-align:center;text-transform:uppercase;color:var(--text);margin-bottom:10px;">
     <div id="join-household-error" style="display:none;color:var(--red);font-size:13px;margin-bottom:12px;"></div>
-    <button id="join-household-submit-btn" type="submit" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:14px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;">Rejoindre</button>
+    <button id="join-household-submit-btn" type="submit" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:14px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;">Envoyer la demande</button>
   </form>
   <button id="join-household-logout-btn" style="background:none;border:none;color:var(--muted);font-family:var(--font);font-size:13px;cursor:pointer;padding:16px 0 0;">Se déconnecter</button>
+</div>
+
+<!-- ÉCRAN DEMANDE EN ATTENTE (une demande "pending" existe, aucune adhésion active) -->
+<div id="pending-approval-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:6000;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;">
+  <div style="font-size:44px;margin-bottom:16px;">⏳</div>
+  <div style="font-size:20px;font-weight:800;color:var(--text);margin-bottom:8px;">Demande en attente</div>
+  <div id="pending-approval-detail" style="font-size:14px;color:var(--muted);line-height:1.5;max-width:300px;margin-bottom:24px;">Un admin du foyer doit approuver ta demande avant que tu puisses accéder à l'app.</div>
+  <button id="pending-approval-logout-btn" style="background:none;border:none;color:var(--muted);font-family:var(--font);font-size:13px;cursor:pointer;">Se déconnecter</button>
 </div>
 
 <div id="app-splash" style="position:fixed;inset:0;z-index:99999;background:#F7C104;display:flex;flex-direction:column;align-items:center;justify-content:center;-webkit-text-size-adjust:none;text-size-adjust:none;">
@@ -2146,6 +2154,7 @@ function renderGroupe() {
   const el = document.getElementById("groupe-panel");
   if(!el) return;
   const memberships = AuthLogic.activeMemberships(state.memberships);
+  const myAdminCodes = memberships.filter(m => m.role === "admin").map(m => m.code);
   const inviteUrl = "https://legeneral.org?g="+(state.groupCode||"")+"&from="+encodeURIComponent(state.name||"quelqu'un");
 
   const householdsListHtml = memberships.length ? memberships.map(m => `
@@ -2164,10 +2173,16 @@ function renderGroupe() {
     </div>
     <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-top:12px;">
       <div class="info-label">➕ Rejoindre un autre foyer</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Ta demande devra être approuvée par un admin de ce foyer.</div>
       <input id="join-other-code" type="text" maxlength="6" placeholder="Code du foyer (ex. 8W5D2B)" style="width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;font-family:var(--font);font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--text);margin-bottom:8px;">
       <div id="join-other-msg" style="display:none;font-size:12px;margin-bottom:8px;"></div>
-      <button id="join-other-btn" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:12px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">Rejoindre</button>
+      <button id="join-other-btn" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:12px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">Envoyer la demande</button>
     </div>
+    ${myAdminCodes.length ? `
+    <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-top:12px;">
+      <div class="info-label">📥 Demandes en attente</div>
+      <div id="pending-requests-list"><div class="loading">Chargement...</div></div>
+    </div>` : ""}
     ${state.groupCode ? `
     <div class="groupe-card" style="margin-top:12px;">
       <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Foyer affiché</div>
@@ -2201,19 +2216,82 @@ function renderGroupe() {
     if (joinBtn) joinBtn.onclick = async () => {
       const codeEl = document.getElementById("join-other-code");
       const msgEl = document.getElementById("join-other-msg");
-      const ok = await joinHouseholdByCode(codeEl?.value, msgEl, joinBtn);
+      const ok = await submitJoinRequest(codeEl?.value, msgEl, joinBtn);
       if (ok) {
-        // Recharge les adhésions depuis Firestore pour refléter le nouveau foyer.
-        const memSnap = await db.collection("users").doc(firebase.auth().currentUser.uid).collection("memberships").get();
-        state.memberships = memSnap.docs.map(d => ({ code: d.id, ...d.data() }));
         if (codeEl) codeEl.value = "";
-        if (msgEl) { msgEl.style.color = "var(--green)"; msgEl.textContent = "Foyer rejoint !"; msgEl.style.display = "block"; }
-        renderGroupe();
+        if (msgEl) { msgEl.style.color = "var(--green)"; msgEl.textContent = "Demande envoyée — en attente de validation par un admin du foyer."; msgEl.style.display = "block"; }
       }
     };
 
+    if (myAdminCodes.length) loadPendingRequests(myAdminCodes);
     if(state.groupCode&&firebaseReady) loadGroupMembers();
   },50);
+}
+
+// Charge les demandes d'adhésion "pending" pour les foyers dont l'utilisateur
+// courant est admin (requête "collection group" sur membershipRequests —
+// voir firestore.rules pour la règle qui l'autorise).
+async function loadPendingRequests(adminCodes) {
+  const el = document.getElementById("pending-requests-list");
+  if (!el || !firebaseReady) return;
+  try {
+    const results = await Promise.all(adminCodes.map(code =>
+      db.collectionGroup("membershipRequests")
+        .where("code", "==", code)
+        .where("status", "==", "pending")
+        .get()
+    ));
+    const allRequests = [];
+    results.forEach(snap => snap.forEach(doc => allRequests.push({ id: doc.id, ...doc.data() })));
+
+    if (!allRequests.length) {
+      el.innerHTML = `<div style="font-size:12px;color:var(--muted);padding:8px 0;">Aucune demande en attente</div>`;
+      return;
+    }
+    el.innerHTML = allRequests.map(r => `
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:700;color:var(--text);">${r.uid.slice(0,8)}…</div>
+          <div style="font-size:11px;color:var(--muted);">Foyer ${r.code}</div>
+        </div>
+        <button class="approve-request-btn" data-uid="${r.uid}" data-code="${r.code}" style="background:var(--green);color:#fff;border:none;border-radius:16px;padding:6px 12px;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;">✓</button>
+        <button class="reject-request-btn" data-uid="${r.uid}" data-code="${r.code}" style="background:none;border:1px solid var(--border2);color:var(--muted);border-radius:16px;padding:6px 12px;font-family:var(--font);font-size:12px;cursor:pointer;">✕</button>
+      </div>`).join("");
+
+    document.querySelectorAll(".approve-request-btn").forEach(btn => {
+      btn.addEventListener("click", () => handleRequestDecision(btn.dataset.uid, btn.dataset.code, "approved"));
+    });
+    document.querySelectorAll(".reject-request-btn").forEach(btn => {
+      btn.addEventListener("click", () => handleRequestDecision(btn.dataset.uid, btn.dataset.code, "rejected"));
+    });
+  } catch (e) {
+    console.log("loadPendingRequests error:", e.message);
+    el.innerHTML = `<div style="font-size:12px;color:var(--red);padding:8px 0;">Erreur de chargement</div>`;
+  }
+}
+
+// Traite une décision (approuver/refuser) prise par un admin sur une
+// demande d'un AUTRE utilisateur. L'admin ne peut jamais traiter sa
+// propre demande (vérifié aussi côté règles Firestore).
+async function handleRequestDecision(requesterUid, code, decision) {
+  const myUid = firebase.auth().currentUser.uid;
+  if (!AuthLogic.canApproveRequest(state.memberships, myUid, requesterUid, code)) {
+    showToast("Action non autorisée");
+    return;
+  }
+  try {
+    if (decision === "approved") {
+      const payload = AuthLogic.buildApprovedMembershipPayload();
+      await db.collection("users").doc(requesterUid).collection("memberships").doc(code).set(payload);
+    }
+    await db.collection("users").doc(requesterUid).collection("membershipRequests").doc(code).update({ status: decision });
+    showToast(decision === "approved" ? "Demande approuvée" : "Demande refusée");
+    const myAdminCodes = AuthLogic.activeMemberships(state.memberships).filter(m => m.role === "admin").map(m => m.code);
+    loadPendingRequests(myAdminCodes);
+  } catch (e) {
+    console.log("handleRequestDecision error:", e.message);
+    showToast("Erreur — réessaie");
+  }
 }
 
 async function loadGroupMembers() {
@@ -2223,8 +2301,8 @@ async function loadGroupMembers() {
     if(doc.exists) {
       const members = doc.data().members||[];
       state._groupMembers = members;
-      const el=document.getElementById("membres-liste");
-      if(el) el.innerHTML=`<div class="info-label">Membres (${members.length})</div>`+members.map(m=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:22px">${m.avatar}</span><span style="font-size:13px;font-weight:600;color:var(--text)">${m.name}</span>${m.name===state.name?`<span style="font-size:11px;color:var(--yellow);font-weight:600;margin-left:auto;">Toi</span>`:""}</div>`).join("");
+      const membersEl=document.getElementById("membres-liste");
+      if(membersEl) membersEl.innerHTML=`<div class="info-label">Membres (${members.length})</div>`+members.map(m=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:22px">${m.avatar}</span><span style="font-size:13px;font-weight:600;color:var(--text)">${m.name}</span>${m.name===state.name?`<span style="font-size:11px;color:var(--yellow);font-weight:600;margin-left:auto;">Toi</span>`:""}</div>`).join("");
       renderDiner();
     }
   } catch(e) { console.log(e); }
@@ -5033,7 +5111,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.41";
+const APP_VERSION = "3.3.42";
 console.log("📦 Le Général v" + APP_VERSION);
 const footerVersionEl = document.getElementById("footer-version");
 if (footerVersionEl) footerVersionEl.textContent = "Le Général v" + APP_VERSION;
@@ -5106,7 +5184,7 @@ function hideSplash() {
 // docs/architecture/authentification.md et firestore.rules.
 
 function showAuthScreen(name) {
-  ["login-screen", "join-household-screen"].forEach(id => {
+  ["login-screen", "join-household-screen", "pending-approval-screen"].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = (id === name ? "flex" : "none");
   });
@@ -5227,7 +5305,11 @@ function wireLoginForm() {
 // (toujours role: "member" — voir firestore.rules). Réutilisé par
 // l'écran "rejoindre un foyer" (aucune adhésion active) ET par le
 // sélecteur de foyers dans Mon QG (rejoindre un foyer SUPPLÉMENTAIRE).
-async function joinHouseholdByCode(rawCode, msgEl, btn) {
+// Envoie une DEMANDE d'adhésion (jamais une adhésion directe — voir revue
+// sécurité du 27/07/2026). Réutilisé par l'écran "rejoindre un foyer"
+// (aucune adhésion active) ET par le formulaire équivalent dans Mon QG
+// (rejoindre un foyer SUPPLÉMENTAIRE).
+async function submitJoinRequest(rawCode, msgEl, btn) {
   const code = String(rawCode || "").trim().toUpperCase();
   if (msgEl) msgEl.style.display = "none";
   if (!AuthLogic.isValidHouseholdCode(code)) {
@@ -5242,15 +5324,15 @@ async function joinHouseholdByCode(rawCode, msgEl, btn) {
       return false;
     }
     const uid = firebase.auth().currentUser.uid;
-    await db.collection("users").doc(uid).collection("memberships").doc(code).set({
-      role: "member",
-      status: "active",
-      joinedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    const payload = AuthLogic.buildJoinRequestPayload(uid, code);
+    await db.collection("users").doc(uid).collection("membershipRequests").doc(code).set({
+      ...payload,
+      requestedAt: firebase.firestore.FieldValue.serverTimestamp(),
     });
     return true;
   } catch (err) {
     if (msgEl) { msgEl.style.color = "var(--red)"; msgEl.textContent = "Erreur — réessaie dans un instant."; msgEl.style.display = "block"; }
-    console.log("joinHouseholdByCode error:", err.message);
+    console.log("submitJoinRequest error:", err.message);
     return false;
   } finally {
     if (btn) { btn.disabled = false; }
@@ -5265,12 +5347,15 @@ function wireJoinHouseholdForm() {
     const codeEl = document.getElementById("join-household-code");
     const msgEl = document.getElementById("join-household-error");
     const btn = document.getElementById("join-household-submit-btn");
-    const ok = await joinHouseholdByCode(codeEl?.value, msgEl, btn);
+    const ok = await submitJoinRequest(codeEl?.value, msgEl, btn);
     if (ok) {
       handleAuthStateChange(firebase.auth().currentUser);
     }
   });
   document.getElementById("join-household-logout-btn")?.addEventListener("click", () => {
+    firebase.auth().signOut().catch(e => console.log("signOut error:", e.message));
+  });
+  document.getElementById("pending-approval-logout-btn")?.addEventListener("click", () => {
     firebase.auth().signOut().catch(e => console.log("signOut error:", e.message));
   });
 
@@ -5283,7 +5368,8 @@ function wireJoinHouseholdForm() {
 
 // Appelé à chaque changement d'état d'authentification Firebase (connexion,
 // inscription, déconnexion, restauration de session, expiration), et
-// rejoué manuellement après avoir rejoint un foyer.
+// rejoué manuellement après avoir envoyé une demande ou traité une
+// approbation.
 async function handleAuthStateChange(user) {
   if (!user) {
     state.groupCode = null; state.isAdmin = false; state.isSuperAdmin = false; state.memberships = [];
@@ -5294,25 +5380,41 @@ async function handleAuthStateChange(user) {
 
   let userDoc = null;
   let memberships = [];
+  let requests = [];
   try {
     const snap = await db.collection("users").doc(user.uid).get();
     userDoc = snap.exists ? snap.data() : null;
     const memSnap = await db.collection("users").doc(user.uid).collection("memberships").get();
     memberships = memSnap.docs.map(d => ({ code: d.id, ...d.data() }));
+    const reqSnap = await db.collection("users").doc(user.uid).collection("membershipRequests").get();
+    requests = reqSnap.docs.map(d => ({ code: d.id, ...d.data() }));
   } catch (e) {
-    console.log("users/memberships lookup error:", e.message);
+    console.log("users/memberships/membershipRequests lookup error:", e.message);
   }
 
   const hasProfile = !!(state.name && state.onboarded);
-  const screen = AuthLogic.resolveScreen({ uid: user.uid }, userDoc, memberships, hasProfile);
+  const screen = AuthLogic.resolveScreen({ uid: user.uid }, userDoc, memberships, requests, hasProfile);
 
   state.memberships = memberships;
+  state.pendingRequests = requests;
   state.isSuperAdmin = AuthLogic.isSuperAdmin(userDoc);
 
   if (screen === "join-household") {
     state.groupCode = null; state.isAdmin = false;
     saveState();
     showAuthScreen("join-household-screen");
+    return;
+  }
+
+  if (screen === "pending-approval") {
+    state.groupCode = null; state.isAdmin = false;
+    saveState();
+    const pending = AuthLogic.pendingRequests(requests);
+    const detailEl = document.getElementById("pending-approval-detail");
+    if (detailEl && pending.length) {
+      detailEl.textContent = "Ta demande pour rejoindre le foyer " + pending.map(r => r.code).join(", ") + " est en attente de validation par un admin.";
+    }
+    showAuthScreen("pending-approval-screen");
     return;
   }
 

@@ -6,10 +6,13 @@
 // sans émulateur Firestore, ET chargées telles quelles dans index.html.
 // Une seule source de vérité : ce qui est testé est ce qui tourne en prod.
 //
-// Modèle : inscription libre (self-service), appartenance à PLUSIEURS
-// foyers possible. Chaque adhésion vit dans users/{uid}/memberships/{code}
-// (voir firestore.rules) ; ici on manipule ces adhésions sous forme d'un
-// tableau simple [{code, role, status}, ...].
+// Modèle (v3, revue sécurité du 27/07/2026) : inscription libre
+// (self-service), mais REJOINDRE un foyer passe par une DEMANDE
+// d'adhésion (users/{uid}/membershipRequests/{code}, status "pending"),
+// jamais une adhésion directe. Seul un admin du foyer peut approuver
+// (users/{uid}/memberships/{code}, toujours role "member" via ce
+// chemin — voir firestore.rules). Un compte peut appartenir à
+// PLUSIEURS foyers.
 
 (function (root, factory) {
   if (typeof module === "object" && module.exports) {
@@ -24,20 +27,29 @@
     return (memberships || []).filter(m => m && m.status === "active");
   }
 
+  // Ne garde que les demandes en attente (status === "pending").
+  function pendingRequests(requests) {
+    return (requests || []).filter(r => r && r.status === "pending");
+  }
+
   // Décide quel écran afficher en fonction de l'état d'authentification.
   //
   // authUser    : null | { uid, email }
-  // userDoc     : null | { email, isSuperAdmin }        (users/{uid})
-  // memberships : [{ code, role, status }, ...]          (users/{uid}/memberships/*)
+  // userDoc     : null | { email, isSuperAdmin }              (users/{uid})
+  // memberships : [{ code, role, status }, ...]                (users/{uid}/memberships/*)
+  // requests    : [{ code, status }, ...]                      (users/{uid}/membershipRequests/*)
   // hasProfile  : bool (prénom/avatar déjà choisis en local)
   //
-  // Retourne l'un de : "login" | "join-household" | "profile-setup" | "app"
-  function resolveScreen(authUser, userDoc, memberships, hasProfile) {
+  // Retourne l'un de :
+  // "login" | "join-household" | "pending-approval" | "profile-setup" | "app"
+  function resolveScreen(authUser, userDoc, memberships, requests, hasProfile) {
     if (!authUser) return "login";
     if (!userDoc) return "join-household"; // filet de sécurité, ne devrait pas arriver
-    if (activeMemberships(memberships).length === 0) return "join-household";
-    if (!hasProfile) return "profile-setup";
-    return "app";
+    if (activeMemberships(memberships).length > 0) {
+      return hasProfile ? "app" : "profile-setup";
+    }
+    if (pendingRequests(requests).length > 0) return "pending-approval";
+    return "join-household";
   }
 
   // Un utilisateur est admin d'un foyer précis ("code") si son adhésion
@@ -62,6 +74,33 @@
     if (active.length === 0) return null;
     if (currentCode && active.some(m => m.code === currentCode)) return currentCode;
     return active[0].code;
+  }
+
+  // Un admin peut-il approuver CETTE demande précise ? Toujours faux si
+  // l'admin est le demandeur lui-même (personne ne s'approuve soi-même),
+  // même s'il est par ailleurs admin d'un AUTRE foyer.
+  //
+  // approverMemberships : adhésions de la personne qui clique "Approuver"
+  // approverUid, requesterUid : uid des deux personnes
+  // code : le foyer concerné
+  function canApproveRequest(approverMemberships, approverUid, requesterUid, code) {
+    if (!approverUid || !requesterUid) return false;
+    if (approverUid === requesterUid) return false;
+    return isHouseholdAdmin(approverMemberships, code);
+  }
+
+  // Construit le payload d'une nouvelle demande d'adhésion (self-service).
+  // Toujours "pending" — jamais un statut qui donnerait un accès direct.
+  function buildJoinRequestPayload(uid, code) {
+    return { uid, code, status: "pending" };
+  }
+
+  // Construit le payload d'une adhésion APPROUVÉE. Toujours role:
+  // "member" — il n'existe aucun chemin, dans ce fichier ni dans
+  // firestore.rules, pour qu'une approbation self-service crée un rôle
+  // "admin" ou un statut super-admin.
+  function buildApprovedMembershipPayload() {
+    return { role: "member", status: "active" };
   }
 
   // Validation d'un email seul (réutilisée par la connexion, l'inscription
@@ -126,9 +165,13 @@
   return {
     resolveScreen,
     activeMemberships,
+    pendingRequests,
     isHouseholdAdmin,
     isSuperAdmin,
     pickActiveHousehold,
+    canApproveRequest,
+    buildJoinRequestPayload,
+    buildApprovedMembershipPayload,
     isValidEmail,
     validateLoginForm,
     validateSignupForm,

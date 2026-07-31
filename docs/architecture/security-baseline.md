@@ -32,7 +32,9 @@
 |---|---|---|
 | Accès aux données d'un foyer sans compte | Oui (code seul) | Non — `firestore.rules` exige `request.auth != null` + un document `users/{uid}/memberships/{code}` actif |
 | Lister tous les foyers | Oui, si les règles Firestore actuelles l'autorisent | Non — réservé à `isSuperAdmin()` |
-| Devenir admin d'un foyer en changeant son prénom, ou en le rejoignant | Oui (avant) / self-service donnerait admin (v1 mal cadrée) | Non — rejoindre un foyer en self-service donne toujours `role: "member"`, jamais modifiable par le client |
+| Rejoindre n'importe quel foyer en devinant/connaissant son code, sans validation | Oui (v2 — faille corrigée le 27/07/2026) | Non — self-service crée une demande `"pending"` sans accès ; seul un admin du foyer peut l'approuver |
+| Devenir admin d'un foyer via self-service | Oui (v1 mal cadrée) | Non — une approbation ne peut créer que `role: "member"`, jamais modifiable par le client |
+| Modifier le document principal d'un foyer en étant simple membre | Oui | Non — réservé aux admins actifs du foyer (ou super-admin) |
 | Accéder au panneau admin global sans y être autorisé | Mot de passe unique visible dans le code source | Champ `isSuperAdmin` sur son propre document `users/{uid}` vérifié côté serveur (règles) et côté client (UI) |
 | Secret exposé côté client | `ADMIN_PASS_HASH` en clair | Aucun secret dans le client ; `firebaseConfig` reste public (ce n'est pas un secret — c'est la protection par Auth + règles qui compte) |
 

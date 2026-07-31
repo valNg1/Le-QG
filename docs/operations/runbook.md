@@ -1,15 +1,14 @@
 # Runbook — Le Général
 
-## Inscription et rattachement à un foyer (nouveau modèle, self-service)
+## Inscription et rattachement à un foyer (self-service + approbation admin)
 
-Depuis le pivot du 27/07/2026, plus besoin de créer les comptes à la
-main : n'importe qui peut s'inscrire depuis l'écran de connexion
-("Pas encore de compte ? Crée-toi en un"), puis rejoindre un foyer en
-saisissant son code à 6 caractères (le seul prérequis : connaître ce
-code — comme avant la sécurisation).
-
-Rien à faire côté Console pour un nouveau membre qui rejoint un foyer
-EXISTANT.
+N'importe qui peut s'inscrire depuis l'écran de connexion ("Pas encore
+de compte ? Crée-toi en un"), puis demander à rejoindre un foyer en
+saisissant son code à 6 caractères. **Cette demande n'accorde aucun
+accès direct** : elle reste "en attente" jusqu'à ce qu'un admin du
+foyer l'approuve depuis **Mon QG → "📥 Demandes en attente"** (bouton
+✓). Rien à faire côté Console pour ça — l'admin traite ses demandes
+directement dans l'app.
 
 ## Créer un nouveau foyer
 

@@ -110,3 +110,38 @@ de plusieurs "Général" différents).
    flux de création de foyer en self-service (avec attribution automatique
    du rôle admin au créateur) est une extension naturelle mais non
    demandée à ce stade.
+
+## Révision — 27/07/2026 (suite) : demandes d'adhésion + approbation admin
+
+**Contexte** : revue de sécurité du directeur technique sur la v2
+(rejoindre un foyer directement avec son code, sans validation). Faille
+identifiée : un code à 6 caractères, même généré aléatoirement, ne
+constitue pas une autorisation suffisante — n'importe quel compte
+authentifié pouvait rejoindre n'importe quel foyer en connaissant (ou en
+devinant) son code, sans qu'aucun membre du foyer n'en soit informé ni
+n'ait à valider quoi que ce soit.
+
+**Décision** :
+1. Rejoindre un foyer crée désormais une **demande d'adhésion**
+   (`users/{uid}/membershipRequests/{code}`, `status: "pending"`), pas
+   une adhésion active. Aucun accès aux données du foyer tant que la
+   demande n'est pas approuvée.
+2. Seul un **admin actif du foyer concerné** peut approuver ou refuser
+   une demande (bouton dans Mon QG → section "Demandes en attente").
+   L'approbation crée l'adhésion, toujours avec `role: "member"` —
+   jamais "admin".
+3. Un admin ne peut jamais approuver sa propre demande, même s'il est
+   admin d'un autre foyer (vérifié à la fois dans `auth-logic.js`
+   `canApproveRequest()` et dans `firestore.rules` via
+   `request.auth.uid != resource.data.uid`).
+4. **Modification du document principal `groupes/{code}`** restreinte
+   aux admins actifs du foyer (ou super-admin) — un simple membre ne
+   peut plus le modifier (il conserve l'accès en lecture/écriture aux
+   sous-collections métier : agenda, mur, dîner).
+5. Chaque demande vit dans un document séparé de l'adhésion elle-même
+   (deux collections distinctes plutôt qu'un statut supplémentaire sur
+   le même document) — permet des règles Firestore simples : la
+   création d'une demande et l'approbation d'une adhésion sont deux
+   opérations indépendantes, sur deux documents différents, chacune
+   avec ses propres contraintes, sans avoir à gérer des transitions
+   d'état complexes sur un seul document.
