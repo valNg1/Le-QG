@@ -175,3 +175,43 @@ règles v3, corrigées avant tout déploiement :
    `diff(resource.data).affectedKeys().hasOnly(['status'])` pour
    interdire toute modification d'un champ non prévu, même un champ pas
    encore imaginé aujourd'hui.
+
+## Révision — 27/07/2026 (suite) : verrou d'atomicité au niveau des règles
+
+Le batch `db.batch()` côté client (revue précédente) garantit l'atomicité
+tant que le CODE APPLICATIF est correct — mais rien n'empêchait, au
+niveau des règles elles-mêmes, une écriture directe (via la console
+Firebase, un script, ou un futur bug) qui contournerait le batch et
+créerait un état incohérent (adhésion sans approbation, ou approbation
+sans adhésion). Corrigé avec `getAfter()` :
+
+- La règle `update` sur `membershipRequests/{code}` exige, quand le
+  statut passe à `"approved"`, que `getAfter()` sur le document
+  `memberships/{code}` correspondant montre déjà `role: "member"` et
+  `status: "active"` — **dans la même opération atomique**.
+- Symétriquement, la règle `create` sur `memberships/{code}` exige que
+  `getAfter()` sur `membershipRequests/{code}` montre déjà
+  `status: "approved"`.
+
+Résultat : il devient **structurellement impossible**, au niveau des
+règles Firestore elles-mêmes (pas seulement par convention côté client),
+d'obtenir l'un des deux états sans l'autre — qu'on utilise l'app, la
+console, ou un appel API direct.
+
+Ajouts complémentaires : `keys().hasOnly(['role','status'])` sur la
+création d'adhésion (aucun champ additionnel ne peut être glissé, ex.
+`isSuperAdmin: true`), et immutabilité stricte du rôle sur les mises à
+jour d'adhésions existantes (`request.resource.data.role ==
+resource.data.role`).
+
+**Tests de règles** : écrits dans `tests/firestore.rules.test.js` avec
+`@firebase/rules-unit-testing`, couvrant les 8 points listés ci-dessus.
+**Non exécutables depuis cet environnement de développement** :
+l'émulateur Firestore télécharge son binaire depuis
+`storage.googleapis.com` au premier lancement, domaine absent de la
+liste blanche réseau du sandbox utilisé pour ce chantier — confirmé par
+tentative réelle (`npm run test:rules` → `Error: download failed, status
+403: Host not in allowlist: storage.googleapis.com`). Ces tests sont
+prêts à tourner sur toute machine avec un accès réseau normal
+(`npm run test:rules`) ; ils constituent la vérification à faire tourner
+en CI ou localement chez toi avant toute future modification des règles.

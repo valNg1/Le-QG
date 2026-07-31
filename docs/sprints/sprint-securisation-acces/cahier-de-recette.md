@@ -1,10 +1,21 @@
-# Cahier de recette — Sécurisation de l'accès (v3 : demandes d'adhésion + approbation admin)
+# Cahier de recette — Sécurisation de l'accès (v4 : verrous d'atomicité getAfter())
 
-## Automatisé
+## Automatisé — logique applicative (exécuté, vert)
 
-- [x] `npm test` → 29/29 tests passent (`tests/auth-logic.test.js`)
+- [x] `npm test` → 33/33 tests passent (`tests/auth-logic.test.js`)
 - [x] `node --check` sur le JS extrait de `index.html` → aucune erreur
 - [x] Équilibre des balises `<div>` → identique avant/après
+
+## Automatisé — règles Firestore (ÉCRIT, NON EXÉCUTÉ)
+
+- [x] `tests/firestore.rules.test.js` écrit avec `@firebase/rules-unit-testing`
+      (17 scénarios couvrant chemin strict, immutabilité, atomicité
+      getAfter(), keys().hasOnly(), rôle immutable, portée admin)
+- [ ] **Non exécutable depuis cet environnement** : `npm run test:rules`
+      échoue au téléchargement du binaire de l'émulateur
+      (`storage.googleapis.com` hors liste blanche réseau) — tentative
+      réelle documentée dans l'ADR. À exécuter sur une machine avec accès
+      réseau normal avant toute future modification des règles.
 
 ## Manuel — inscription et connexion
 

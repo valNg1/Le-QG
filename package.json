@@ -1,8 +1,12 @@
 {
   "name": "le-general",
   "private": true,
-  "description": "Le Général (legeneral.org) — tests de la logique d'authentification. Aucune dépendance externe : utilise le test runner intégré à Node (>=18).",
+  "description": "Le Général (legeneral.org) — tests de la logique d'authentification et des règles Firestore. 'npm test' (logique pure, node:test, zéro dépendance) est toujours exécutable. 'npm run test:rules' nécessite l'émulateur Firestore (télécharge un binaire depuis storage.googleapis.com — non exécutable dans certains environnements réseau restreints, voir tests/firestore.rules.test.js).",
   "scripts": {
-    "test": "node --test \"tests/**/*.test.js\""
+    "test": "node --test tests/auth-logic.test.js",
+    "test:rules": "firebase emulators:exec --only firestore \"node --test tests/firestore.rules.test.js\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.1"
   }
 }

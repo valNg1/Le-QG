@@ -50,19 +50,35 @@ service cloud.firestore {
       allow delete: if false;
 
       // ─── users/{uid}/memberships/{code} ──────────────────────────
-      // Une adhésion active à un foyer = un document. AUCUNE création ni
-      // modification par le titulaire lui-même : seule l'approbation
-      // d'une demande (par un admin du foyer concerné) peut créer ou
-      // activer une adhésion, et toujours avec role "member" — jamais
-      // "admin" par ce chemin (attribution admin = geste manuel
-      // Console, voir runbook.md). Le titulaire peut seulement LIRE ses
-      // propres adhésions.
+      // Une adhésion active à un foyer = un document.
+      //
+      // CRÉATION : réservée à un admin du foyer, uniquement role
+      // "member", uniquement les champs role+status (keys().hasOnly —
+      // aucun champ additionnel ne peut être glissé dans le document),
+      // et — verrou d'atomicité — la demande correspondante DOIT être en
+      // train de passer à "approved" dans le MÊME batch (getAfter sur
+      // membershipRequests/{code}). Impossible de créer une adhésion
+      // active sans que la demande soit simultanément approuvée.
+      //
+      // MISE À JOUR (ex. désactiver un membre existant) : le rôle est
+      // immuable (doit rester identique à l'existant), seul le statut
+      // peut basculer active/disabled — pas de lien à une demande ici,
+      // c'est une action de gestion directe par l'admin sur une adhésion
+      // qui existe déjà.
       match /memberships/{code} {
         allow read: if request.auth != null && request.auth.uid == uid;
 
-        allow create, update: if request.auth != null &&
+        allow create: if request.auth != null &&
           isActiveHouseholdAdmin(code) &&
+          request.resource.data.keys().hasOnly(['role', 'status']) &&
           request.resource.data.role == 'member' &&
+          request.resource.data.status == 'active' &&
+          getAfter(/databases/$(database)/documents/users/$(uid)/membershipRequests/$(code)).data.status == 'approved';
+
+        allow update: if request.auth != null &&
+          isActiveHouseholdAdmin(code) &&
+          request.resource.data.keys().hasOnly(['role', 'status']) &&
+          request.resource.data.role == resource.data.role &&
           (request.resource.data.status == 'active' || request.resource.data.status == 'disabled');
 
         allow delete: if false;
@@ -70,34 +86,28 @@ service cloud.firestore {
 
       // ─── users/{uid}/membershipRequests/{code} ───────────────────
       // Chemin STRICTEMENT limité à users/{uid}/membershipRequests/{code}
-      // (imbriqué dans le match users/{uid} ci-dessus, pas de wildcard
-      // "{path=**}" — corrigé suite à revue sécurité : un chemin trop
-      // large aurait potentiellement permis de créer une demande
-      // n'importe où se terminant par "membershipRequests/{reqId}").
-      // uid et code sont ici des VARIABLES DE CHEMIN, garanties par la
-      // structure du document lui-même — pas de simples champs qu'on
-      // pourrait tenter de falsifier dans le contenu écrit.
+      // (imbriqué dans le match users/{uid}, pas de wildcard
+      // "{path=**}"). uid et code sont des VARIABLES DE CHEMIN,
+      // garanties par la structure du document — pas de simples champs
+      // qu'on pourrait falsifier dans le contenu écrit.
       match /membershipRequests/{code} {
-        // Le demandeur peut lire ses propres demandes.
         allow read: if request.auth != null && request.auth.uid == uid;
         // Un admin (ou super-admin) du foyer concerné peut lire les
-        // demandes qui LUI sont adressées (liste des demandes en
-        // attente) — cette règle s'applique aussi aux requêtes
-        // "collection group" utilisées par l'app pour lister toutes les
-        // demandes d'un foyer tous utilisateurs confondus : Firestore
-        // évalue cette règle document par document, donc chaque demande
-        // n'est renvoyée que si l'admin qui interroge est bien admin du
-        // foyer "code" de CE document précis.
+        // demandes qui LUI sont adressées. Cette règle s'applique aussi
+        // aux requêtes "collection group" : Firestore l'évalue document
+        // par document, donc une requête admin ne peut jamais voir les
+        // demandes d'un foyer dont il n'est pas admin, même s'il tente
+        // d'élargir sa requête côté client (l'app elle-même limite déjà
+        // chaque requête à un seul "code" à la fois — voir
+        // loadPendingRequests() dans index.html — mais la garantie
+        // réelle vient d'ici, pas du client).
         allow read: if isActiveHouseholdAdmin(code) || isSuperAdmin();
 
-        // Créer sa PROPRE demande (uid = soi-même, imposé par la
-        // structure du chemin), en cohérence stricte entre le chemin et
-        // le contenu du document (uid et code du contenu DOIVENT
-        // correspondre exactement aux variables de chemin — empêche
-        // toute demande usurpant l'identité d'un autre uid ou visant un
-        // autre foyer que celui du chemin), uniquement "pending",
-        // uniquement pour un foyer qui existe déjà, uniquement si on
-        // n'a pas déjà une adhésion active pour ce foyer.
+        // Créer sa PROPRE demande (uid = soi-même, imposé par le chemin),
+        // en cohérence stricte chemin/contenu (uid et code du document
+        // DOIVENT correspondre exactement aux variables de chemin),
+        // uniquement "pending", uniquement pour un foyer qui existe déjà,
+        // uniquement si on n'a pas déjà une adhésion active pour ce foyer.
         allow create: if request.auth != null &&
           request.auth.uid == uid &&
           request.resource.data.uid == uid &&
@@ -108,17 +118,28 @@ service cloud.firestore {
 
         // Faire évoluer une demande (accepter/refuser) : réservé à un
         // admin du foyer concerné — JAMAIS le demandeur lui-même.
-        // Immutabilité stricte de l'identité de la demande : uid, code
-        // et requestedAt ne peuvent PAS changer, seul le champ status
-        // peut passer à approved/rejected. Aucun autre champ ne peut
-        // être ajouté ou modifié par ce chemin.
+        // Immutabilité stricte : uid, code, requestedAt ne peuvent pas
+        // changer, et diff().affectedKeys().hasOnly(['status']) interdit
+        // tout autre champ, même un champ pas encore imaginé aujourd'hui.
+        // Verrou d'atomicité (miroir de celui sur memberships ci-dessus) :
+        // si le statut passe à "approved", l'adhésion correspondante DOIT
+        // être en train d'être créée/activée dans le MÊME batch (getAfter
+        // sur memberships/{code}) — impossible d'approuver sans que
+        // l'adhésion soit simultanément créée. Un refus n'a pas cette
+        // contrainte (aucune adhésion à créer).
         allow update: if isActiveHouseholdAdmin(code) &&
           request.auth.uid != uid &&
           request.resource.data.uid == resource.data.uid &&
           request.resource.data.code == resource.data.code &&
           request.resource.data.requestedAt == resource.data.requestedAt &&
           request.resource.data.status in ['approved', 'rejected'] &&
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']) &&
+          (request.resource.data.status == 'rejected' ||
+            (
+              getAfter(/databases/$(database)/documents/users/$(uid)/memberships/$(code)).data.role == 'member' &&
+              getAfter(/databases/$(database)/documents/users/$(uid)/memberships/$(code)).data.status == 'active'
+            )
+          );
 
         allow delete: if isActiveHouseholdAdmin(code) || isSuperAdmin();
       }
