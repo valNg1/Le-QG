@@ -2265,8 +2265,11 @@ async function loadPendingRequests(adminCodes) {
       btn.addEventListener("click", () => handleRequestDecision(btn.dataset.uid, btn.dataset.code, "rejected"));
     });
   } catch (e) {
-    console.log("loadPendingRequests error:", e.message);
-    el.innerHTML = `<div style="font-size:12px;color:var(--red);padding:8px 0;">Erreur de chargement</div>`;
+    console.log("loadPendingRequests error:", e.code, e.message);
+    const isIndexError = e.code === "failed-precondition" || /index/i.test(e.message || "");
+    el.innerHTML = isIndexError
+      ? `<div style="font-size:12px;color:var(--red);padding:8px 0;line-height:1.5;">Index Firestore manquant pour cette requête.<br><span style="color:var(--muted);">Détail technique : ${e.message}</span></div>`
+      : `<div style="font-size:12px;color:var(--red);padding:8px 0;line-height:1.5;">Erreur (${e.code || "inconnue"}) : ${e.message}</div>`;
   }
 }
 
@@ -5117,7 +5120,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.44";
+const APP_VERSION = "3.3.45";
 console.log("📦 Le Général v" + APP_VERSION);
 const footerVersionEl = document.getElementById("footer-version");
 if (footerVersionEl) footerVersionEl.textContent = "Le Général v" + APP_VERSION;
