@@ -33,6 +33,8 @@ puis une seconde fois après publication des règles Firestore (étape P).
 | 13 | Membre normal (`role: "member"`) tente d'ouvrir le panneau admin foyer (`isAdmin`) | Non affiché — seul `role: "admin"` y a droit |
 | 14 | Toi (compte admin, foyer existant) après publication des règles | Accès complet inchangé — agenda, dîner, mur, mêmes données qu'avant |
 | 15 | Ajout d'un nouvel événement dans l'agenda (test de non-régression du fix double-listener) | Un seul événement créé, pas de doublon visuel |
+| 16 | Admin de foyer crée un membre via "➕ Ajouter un membre" (Mon QG) | Compte créé, admin reste connecté (pas de déconnexion), nouveau membre peut se connecter avec les identifiants communiqués et arrive directement dans le bon foyer |
+| 17 | Un membre (`role: "member"`, pas admin) tente de créer un autre compte via la même API Firestore (devtools) | Refusé par les règles (`isActiveHouseholdAdmin` échoue) |
 
 ## Critère de passage en production
 

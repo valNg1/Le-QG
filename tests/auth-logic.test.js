@@ -14,7 +14,9 @@ const {
   isSuperAdmin,
   isValidEmail,
   validateLoginForm,
+  validateNewMemberForm,
   loginErrorMessage,
+  createAccountErrorMessage,
 } = require("../auth-logic.js");
 
 // ─── Visiteur non connecté ──────────────────────────────────────────
@@ -116,4 +118,23 @@ test("messages d'erreur Firebase Auth traduits sans énumération de compte", ()
   assert.equal(loginErrorMessage("auth/invalid-credential"), "Email ou mot de passe incorrect.");
   assert.equal(loginErrorMessage("auth/user-disabled"), "Ce compte a été désactivé.");
   assert.equal(loginErrorMessage("code-inconnu-xyz"), "Email ou mot de passe incorrect.");
+});
+
+// ─── Création de compte membre (par un admin de foyer) ──────────────
+test("formulaire nouveau membre : mot de passe trop court invalide (< 6 caractères, minimum Firebase)", () => {
+  assert.equal(validateNewMemberForm("famille@example.com", "abc").valid, false);
+});
+
+test("formulaire nouveau membre : email invalide rejeté", () => {
+  assert.equal(validateNewMemberForm("pas-un-email", "motdepasse123").valid, false);
+});
+
+test("formulaire nouveau membre : email + mot de passe valides (6+ caractères)", () => {
+  assert.equal(validateNewMemberForm("famille@example.com", "abcdef").valid, true);
+});
+
+test("messages d'erreur de création de compte, distincts et informatifs pour l'admin", () => {
+  assert.equal(createAccountErrorMessage("auth/email-already-in-use"), "Un compte existe déjà avec cet email.");
+  assert.equal(createAccountErrorMessage("auth/weak-password"), "Mot de passe trop faible (6 caractères minimum).");
+  assert.equal(createAccountErrorMessage("code-inconnu-xyz"), "Erreur lors de la création du compte.");
 });

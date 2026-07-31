@@ -96,6 +96,36 @@ suspended? }`. Ce qui change, c'est **qui peut y accéder** (voir
 connaît le code", mais "un membre authentifié dont `users/{uid}.householdId
 == code`", ou un super-admin.
 
+## Création de comptes membres (par un admin de foyer)
+
+Pas d'inscription publique, mais pas non plus de création manuelle
+systématique dans la Console pour chaque membre de la famille. Un admin
+de foyer déjà connecté peut créer un compte pour un proche directement
+depuis l'app (Mon QG → section groupe, formulaire "➕ Ajouter un
+membre") :
+
+1. L'admin saisit email + mot de passe (choisis par lui, communiqués
+   ensuite au proche à la main).
+2. `createMemberAccount()` crée le compte Firebase via une **instance
+   Firebase secondaire** (`firebase.initializeApp(FB_CONFIG,
+   "secondary")`), pour ne pas déconnecter l'admin — sans cette astuce,
+   `createUserWithEmailAndPassword` connecte automatiquement le nouveau
+   compte sur l'app appelante.
+3. Le document `users/{nouvelUid}` est ensuite écrit depuis l'instance
+   **principale** (session de l'admin), avec `householdId` = le foyer
+   de l'admin (automatique, jamais saisi), `role: "member"` (toujours,
+   jamais admin ni super-admin via ce formulaire), `status: "active"`.
+
+Les règles Firestore (`firestore.rules`, règle `allow create` sur
+`users/{uid}`) imposent exactement ces contraintes côté serveur : seul un
+admin de foyer actif peut créer un document, uniquement pour son propre
+foyer, uniquement `role: "member"`, jamais `isSuperAdmin: true`. Un
+compte ne peut jamais se créer lui-même (`request.auth.uid != uid`).
+
+Le tout premier compte de chaque foyer (l'admin) reste créé à la main
+dans la Firebase Console (voir `runbook.md`) — ce formulaire ne sert
+qu'à ajouter des membres à un foyer qui existe déjà.
+
 ## Récupération de mot de passe
 
 Bouton "Mot de passe oublié ?" sur l'écran de connexion → appelle

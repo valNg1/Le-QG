@@ -8,20 +8,6 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // ─── users/{uid} ───────────────────────────────────────────────
-    // Source de vérité unique : rattachement compte Firebase -> foyer,
-    // rôle de foyer (admin/member) ET statut super-admin global
-    // (isSuperAdmin, remplace l'ancien mot de passe "2601" côté client).
-    // Un utilisateur ne peut lire QUE son propre document. Écriture
-    // interdite depuis le client : les comptes et leur rattachement au
-    // foyer sont créés manuellement par l'administrateur dans la
-    // Firebase Console (aucune inscription publique en V1 — voir
-    // docs/architecture/authentification.md).
-    match /users/{uid} {
-      allow read: if request.auth != null && request.auth.uid == uid;
-      allow write: if false;
-    }
-
     // Un utilisateur connecté est-il membre actif du foyer "code" ?
     function isActiveHouseholdMember(code) {
       return request.auth != null &&
@@ -30,12 +16,48 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'active';
     }
 
-    // Le champ isSuperAdmin vit sur le même document users/{uid} — une
-    // seule lecture suffit, pas de collection séparée à interroger.
+    // Un utilisateur connecté est-il ADMIN actif du foyer "code" ?
+    // (utilisé pour autoriser la création de nouveaux membres)
+    function isActiveHouseholdAdmin(code) {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.householdId == code &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'active' &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Le champ isSuperAdmin vit sur le document users/{uid} — une seule
+    // lecture suffit, pas de collection séparée à interroger.
     function isSuperAdmin() {
       return request.auth != null &&
         exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isSuperAdmin == true;
+    }
+
+    // ─── users/{uid} ───────────────────────────────────────────────
+    // Source de vérité unique : rattachement compte Firebase -> foyer,
+    // rôle de foyer (admin/member) ET statut super-admin global
+    // (isSuperAdmin, remplace l'ancien mot de passe "2601" côté client).
+    // Un utilisateur ne peut lire QUE son propre document.
+    //
+    // Écriture : aucune inscription publique (un visiteur ne peut jamais
+    // créer son propre document — request.auth.uid != uid l'interdit).
+    // Seul un admin de foyer déjà actif peut provisionner un NOUVEAU
+    // membre pour SON PROPRE foyer — jamais un autre foyer, jamais avec
+    // role != "member", jamais super-admin. Le compte admin lui-même
+    // (premier compte de chaque foyer) reste créé à la main dans la
+    // Firebase Console (voir runbook.md).
+    match /users/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+
+      allow create: if request.auth != null &&
+        request.auth.uid != uid &&
+        isActiveHouseholdAdmin(request.resource.data.householdId) &&
+        request.resource.data.role == 'member' &&
+        request.resource.data.status == 'active' &&
+        request.resource.data.isSuperAdmin != true;
+
+      allow update, delete: if false;
     }
 
     // ─── groupes/{code} ──────────────────────────────────────────────

@@ -2243,7 +2243,16 @@ function renderGroupe() {
         <button id="leave-group-btn" style="background:none;border:1px solid var(--border2);color:var(--muted);border-radius:20px;padding:7px 16px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;">Quitter</button>
       </div>
     </div>
-    <div id="membres-liste" style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;"><div class="info-label">Membres</div><div class="loading">Chargement...</div></div>` 
+    <div id="membres-liste" style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;"><div class="info-label">Membres</div><div class="loading">Chargement...</div></div>
+    ${state.isAdmin ? `
+    <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-top:12px;">
+      <div class="info-label">➕ Ajouter un membre</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Crée un compte pour un proche — communique-lui ensuite l'email et le mot de passe toi-même.</div>
+      <input id="new-member-email" type="email" inputmode="email" placeholder="Email" style="width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;font-family:var(--font);font-size:14px;color:var(--text);margin-bottom:8px;">
+      <input id="new-member-password" type="text" placeholder="Mot de passe (6 caractères min.)" style="width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;font-family:var(--font);font-size:14px;color:var(--text);margin-bottom:8px;">
+      <div id="new-member-msg" style="display:none;font-size:12px;margin-bottom:8px;"></div>
+      <button id="add-member-btn" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:12px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">Créer le compte</button>
+    </div>` : ""}` 
   : `<div class="groupe-card"><div class="loading">Aucun groupe — crée-en un lors de l'inscription</div></div>`;
 
   setTimeout(()=>{
@@ -2255,6 +2264,8 @@ function renderGroupe() {
     if(sb) sb.onclick=()=>openShareMenu(shareText, inviteUrl);
     if(cb) cb.onclick=()=>navigator.clipboard.writeText(inviteUrl).then(()=>showToast("Lien copié !"));
     if(lb) lb.onclick=()=>{if(confirm("Quitter le groupe ?")){state.groupCode=null;state.groupName=null;saveState();renderGroupe();}};
+    const amb = document.getElementById("add-member-btn");
+    if (amb) amb.onclick = handleAddMemberClick;
     if(state.groupCode&&firebaseReady) loadGroupMembers();
   },50);
 }
@@ -2271,6 +2282,83 @@ async function loadGroupMembers() {
       renderDiner();
     }
   } catch(e) { console.log(e); }
+}
+
+// ────────────────────────────────────────────
+// CRÉATION DE COMPTE MEMBRE (par un admin de foyer)
+// ────────────────────────────────────────────
+// Aucune inscription publique : c'est toujours un admin de foyer déjà
+// connecté qui saisit email + mot de passe pour un proche, puis les lui
+// communique lui-même (SMS, en personne...). Le foyer (householdId) est
+// pris automatiquement sur l'admin qui crée le compte — jamais choisi
+// par un tiers.
+//
+// Astuce technique : firebase.auth().createUserWithEmailAndPassword()
+// connecte automatiquement le nouveau compte sur l'app QUI L'APPELLE, ce
+// qui déconnecterait l'admin en train de créer le compte. On utilise donc
+// une 2e instance Firebase ("secondary"), isolée, pour créer le compte
+// sans jamais toucher à la session de l'admin sur l'instance principale.
+async function createMemberAccount(email, password) {
+  let secondaryApp = firebase.apps.find(a => a.name === "secondary");
+  if (!secondaryApp) secondaryApp = firebase.initializeApp(FB_CONFIG, "secondary");
+  const secondaryAuth = secondaryApp.auth();
+  try {
+    const cred = await secondaryAuth.createUserWithEmailAndPassword(email.trim(), password);
+    const newUid = cred.user.uid;
+    await secondaryAuth.signOut();
+    // Écriture faite depuis l'instance PRINCIPALE (db), donc avec la
+    // session de l'admin (request.auth.uid = l'admin) — c'est ce que
+    // vérifient les règles Firestore (isActiveHouseholdAdmin).
+    await db.collection("users").doc(newUid).set({
+      email: email.trim(),
+      householdId: state.groupCode,
+      role: "member",
+      status: "active",
+      isSuperAdmin: false,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    return { ok: true, uid: newUid };
+  } catch (err) {
+    return { ok: false, error: err };
+  }
+}
+
+async function handleAddMemberClick() {
+  const emailEl = document.getElementById("new-member-email");
+  const passEl = document.getElementById("new-member-password");
+  const msgEl = document.getElementById("new-member-msg");
+  const btn = document.getElementById("add-member-btn");
+  const email = emailEl?.value || "";
+  const password = passEl?.value || "";
+
+  const check = AuthLogic.validateNewMemberForm(email, password);
+  if (msgEl) { msgEl.style.display = "none"; }
+  if (!check.valid) {
+    if (msgEl) {
+      msgEl.style.color = "var(--red)";
+      msgEl.textContent = check.errors.includes("email") ? "Email invalide." : "Mot de passe trop court (6 caractères minimum).";
+      msgEl.style.display = "block";
+    }
+    return;
+  }
+
+  if (btn) { btn.disabled = true; btn.textContent = "Création..."; }
+  const result = await createMemberAccount(email, password);
+  if (btn) { btn.disabled = false; btn.textContent = "Créer le compte"; }
+
+  if (result.ok) {
+    if (msgEl) {
+      msgEl.style.color = "var(--green)";
+      msgEl.textContent = `Compte créé ! Communique-lui : ${email.trim()} / ${password}`;
+      msgEl.style.display = "block";
+    }
+    if (emailEl) emailEl.value = "";
+    if (passEl) passEl.value = "";
+  } else if (msgEl) {
+    msgEl.style.color = "var(--red)";
+    msgEl.textContent = AuthLogic.createAccountErrorMessage(result.error?.code);
+    msgEl.style.display = "block";
+  }
 }
 
 // ════════════════════════════════════════════
@@ -5076,7 +5164,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.39";
+const APP_VERSION = "3.3.40";
 console.log("📦 Le Général v" + APP_VERSION);
 const footerVersionEl = document.getElementById("footer-version");
 if (footerVersionEl) footerVersionEl.textContent = "Le Général v" + APP_VERSION;

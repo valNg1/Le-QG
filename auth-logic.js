@@ -60,6 +60,16 @@
     return { valid: errors.length === 0, errors };
   }
 
+  // Valide le formulaire de création d'un compte membre (utilisé par un
+  // admin de foyer pour provisionner sa famille — aucune inscription
+  // publique, c'est toujours l'admin qui saisit ces informations).
+  function validateNewMemberForm(email, password) {
+    const errors = [];
+    if (!isValidEmail(email)) errors.push("email");
+    if (!password || String(password).length < 6) errors.push("password");
+    return { valid: errors.length === 0, errors };
+  }
+
   // Traduit une erreur Firebase Auth (code) en message utilisateur clair,
   // sans jamais révéler si c'est l'email ou le mot de passe qui est faux
   // (bonne pratique de sécurité : ne pas aider à l'énumération de comptes).
@@ -77,5 +87,28 @@
     return map[errorCode] || generic;
   }
 
-  return { resolveScreen, isHouseholdAdmin, isSuperAdmin, isValidEmail, validateLoginForm, loginErrorMessage };
+  // Traduit une erreur Firebase Auth survenue lors de la CRÉATION d'un
+  // compte membre (contexte différent de la connexion : ici l'admin a le
+  // droit de savoir précisément ce qui cloche, ce n'est pas une tentative
+  // de connexion d'un tiers).
+  function createAccountErrorMessage(errorCode) {
+    const map = {
+      "auth/email-already-in-use": "Un compte existe déjà avec cet email.",
+      "auth/invalid-email": "Adresse email invalide.",
+      "auth/weak-password": "Mot de passe trop faible (6 caractères minimum).",
+      "auth/network-request-failed": "Problème de connexion réseau.",
+    };
+    return map[errorCode] || "Erreur lors de la création du compte.";
+  }
+
+  return {
+    resolveScreen,
+    isHouseholdAdmin,
+    isSuperAdmin,
+    isValidEmail,
+    validateLoginForm,
+    validateNewMemberForm,
+    loginErrorMessage,
+    createAccountErrorMessage,
+  };
 });
