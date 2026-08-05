@@ -421,6 +421,18 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
   <button id="pending-approval-logout-btn" style="background:none;border:none;color:var(--muted);font-family:var(--font);font-size:13px;cursor:pointer;">Se déconnecter</button>
 </div>
 
+<!-- ÉCRAN ERREUR DE CONNEXION (lecture Firestore impossible — réseau faible, etc.) -->
+<!-- Distinct de "join-household-screen" : ne jamais présenter une simple erreur -->
+<!-- réseau comme "tu n'as aucun foyer", ça inquiète inutilement et pourrait -->
+<!-- pousser à renvoyer une demande d'adhésion en double. -->
+<div id="connection-error-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:6000;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;">
+  <div style="font-size:44px;margin-bottom:16px;">📶</div>
+  <div style="font-size:20px;font-weight:800;color:var(--text);margin-bottom:8px;">Connexion impossible</div>
+  <div style="font-size:14px;color:var(--muted);line-height:1.5;max-width:300px;margin-bottom:24px;">Impossible de vérifier ton accès pour le moment — vérifie ta connexion internet et réessaie. Tes foyers restent intacts, rien n'a été perdu.</div>
+  <button id="connection-error-retry-btn" style="width:100%;max-width:280px;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:14px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;margin-bottom:12px;">Réessayer</button>
+  <button id="connection-error-logout-btn" style="background:none;border:none;color:var(--muted);font-family:var(--font);font-size:13px;cursor:pointer;">Se déconnecter</button>
+</div>
+
 <div id="app-splash" style="position:fixed;inset:0;z-index:99999;background:#F7C104;display:flex;flex-direction:column;align-items:center;justify-content:center;-webkit-text-size-adjust:none;text-size-adjust:none;">
   <div style="width:96px;height:96px;border-radius:24px;background:#1A1916;display:flex;align-items:center;justify-content:center;margin-bottom:22px;flex-shrink:0;">
     <span style="font-family:var(--serif);font-size:34px;font-weight:700;color:#F7C104;-webkit-text-size-adjust:none;">QG</span>
@@ -5120,7 +5132,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.46";
+const APP_VERSION = "3.3.47";
 console.log("📦 Le Général v" + APP_VERSION);
 const footerVersionEl = document.getElementById("footer-version");
 if (footerVersionEl) footerVersionEl.textContent = "Le Général v" + APP_VERSION;
@@ -5193,7 +5205,7 @@ function hideSplash() {
 // docs/architecture/authentification.md et firestore.rules.
 
 function showAuthScreen(name) {
-  ["login-screen", "join-household-screen", "pending-approval-screen"].forEach(id => {
+  ["login-screen", "join-household-screen", "pending-approval-screen", "connection-error-screen"].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = (id === name ? "flex" : "none");
   });
@@ -5367,6 +5379,12 @@ function wireJoinHouseholdForm() {
   document.getElementById("pending-approval-logout-btn")?.addEventListener("click", () => {
     firebase.auth().signOut().catch(e => console.log("signOut error:", e.message));
   });
+  document.getElementById("connection-error-retry-btn")?.addEventListener("click", () => {
+    if (firebase.auth().currentUser) handleAuthStateChange(firebase.auth().currentUser);
+  });
+  document.getElementById("connection-error-logout-btn")?.addEventListener("click", () => {
+    firebase.auth().signOut().catch(e => console.log("signOut error:", e.message));
+  });
 
   const urlCode = new URLSearchParams(window.location.search).get("g");
   if (urlCode) {
@@ -5390,6 +5408,7 @@ async function handleAuthStateChange(user) {
   let userDoc = null;
   let memberships = [];
   let requests = [];
+  let fetchError = false;
   try {
     const snap = await db.collection("users").doc(user.uid).get();
     userDoc = snap.exists ? snap.data() : null;
@@ -5398,7 +5417,18 @@ async function handleAuthStateChange(user) {
     const reqSnap = await db.collection("users").doc(user.uid).collection("membershipRequests").get();
     requests = reqSnap.docs.map(d => ({ code: d.id, ...d.data() }));
   } catch (e) {
-    console.log("users/memberships/membershipRequests lookup error:", e.message);
+    console.log("users/memberships/membershipRequests lookup error:", e.code, e.message);
+    fetchError = true;
+  }
+
+  // Une lecture Firestore en échec (réseau faible, hors-ligne...) ne doit
+  // JAMAIS être présentée comme "tu n'as aucun foyer" — ce sont deux
+  // situations différentes. On affiche un écran dédié avec un bouton
+  // "Réessayer", plutôt que de risquer une inquiétude inutile ou une
+  // double demande d'adhésion envoyée par erreur.
+  if (fetchError) {
+    showAuthScreen("connection-error-screen");
+    return;
   }
 
   const hasProfile = !!(state.name && state.onboarded);
