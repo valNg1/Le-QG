@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sports Bloomington & Indiana — Le Général</title>
+<style>
+  :root {
+    --bg:#0A0A12; --surface:#14141E; --surface2:#1C1C28; --border:rgba(255,255,255,.08); --border2:rgba(255,255,255,.14);
+    --text:#F2F2F0; --muted:#8A8A95; --muted2:#5A5A65;
+    --gold:#C9A84C; --green:#2E7D32; --red:#B3261E; --cream:#EEEDEB;
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    --r:16px; --r-sm:10px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  body { background:var(--bg); color:var(--text); font-family:var(--font); padding-bottom:40px; }
+  .back-to-qg { color:var(--muted); text-decoration:none; font-size:12px; font-weight:600; }
+  .header { background:linear-gradient(135deg,#2B0A0A 0%,#0A0A12 100%); padding:52px 16px 20px; position:sticky; top:0; z-index:100; }
+  .header-inner { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .title-block { display:flex; align-items:center; gap:10px; }
+  .trophy { font-size:28px; }
+  .title { font-size:20px; font-weight:800; }
+  .title span { color:var(--gold); }
+  .badge { background:var(--gold); color:#1A1916; font-size:10px; font-weight:800; padding:4px 10px; border-radius:20px; letter-spacing:.04em; }
+  .view { padding:16px; }
+  .sec { font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin:18px 0 8px; }
+  .sec:first-child { margin-top:0; }
+  .hero { background:linear-gradient(135deg,#2B0A0A,#3A1010); border-radius:var(--r); padding:20px; margin-bottom:6px; border:1px solid rgba(201,168,76,.2); }
+  .hero-label { font-size:11px; color:var(--gold); font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px; }
+  .hero-title { font-size:22px; font-weight:800; margin-bottom:6px; }
+  .hero-sub { font-size:13px; color:rgba(255,255,255,.65); margin-bottom:14px; }
+  .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .stat-box { background:rgba(255,255,255,.05); border-radius:var(--r-sm); padding:10px 6px; text-align:center; }
+  .stat-val { font-size:17px; font-weight:800; }
+  .stat-lbl { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; margin-top:2px; }
+  .card { background:var(--surface); border-radius:var(--r); border:1px solid var(--border); padding:16px; margin-bottom:12px; }
+  .row { display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--border); }
+  .row:last-child { border-bottom:none; }
+  .flag { width:34px; height:34px; border-radius:8px; background:var(--surface2); display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:800; flex-shrink:0; }
+  .rname { font-size:14px; font-weight:700; }
+  .rmeta { font-size:11px; color:var(--muted); margin-top:1px; }
+  .pill { font-size:10px; font-weight:700; padding:3px 9px; border-radius:20px; flex-shrink:0; white-space:nowrap; }
+  .pill-champ { background:rgba(201,168,76,.15); color:var(--gold); border:1px solid rgba(201,168,76,.3); }
+  .pill-live { background:rgba(179,38,30,.15); color:#FF6B5E; border:1px solid rgba(179,38,30,.3); }
+  .pill-soon { background:rgba(255,255,255,.06); color:var(--muted); border:1px solid var(--border2); }
+</style>
+</head>
+<body>
+
+<div style="background:#0A0A12;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.07);">
+  <a href="https://legeneral.org" class="back-to-qg">← Le Général</a>
+  <div style="font-size:11px;color:#7A7A85;">Bloomington & Indiana</div>
+</div>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="title-block">
+      <div class="trophy">🏀</div>
+      <div>
+        <div class="title">Sports <span>Bloomington</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">IU Hoosiers & Indiana Pacers</div>
+      </div>
+    </div>
+    <div class="badge">🏆 CHAMPIONS NCAAF</div>
+  </div>
+</header>
+
+<!-- ACCUEIL -->
+<div id="view-accueil" class="view">
+  <div class="hero">
+    <div class="hero-label">📊 Stats du moment</div>
+    <div class="hero-title">Rentrée sportive à Bloomington</div>
+    <div class="hero-sub">Football IU champion national · Pacers en reconstruction · Basket IU à suivre</div>
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-val">15-0</div><div class="stat-lbl">Saison IU football 2025</div></div>
+      <div class="stat-box"><div class="stat-val">5 sept</div><div class="stat-lbl">Coup d'envoi IU FB</div></div>
+      <div class="stat-box"><div class="stat-val">21 oct</div><div class="stat-lbl">Reprise Pacers</div></div>
+      <div class="stat-box"><div class="stat-val">53k</div><div class="stat-lbl">Places Memorial Stadium</div></div>
+    </div>
+  </div>
+
+  <p class="sec">🏈 Football — Indiana Hoosiers</p>
+  <div class="card" style="border-color:rgba(201,168,76,.3);">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <span style="font-size:18px;">🏆</span>
+      <div style="font-size:14px;font-weight:800;">Champions nationaux en titre !</div>
+    </div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.6;">Fait totalement inédit dans l'histoire du programme : les Hoosiers ont terminé la saison 2025 invaincus (15-0), remporté le Big Ten, puis battu Miami au College Football Playoff National Championship le 19 janvier 2026 à Miami. Le QB Fernando Mendoza, élu MVP de la finale, a été drafté en NFL dans la foulée.</div>
+  </div>
+  <div class="card">
+    <div class="row">
+      <div class="flag">🏟️</div>
+      <div style="flex:1;">
+        <div class="rname">IU vs North Texas</div>
+        <div class="rmeta">Memorial Stadium, Bloomington</div>
+      </div>
+      <span class="pill pill-soon">5 SEPT</span>
+    </div>
+    <div class="row">
+      <div class="flag">🏟️</div>
+      <div style="flex:1;">
+        <div class="rname">IU vs Ohio State</div>
+        <div class="rmeta">Revanche de la finale Big Ten 2025</div>
+      </div>
+      <span class="pill pill-soon">17 OCT</span>
+    </div>
+    <div class="row">
+      <div class="flag">🪣</div>
+      <div style="flex:1;">
+        <div class="rname">IU vs Purdue</div>
+        <div class="rmeta">"Old Oaken Bucket" — dernier match de la saison régulière</div>
+      </div>
+      <span class="pill pill-soon">28 NOV</span>
+    </div>
+  </div>
+
+  <p class="sec">🏀 Basket universitaire — IU Hoosiers</p>
+  <div class="card">
+    <div style="font-size:13px;color:var(--muted);line-height:1.7;">Coach <strong style="color:var(--text);">Darian DeVries</strong> entame sa 2ᵉ saison à la tête du programme masculin. Les matchs se jouent au <strong style="color:var(--text);">Simon Skjodt Assembly Hall</strong>, en plein campus — l'une des salles les plus mythiques du basket universitaire américain. Coup d'envoi de la saison 2026-27 en novembre.</div>
+  </div>
+
+  <p class="sec">🏀 NBA — Indiana Pacers (Indianapolis)</p>
+  <div class="card" style="border-color:rgba(201,168,76,.25);">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <span style="font-size:18px;">🩹</span>
+      <div style="font-size:14px;font-weight:800;">Retour attendu de Tyrese Haliburton</div>
+    </div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.6;">Finalistes NBA en 2025, les Pacers ont vécu une saison 2025-26 cauchemardesque (pire bilan de l'histoire du club) après la rupture du tendon d'Achille de leur meneur star <strong style="color:var(--text);">Tyrese Haliburton</strong>, blessé lors du Game 7 des Finales. Il est attendu de retour pour la reprise. Coach : <strong style="color:var(--text);">Rick Carlisle</strong>. Salle : Gainbridge Fieldhouse, à ~1h de Bloomington.</div>
+  </div>
+  <div class="card">
+    <div class="row">
+      <div class="flag">✈️</div>
+      <div style="flex:1;">
+        <div class="rname">Pacers @ New Orleans</div>
+        <div class="rmeta">Ouverture de la saison 2026-27</div>
+      </div>
+      <span class="pill pill-soon">21 OCT</span>
+    </div>
+    <div class="row">
+      <div class="flag">🏠</div>
+      <div style="flex:1;">
+        <div class="rname">Pacers vs Dallas Mavericks</div>
+        <div class="rmeta">1er match à domicile — retour de Haliburton espéré</div>
+      </div>
+      <span class="pill pill-soon">23 OCT</span>
+    </div>
+  </div>
+
+  <p class="sec">💡 Fun facts</p>
+  <div class="card">
+    <div class="row">
+      <div class="flag">🦬</div>
+      <div style="flex:1;">
+        <div class="rname">La mascotte des Hoosiers</div>
+        <div class="rmeta">S'appelle "Hoosier the Bison" — un bison, pas un animal auquel on penserait spontanément pour l'Indiana</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="flag">🏛️</div>
+      <div style="flex:1;">
+        <div class="rname">Assembly Hall</div>
+        <div class="rmeta">La salle de basket IU est classée parmi les temples du sport universitaire US, comparable à Cameron Indoor (Duke)</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="flag">🥉</div>
+      <div style="flex:1;">
+        <div class="rname">Pacers-Bloomington</div>
+        <div class="rmeta">Indianapolis n'est qu'à environ 1h de route de Bloomington — facile d'aller voir un match sur place</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="text-align:center;">
+    <div style="font-size:12px;color:var(--muted);">Demande une "mise à jour Bloomington" quand tu veux pour actualiser cette page avec les derniers résultats et highlights.</div>
+  </div>
+</div>
+
+</body>
+</html>
