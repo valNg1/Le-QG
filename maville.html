@@ -34,12 +34,21 @@
   .meteo-icon { font-size:26px; margin-bottom:4px; }
   .meteo-temps { font-size:13px; font-weight:700; }
   .meteo-temps .lo { color:var(--muted); font-weight:500; }
-  .poi-row { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); }
-  .poi-row:last-child { border-bottom:none; }
-  .poi-name { font-size:13px; font-weight:700; }
-  .poi-dist { font-size:11px; color:var(--muted); margin-top:1px; }
-  .poi-link { color:var(--sea); text-decoration:none; font-size:11px; font-weight:700; }
+  .poi-row, .evt-row { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); }
+  .poi-row:last-child, .evt-row:last-child { border-bottom:none; }
+  .poi-name, .evt-name { font-size:13px; font-weight:700; }
+  .poi-dist, .evt-date { font-size:11px; color:var(--muted); margin-top:1px; }
+  .poi-link, .evt-link { color:var(--sea); text-decoration:none; font-size:11px; font-weight:700; flex-shrink:0; }
   .aqi-badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:800; }
+  .search-wrap { padding:14px 16px; background:var(--surface); border-bottom:1px solid var(--border); }
+  .search-row { display:flex; gap:8px; }
+  .search-input { flex:1; background:var(--bg); border:1px solid var(--border2); border-radius:var(--r-sm); padding:11px 14px; font-family:var(--font); font-size:14px; color:var(--text); }
+  .search-input::placeholder { color:var(--muted2); }
+  .search-btn { background:var(--sea); color:#fff; border:none; border-radius:var(--r-sm); padding:11px 16px; font-family:var(--font); font-size:13px; font-weight:700; cursor:pointer; }
+  .search-results { margin-top:8px; }
+  .search-item { display:flex; flex-direction:column; align-items:flex-start; width:100%; background:var(--bg); border:1px solid var(--border2); border-radius:var(--r-sm); padding:10px 14px; margin-bottom:6px; font-family:var(--font); cursor:pointer; text-align:left; }
+  .search-item-name { font-size:13px; font-weight:700; color:var(--text); }
+  .search-item-region { font-size:11px; color:var(--muted); }
 </style>
 </head>
 <body>
@@ -49,42 +58,36 @@
   <div style="font-size:11px;color:var(--muted2);">Ma ville</div>
 </div>
 
-<!--
-  ════════════════════════════════════════════
-  CONFIG — la SEULE chose codée en dur sur cette page.
-  Tout le reste (météo, pollution, histoire, population, lieux à
-  visiter) est récupéré en direct via API à partir de ces 3 infos.
-  Pour changer de ville : changer uniquement ces 3 lignes.
-  ════════════════════════════════════════════
--->
-<script>
-const VILLE = { nom: "Quiberon", lat: 47.4844, lon: -3.1200 };
-</script>
+<div class="search-wrap">
+  <div class="search-row">
+    <input id="search-input" class="search-input" type="text" placeholder="Chercher une ville dans le monde...">
+    <button id="search-btn" class="search-btn">Chercher</button>
+  </div>
+  <div id="search-results" class="search-results"></div>
+</div>
 
 <div id="hero-photo-wrap"></div>
 <div class="hero-title-wrap">
-  <div class="hero-title">📍 <span id="ville-nom">Quiberon</span></div>
-  <div class="hero-sub" id="ville-coords">Chargement des données en direct…</div>
+  <div class="hero-title">📍 <span id="ville-nom">—</span></div>
+  <div class="hero-sub" id="ville-coords">Chargement…</div>
 </div>
 
 <div class="view">
 
   <p class="sec">📖 À propos</p>
-  <div class="card" id="topo-card"><div class="loading">Chargement depuis Wikipédia…</div></div>
+  <div class="card" id="topo-card"><div class="loading">…</div></div>
 
   <p class="sec">🌤 Météo — aujourd'hui, demain, après-demain</p>
-  <div class="card" id="meteo-card"><div class="loading">Chargement Open-Meteo…</div></div>
+  <div class="card" id="meteo-card"><div class="loading">…</div></div>
 
   <p class="sec">🌬 Qualité de l'air</p>
-  <div class="card" id="aqi-card"><div class="loading">Chargement…</div></div>
+  <div class="card" id="aqi-card"><div class="loading">…</div></div>
 
   <p class="sec">🏛 Lieux à visiter à proximité</p>
-  <div class="card" id="poi-card"><div class="loading">Recherche des points d'intérêt Wikipédia…</div></div>
+  <div class="card" id="poi-card"><div class="loading">…</div></div>
 
   <p class="sec">🎉 Événements</p>
-  <div class="card" id="events-card">
-    <div style="font-size:13px;color:var(--muted);line-height:1.6;">Pas de source fiable et gratuite couvrant les événements de toutes les communes — cette section se met à jour manuellement.<br><br>Demande une "mise à jour Quiberon" quand tu veux pour que j'aille chercher les événements à venir.</div>
-  </div>
+  <div class="card" id="events-card"><div class="loading">…</div></div>
 
 </div>
 
@@ -92,39 +95,102 @@ const VILLE = { nom: "Quiberon", lat: 47.4844, lon: -3.1200 };
 const WMO_ICONS = {0:"☀️",1:"🌤",2:"⛅",3:"☁️",45:"🌫",48:"🌫",51:"🌦",53:"🌦",55:"🌧",61:"🌧",63:"🌧",65:"🌧",71:"🌨",73:"🌨",75:"❄️",80:"🌦",81:"🌧",82:"⛈",95:"⛈",96:"⛈",99:"⛈"};
 const WMO_DESC = {0:"Ciel dégagé",1:"Peu nuageux",2:"Partiellement nuageux",3:"Couvert",45:"Brouillard",51:"Bruine légère",61:"Pluie légère",63:"Pluie",71:"Neige légère",80:"Averses",95:"Orage"};
 const JOURS = ["Aujourd'hui","Demain","Après-demain"];
+const STORAGE_KEY = "qg_maville_derniere";
 
-document.getElementById("ville-nom").textContent = VILLE.nom;
-document.getElementById("ville-coords").textContent = `${VILLE.lat.toFixed(3)}°N, ${Math.abs(VILLE.lon).toFixed(3)}°${VILLE.lon<0?"O":"E"}`;
+let VILLE = null;
 
-// ─── Topo (Wikipédia) : histoire + population, texte + photo ────────
-async function loadTopo() {
+function setVille(v) {
+  VILLE = v;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(v));
+  document.getElementById("ville-nom").textContent = v.nom;
+  document.getElementById("ville-coords").textContent =
+    `${v.lat.toFixed(3)}°N, ${Math.abs(v.lon).toFixed(3)}°${v.lon<0?"O":"E"}${v.pays ? " · " + v.pays : ""}`;
+  ["topo-card","meteo-card","aqi-card","poi-card","events-card"].forEach(id => {
+    document.getElementById(id).innerHTML = '<div class="loading">Chargement…</div>';
+  });
+  loadTopo(); loadMeteo(); loadAQI(); loadPOI(); loadEvents();
+}
+
+let searchTimer;
+document.getElementById("search-input").addEventListener("input", function() {
+  clearTimeout(searchTimer);
+  const q = this.value.trim();
+  if (q.length < 2) { document.getElementById("search-results").innerHTML = ""; return; }
+  searchTimer = setTimeout(() => searchCities(q), 350);
+});
+document.getElementById("search-btn").addEventListener("click", () => {
+  const q = document.getElementById("search-input").value.trim();
+  if (q.length >= 2) searchCities(q);
+});
+
+async function searchCities(query) {
+  const resultsEl = document.getElementById("search-results");
+  resultsEl.innerHTML = '<div style="padding:10px;color:var(--muted);font-size:13px;">Recherche…</div>';
   try {
-    const res = await fetch(`https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(VILLE.nom)}`);
+    const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=8&language=fr`);
     const data = await res.json();
-    const el = document.getElementById("topo-card");
-    if (data.extract) {
-      el.innerHTML = `<div style="font-size:13px;color:var(--text);line-height:1.7;">${data.extract}</div>
-        <div style="margin-top:10px;"><a href="${data.content_urls?.desktop?.page || '#'}" target="_blank" style="color:var(--sea);font-size:11px;font-weight:700;text-decoration:none;">Lire l'article complet sur Wikipédia →</a></div>`;
-    } else {
-      el.innerHTML = `<div style="font-size:13px;color:var(--muted);">Aucun article Wikipédia trouvé pour "${VILLE.nom}".</div>`;
+    const cities = data.results || [];
+    if (!cities.length) {
+      resultsEl.innerHTML = '<div style="padding:10px;color:var(--muted);font-size:13px;">Aucun résultat</div>';
+      return;
     }
-    if (data.thumbnail?.source) {
-      const wrap = document.getElementById("hero-photo-wrap");
-      wrap.innerHTML = `<img class="hero-photo" src="${data.originalimage?.source || data.thumbnail.source}" alt="${VILLE.nom}">`;
-    }
+    resultsEl.innerHTML = cities.map((c, i) => {
+      const region = [c.admin1, c.country].filter(Boolean).join(", ");
+      return `<button class="search-item" data-i="${i}">
+        <span class="search-item-name">${c.name}</span>
+        <span class="search-item-region">${region}</span>
+      </button>`;
+    }).join("");
+    resultsEl.querySelectorAll(".search-item").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const c = cities[+btn.dataset.i];
+        setVille({ nom: c.name, lat: c.latitude, lon: c.longitude, pays: c.country });
+        resultsEl.innerHTML = "";
+        document.getElementById("search-input").value = "";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    });
   } catch (e) {
-    document.getElementById("topo-card").innerHTML = `<div style="font-size:13px;color:var(--red);">Erreur de chargement Wikipédia.</div>`;
+    resultsEl.innerHTML = '<div style="padding:10px;color:var(--red);font-size:13px;">Erreur de recherche.</div>';
   }
 }
 
-// ─── Météo 3 jours (Open-Meteo) ──────────────────────────────────────
+async function fetchWikiSummary(nom, lang) {
+  const res = await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(nom)}`);
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data.extract ? data : null;
+}
+async function loadTopo() {
+  const el = document.getElementById("topo-card");
+  try {
+    let data = await fetchWikiSummary(VILLE.nom, "fr");
+    let lang = "fr";
+    if (!data) { data = await fetchWikiSummary(VILLE.nom, "en"); lang = "en"; }
+    if (data) {
+      el.innerHTML = `<div style="font-size:13px;color:var(--text);line-height:1.7;">${data.extract}</div>
+        <div style="margin-top:10px;display:flex;align-items:center;gap:8px;">
+          <a href="${data.content_urls?.desktop?.page || '#'}" target="_blank" style="color:var(--sea);font-size:11px;font-weight:700;text-decoration:none;">Lire l'article complet →</a>
+          ${lang==="en" ? '<span style="font-size:10px;color:var(--muted2);">(article en anglais, pas de version française trouvée)</span>' : ''}
+        </div>`;
+      const photo = data.originalimage?.source || data.thumbnail?.source;
+      document.getElementById("hero-photo-wrap").innerHTML = photo ? `<img class="hero-photo" src="${photo}" alt="${VILLE.nom}">` : "";
+    } else {
+      el.innerHTML = `<div style="font-size:13px;color:var(--muted);">Aucun article Wikipédia trouvé pour "${VILLE.nom}".</div>`;
+      document.getElementById("hero-photo-wrap").innerHTML = "";
+    }
+  } catch (e) {
+    el.innerHTML = '<div style="font-size:13px;color:var(--red);">Erreur de chargement Wikipédia.</div>';
+  }
+}
+
 async function loadMeteo() {
   try {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${VILLE.lat}&longitude=${VILLE.lon}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto&forecast_days=3`;
     const res = await fetch(url);
     const data = await res.json();
     const d = data.daily;
-    const html = `<div class="meteo-row">` + d.time.map((date, i) => `
+    const html = '<div class="meteo-row">' + d.time.map((date, i) => `
       <div class="meteo-day">
         <div class="meteo-day-label">${JOURS[i] || date}</div>
         <div class="meteo-icon">${WMO_ICONS[d.weathercode[i]] || "🌡"}</div>
@@ -133,11 +199,10 @@ async function loadMeteo() {
       <div style="font-size:11px;color:var(--muted);margin-top:10px;text-align:center;">${WMO_DESC[d.weathercode[0]] || ""} aujourd'hui</div>`;
     document.getElementById("meteo-card").innerHTML = html;
   } catch (e) {
-    document.getElementById("meteo-card").innerHTML = `<div style="font-size:13px;color:var(--red);">Erreur de chargement météo.</div>`;
+    document.getElementById("meteo-card").innerHTML = '<div style="font-size:13px;color:var(--red);">Erreur de chargement météo.</div>';
   }
 }
 
-// ─── Qualité de l'air (Open-Meteo Air Quality) ───────────────────────
 function aqiInfo(aqi) {
   if (aqi == null) return { label: "Inconnu", color: "var(--muted)" };
   if (aqi <= 20) return { label: "Très bon", color: "var(--green)" };
@@ -160,11 +225,10 @@ async function loadAQI() {
       </div>
       <div style="font-size:12px;color:var(--muted);margin-top:10px;">PM2.5 : ${cur.pm2_5 ?? "?"} µg/m³ · PM10 : ${cur.pm10 ?? "?"} µg/m³</div>`;
   } catch (e) {
-    document.getElementById("aqi-card").innerHTML = `<div style="font-size:13px;color:var(--red);">Erreur de chargement qualité de l'air.</div>`;
+    document.getElementById("aqi-card").innerHTML = '<div style="font-size:13px;color:var(--red);">Erreur de chargement qualité de l\'air.</div>';
   }
 }
 
-// ─── Lieux à visiter (recherche géographique Wikipédia) ──────────────
 function distLabel(m) {
   return m < 1000 ? `${Math.round(m)} m` : `${(m/1000).toFixed(1)} km`;
 }
@@ -175,7 +239,7 @@ async function loadPOI() {
     const data = await res.json();
     const results = (data.query?.geosearch || []).filter(p => p.title !== VILLE.nom);
     if (!results.length) {
-      document.getElementById("poi-card").innerHTML = `<div style="font-size:13px;color:var(--muted);">Aucun lieu trouvé à proximité.</div>`;
+      document.getElementById("poi-card").innerHTML = '<div style="font-size:13px;color:var(--muted);">Aucun lieu trouvé à proximité.</div>';
       return;
     }
     document.getElementById("poi-card").innerHTML = results.slice(0, 10).map(p => `
@@ -187,14 +251,37 @@ async function loadPOI() {
         <a class="poi-link" href="https://fr.wikipedia.org/wiki/${encodeURIComponent(p.title.replace(/ /g,'_'))}" target="_blank">Voir →</a>
       </div>`).join("");
   } catch (e) {
-    document.getElementById("poi-card").innerHTML = `<div style="font-size:13px;color:var(--red);">Erreur de recherche des lieux à visiter.</div>`;
+    document.getElementById("poi-card").innerHTML = '<div style="font-size:13px;color:var(--red);">Erreur de recherche des lieux à visiter.</div>';
   }
 }
 
-loadTopo();
-loadMeteo();
-loadAQI();
-loadPOI();
+async function loadEvents() {
+  const el = document.getElementById("events-card");
+  try {
+    const url = `https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/evenements-publics-openagenda/records?where=distance(location_coordinates,geom%27POINT(${VILLE.lon}%20${VILLE.lat})%27,20km)&limit=8`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    const events = data.results || [];
+    if (!events.length) {
+      el.innerHTML = `<div style="font-size:13px;color:var(--muted);line-height:1.6;">Aucun événement trouvé dans la base publique OpenAgenda pour cette zone (couverture variable selon les communes).<br><br>Demande une "mise à jour ${VILLE.nom}" pour que je cherche manuellement les événements à venir.</div>`;
+      return;
+    }
+    el.innerHTML = events.map(e => `
+      <div class="evt-row">
+        <div style="flex:1;">
+          <div class="evt-name">${e.title_fr || e.title || "Événement"}</div>
+          <div class="evt-date">${e.firstdate_begin ? new Date(e.firstdate_begin).toLocaleDateString('fr-FR', {day:'numeric',month:'short'}) : ""}</div>
+        </div>
+        ${e.canonicalurl ? `<a class="evt-link" href="${e.canonicalurl}" target="_blank">Voir →</a>` : ""}
+      </div>`).join("");
+  } catch (e) {
+    el.innerHTML = `<div style="font-size:13px;color:var(--muted);line-height:1.6;">Pas de source fiable et gratuite couvrant les événements de toutes les communes (base OpenAgenda inaccessible ou vide pour cette zone).<br><br>Demande une "mise à jour ${VILLE.nom}" pour que je cherche manuellement les événements à venir.</div>`;
+  }
+}
+
+const saved = localStorage.getItem(STORAGE_KEY);
+setVille(saved ? JSON.parse(saved) : { nom: "Quiberon", lat: 47.4844, lon: -3.1200, pays: "France" });
 </script>
 
 </body>
