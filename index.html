@@ -1232,16 +1232,11 @@ let obAvatar = "🧑";
 function obNext() {
   const name = document.getElementById("ob-name").value.trim();
   if (!name || name.length < 2) { document.getElementById("ob-err").textContent = "Prénom trop court"; return; }
-  // Nouveau profil (prénom différent) = repart de données vierges
-  // pour ne pas hériter des tâches/events d'un ancien utilisateur de cet appareil
-  if (state.name && state.name !== name) {
-    const freshState = {};
-    Object.keys(state).forEach(k => delete state[k]);
-    Object.assign(state, freshState);
-    // Purge aussi les caches annexes
-    Object.keys(localStorage).filter(k => k.startsWith("qg_quiz_seen")).forEach(k => localStorage.removeItem(k));
-    localStorage.removeItem("qg_quiz_wrong");
-  }
+  // Depuis le passage à de vrais comptes Firebase, c'est la connexion —
+  // pas le prénom tapé ici — qui identifie la personne. On ne purge donc
+  // plus jamais les données locales sur simple changement de prénom (ex.
+  // après une perte de stockage local, ressaisir son prénom ne doit rien
+  // effacer d'autre : tâches, historique quiz, etc. restent intacts).
   state.name = name; state.avatar = obAvatar || "🧑";
   finishOnboarding();
 }
@@ -5151,7 +5146,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.50";
+const APP_VERSION = "3.3.51";
 console.log("📦 Le Général v" + APP_VERSION);
 const footerVersionEl = document.getElementById("footer-version");
 if (footerVersionEl) footerVersionEl.textContent = "Le Général v" + APP_VERSION;
