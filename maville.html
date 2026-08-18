@@ -258,11 +258,18 @@ async function loadPOI() {
 async function loadEvents() {
   const el = document.getElementById("events-card");
   try {
-    const url = `https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/evenements-publics-openagenda/records?where=distance(location_coordinates,geom%27POINT(${VILLE.lon}%20${VILLE.lat})%27,20km)&limit=8`;
+    const url = `https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/evenements-publics-openagenda/records?where=distance(location_coordinates,geom%27POINT(${VILLE.lon}%20${VILLE.lat})%27,20km)&order_by=firstdate_begin%20asc&limit=8`;
     const res = await fetch(url);
     if (!res.ok) throw new Error("HTTP " + res.status);
     const data = await res.json();
-    const events = data.results || [];
+    // Tri chronologique garanti côté client (indépendant de l'ordre
+    // effectivement renvoyé par l'API) — événements sans date connue
+    // relégués en fin de liste plutôt qu'exclus.
+    const events = (data.results || []).slice().sort((a, b) => {
+      if (!a.firstdate_begin) return 1;
+      if (!b.firstdate_begin) return -1;
+      return new Date(a.firstdate_begin) - new Date(b.firstdate_begin);
+    });
     if (!events.length) {
       el.innerHTML = `<div style="font-size:13px;color:var(--muted);line-height:1.6;">Aucun événement trouvé dans la base publique OpenAgenda pour cette zone (couverture variable selon les communes).<br><br>Demande une "mise à jour ${VILLE.nom}" pour que je cherche manuellement les événements à venir.</div>`;
       return;
