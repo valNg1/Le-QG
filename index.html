@@ -1160,7 +1160,24 @@ let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null") || {
   annivs: [], events: [], mur: [], diner: {}
 };
 
-function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {
+    console.log("saveState error:", e.message);
+    // Le stockage local est bloqué (navigation privée, réglages navigateur
+    // très restrictifs...) : sans lui, on ne peut jamais dépasser l'écran
+    // prénom/avatar puisque state.onboarded ne peut jamais être retenu.
+    // Mieux vaut le dire clairement que de rester bloqué sans explication.
+    if (!document.getElementById("storage-blocked-banner")) {
+      const b = document.createElement("div");
+      b.id = "storage-blocked-banner";
+      b.style.cssText = "position:fixed;bottom:0;left:0;right:0;background:#B3261E;color:#fff;padding:14px 16px;font-family:sans-serif;font-size:13px;text-align:center;z-index:99999;";
+      b.textContent = "⚠️ Le stockage local de ce navigateur est bloqué (navigation privée ?) — l'app ne peut pas retenir tes informations. Essaie en navigation normale.";
+      document.body.appendChild(b);
+    }
+  }
+}
 
 // ════════════════════════════════════════════
 // DONNÉES
@@ -5134,7 +5151,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.49";
+const APP_VERSION = "3.3.50";
 console.log("📦 Le Général v" + APP_VERSION);
 const footerVersionEl = document.getElementById("footer-version");
 if (footerVersionEl) footerVersionEl.textContent = "Le Général v" + APP_VERSION;
