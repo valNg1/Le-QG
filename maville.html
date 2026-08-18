@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ma ville — Le Général</title>
+<style>
+  :root {
+    --bg:#0B1420; --surface:#132234; --surface2:#1A2E44; --border:rgba(255,255,255,.08); --border2:rgba(255,255,255,.14);
+    --text:#F0F4F8; --muted:#8FA3B8; --muted2:#5A6E82;
+    --sand:#E8C170; --sea:#2E8FA3; --green:#3DA35D; --red:#D64545;
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    --r:16px; --r-sm:10px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  body { background:var(--bg); color:var(--text); font-family:var(--font); padding-bottom:40px; }
+  .back-to-qg { color:var(--muted); text-decoration:none; font-size:12px; font-weight:600; }
+  .header-bar { background:#0B1420; padding:10px 16px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); }
+  .hero-photo { width:100%; height:180px; object-fit:cover; background:var(--surface); display:block; }
+  .hero-title-wrap { padding:16px; background:linear-gradient(135deg,#0E2A3A,#0B1420); border-bottom:1px solid var(--border); }
+  .hero-title { font-size:24px; font-weight:800; display:flex; align-items:center; gap:8px; }
+  .hero-sub { font-size:12px; color:var(--muted); margin-top:4px; }
+  .view { padding:16px; }
+  .sec { font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin:20px 0 8px; }
+  .sec:first-child { margin-top:0; }
+  .card { background:var(--surface); border-radius:var(--r); border:1px solid var(--border); padding:16px; margin-bottom:12px; }
+  .loading { font-size:13px; color:var(--muted); padding:12px 0; }
+  .meteo-row { display:flex; gap:8px; }
+  .meteo-day { flex:1; background:var(--surface2); border-radius:var(--r-sm); padding:12px 6px; text-align:center; }
+  .meteo-day-label { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px; }
+  .meteo-icon { font-size:26px; margin-bottom:4px; }
+  .meteo-temps { font-size:13px; font-weight:700; }
+  .meteo-temps .lo { color:var(--muted); font-weight:500; }
+  .poi-row { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); }
+  .poi-row:last-child { border-bottom:none; }
+  .poi-name { font-size:13px; font-weight:700; }
+  .poi-dist { font-size:11px; color:var(--muted); margin-top:1px; }
+  .poi-link { color:var(--sea); text-decoration:none; font-size:11px; font-weight:700; }
+  .aqi-badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:800; }
+</style>
+</head>
+<body>
+
+<div class="header-bar">
+  <a href="https://legeneral.org" class="back-to-qg">← Le Général</a>
+  <div style="font-size:11px;color:var(--muted2);">Ma ville</div>
+</div>
+
+<!--
+  ════════════════════════════════════════════
+  CONFIG — la SEULE chose codée en dur sur cette page.
+  Tout le reste (météo, pollution, histoire, population, lieux à
+  visiter) est récupéré en direct via API à partir de ces 3 infos.
+  Pour changer de ville : changer uniquement ces 3 lignes.
+  ════════════════════════════════════════════
+-->
+<script>
+const VILLE = { nom: "Quiberon", lat: 47.4844, lon: -3.1200 };
+</script>
+
+<div id="hero-photo-wrap"></div>
+<div class="hero-title-wrap">
+  <div class="hero-title">📍 <span id="ville-nom">Quiberon</span></div>
+  <div class="hero-sub" id="ville-coords">Chargement des données en direct…</div>
+</div>
+
+<div class="view">
+
+  <p class="sec">📖 À propos</p>
+  <div class="card" id="topo-card"><div class="loading">Chargement depuis Wikipédia…</div></div>
+
+  <p class="sec">🌤 Météo — aujourd'hui, demain, après-demain</p>
+  <div class="card" id="meteo-card"><div class="loading">Chargement Open-Meteo…</div></div>
+
+  <p class="sec">🌬 Qualité de l'air</p>
+  <div class="card" id="aqi-card"><div class="loading">Chargement…</div></div>
+
+  <p class="sec">🏛 Lieux à visiter à proximité</p>
+  <div class="card" id="poi-card"><div class="loading">Recherche des points d'intérêt Wikipédia…</div></div>
+
+  <p class="sec">🎉 Événements</p>
+  <div class="card" id="events-card">
+    <div style="font-size:13px;color:var(--muted);line-height:1.6;">Pas de source fiable et gratuite couvrant les événements de toutes les communes — cette section se met à jour manuellement.<br><br>Demande une "mise à jour Quiberon" quand tu veux pour que j'aille chercher les événements à venir.</div>
+  </div>
+
+</div>
+
+<script>
+const WMO_ICONS = {0:"☀️",1:"🌤",2:"⛅",3:"☁️",45:"🌫",48:"🌫",51:"🌦",53:"🌦",55:"🌧",61:"🌧",63:"🌧",65:"🌧",71:"🌨",73:"🌨",75:"❄️",80:"🌦",81:"🌧",82:"⛈",95:"⛈",96:"⛈",99:"⛈"};
+const WMO_DESC = {0:"Ciel dégagé",1:"Peu nuageux",2:"Partiellement nuageux",3:"Couvert",45:"Brouillard",51:"Bruine légère",61:"Pluie légère",63:"Pluie",71:"Neige légère",80:"Averses",95:"Orage"};
+const JOURS = ["Aujourd'hui","Demain","Après-demain"];
+
+document.getElementById("ville-nom").textContent = VILLE.nom;
+document.getElementById("ville-coords").textContent = `${VILLE.lat.toFixed(3)}°N, ${Math.abs(VILLE.lon).toFixed(3)}°${VILLE.lon<0?"O":"E"}`;
+
+// ─── Topo (Wikipédia) : histoire + population, texte + photo ────────
+async function loadTopo() {
+  try {
+    const res = await fetch(`https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(VILLE.nom)}`);
+    const data = await res.json();
+    const el = document.getElementById("topo-card");
+    if (data.extract) {
+      el.innerHTML = `<div style="font-size:13px;color:var(--text);line-height:1.7;">${data.extract}</div>
+        <div style="margin-top:10px;"><a href="${data.content_urls?.desktop?.page || '#'}" target="_blank" style="color:var(--sea);font-size:11px;font-weight:700;text-decoration:none;">Lire l'article complet sur Wikipédia →</a></div>`;
+    } else {
+      el.innerHTML = `<div style="font-size:13px;color:var(--muted);">Aucun article Wikipédia trouvé pour "${VILLE.nom}".</div>`;
+    }
+    if (data.thumbnail?.source) {
+      const wrap = document.getElementById("hero-photo-wrap");
+      wrap.innerHTML = `<img class="hero-photo" src="${data.originalimage?.source || data.thumbnail.source}" alt="${VILLE.nom}">`;
+    }
+  } catch (e) {
+    document.getElementById("topo-card").innerHTML = `<div style="font-size:13px;color:var(--red);">Erreur de chargement Wikipédia.</div>`;
+  }
+}
+
+// ─── Météo 3 jours (Open-Meteo) ──────────────────────────────────────
+async function loadMeteo() {
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${VILLE.lat}&longitude=${VILLE.lon}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto&forecast_days=3`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const d = data.daily;
+    const html = `<div class="meteo-row">` + d.time.map((date, i) => `
+      <div class="meteo-day">
+        <div class="meteo-day-label">${JOURS[i] || date}</div>
+        <div class="meteo-icon">${WMO_ICONS[d.weathercode[i]] || "🌡"}</div>
+        <div class="meteo-temps">${Math.round(d.temperature_2m_max[i])}° <span class="lo">${Math.round(d.temperature_2m_min[i])}°</span></div>
+      </div>`).join("") + `</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:10px;text-align:center;">${WMO_DESC[d.weathercode[0]] || ""} aujourd'hui</div>`;
+    document.getElementById("meteo-card").innerHTML = html;
+  } catch (e) {
+    document.getElementById("meteo-card").innerHTML = `<div style="font-size:13px;color:var(--red);">Erreur de chargement météo.</div>`;
+  }
+}
+
+// ─── Qualité de l'air (Open-Meteo Air Quality) ───────────────────────
+function aqiInfo(aqi) {
+  if (aqi == null) return { label: "Inconnu", color: "var(--muted)" };
+  if (aqi <= 20) return { label: "Très bon", color: "var(--green)" };
+  if (aqi <= 40) return { label: "Bon", color: "var(--green)" };
+  if (aqi <= 60) return { label: "Moyen", color: "var(--sand)" };
+  if (aqi <= 80) return { label: "Dégradé", color: "#E08A3C" };
+  if (aqi <= 100) return { label: "Mauvais", color: "var(--red)" };
+  return { label: "Très mauvais", color: "var(--red)" };
+}
+async function loadAQI() {
+  try {
+    const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${VILLE.lat}&longitude=${VILLE.lon}&current=european_aqi,pm2_5,pm10`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const cur = data.current;
+    const info = aqiInfo(cur.european_aqi);
+    document.getElementById("aqi-card").innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span class="aqi-badge" style="background:${info.color}22;color:${info.color};border:1px solid ${info.color}55;">Indice ${cur.european_aqi ?? "?"} — ${info.label}</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:10px;">PM2.5 : ${cur.pm2_5 ?? "?"} µg/m³ · PM10 : ${cur.pm10 ?? "?"} µg/m³</div>`;
+  } catch (e) {
+    document.getElementById("aqi-card").innerHTML = `<div style="font-size:13px;color:var(--red);">Erreur de chargement qualité de l'air.</div>`;
+  }
+}
+
+// ─── Lieux à visiter (recherche géographique Wikipédia) ──────────────
+function distLabel(m) {
+  return m < 1000 ? `${Math.round(m)} m` : `${(m/1000).toFixed(1)} km`;
+}
+async function loadPOI() {
+  try {
+    const url = `https://fr.wikipedia.org/w/api.php?action=query&list=geosearch&gscoord=${VILLE.lat}|${VILLE.lon}&gsradius=10000&gslimit=12&format=json&origin=*`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const results = (data.query?.geosearch || []).filter(p => p.title !== VILLE.nom);
+    if (!results.length) {
+      document.getElementById("poi-card").innerHTML = `<div style="font-size:13px;color:var(--muted);">Aucun lieu trouvé à proximité.</div>`;
+      return;
+    }
+    document.getElementById("poi-card").innerHTML = results.slice(0, 10).map(p => `
+      <div class="poi-row">
+        <div style="flex:1;">
+          <div class="poi-name">${p.title}</div>
+          <div class="poi-dist">${distLabel(p.dist)}</div>
+        </div>
+        <a class="poi-link" href="https://fr.wikipedia.org/wiki/${encodeURIComponent(p.title.replace(/ /g,'_'))}" target="_blank">Voir →</a>
+      </div>`).join("");
+  } catch (e) {
+    document.getElementById("poi-card").innerHTML = `<div style="font-size:13px;color:var(--red);">Erreur de recherche des lieux à visiter.</div>`;
+  }
+}
+
+loadTopo();
+loadMeteo();
+loadAQI();
+loadPOI();
+</script>
+
+</body>
+</html>

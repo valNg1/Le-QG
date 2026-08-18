@@ -1221,6 +1221,7 @@ const WIDGET_DEFS = [
   { id:"cdm",      name:"Coupe du Monde 2026", desc:"App complète USA/Canada/Mexique",     emoji:"🏆" },
   { id:"rugby",    name:"Top 14 2026-2027",    desc:"Saison à venir — clubs, dates, format", emoji:"🏉" },
   { id:"bloomington", name:"Sports Bloomington", desc:"IU Hoosiers & Indiana Pacers",       emoji:"🏀" },
+  { id:"maville",  name:"Ma ville",            desc:"Quiberon — météo, air, histoire, à visiter", emoji:"📍" },
   { id:"taches",   name:"Tâches ménagères",   desc:"Répartition aléatoire entre membres",  emoji:"🧹" },
 ];
 
@@ -2051,6 +2052,7 @@ function renderWidgetsZone() {
     {id:"cdm",   emoji:"⚽", nom:"Coupe du Monde 2026",    sub:"🇪🇸 Championne du monde",     url:"cdm2026.html",   color:"#34C77B"},
     {id:"rugby", emoji:"🏉", nom:"Top 14 2026-2027",       sub:"Dès le 5 sept.",    url:"rugby2026.html", color:"#C9A84C"},
     {id:"bloomington", emoji:"🏀", nom:"Sports Bloomington", sub:"🏆 IU champions NCAAF",    url:"bloomington2026.html", color:"#C9A84C"},
+    {id:"maville", emoji:"📍", nom:"Ma ville",  sub:"Quiberon — météo, air, à visiter",    url:"maville.html", color:"#2E8FA3"},
   ];
   sportApps.forEach(a => {
     if (!state.widgets[a.id]) return;
@@ -5146,7 +5148,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.51";
+const APP_VERSION = "3.3.52";
 console.log("📦 Le Général v" + APP_VERSION);
 const footerVersionEl = document.getElementById("footer-version");
 if (footerVersionEl) footerVersionEl.textContent = "Le Général v" + APP_VERSION;
