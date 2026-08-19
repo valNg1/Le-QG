@@ -4165,6 +4165,7 @@ function addTachePerso() {
   };
   state.tachesPerso.push(t);
   saveState();
+  syncTachesToFirestore();
   const titleEl = document.getElementById("tp-title");
   const dateEl = document.getElementById("tp-date");
   if (titleEl) titleEl.value = "";
@@ -4182,19 +4183,19 @@ function toggleTachePerso(id) {
   if (!t) return;
   t.done = !t.done;
   if (t.done) t.doneAt = Date.now();
-  saveState(); renderTachesPerso(); renderBandeau();
+  saveState(); syncTachesToFirestore(); renderTachesPerso(); renderBandeau();
 }
 
 function toggleTachePersoStar(id) {
   const t = (state.tachesPerso||[]).find(x=>x.id===id);
   if (!t) return;
   t.star = !t.star;
-  saveState(); renderTachesPerso(); renderBandeau();
+  saveState(); syncTachesToFirestore(); renderTachesPerso(); renderBandeau();
 }
 
 function deleteTachePerso(id) {
   state.tachesPerso = (state.tachesPerso||[]).filter(x=>x.id!==id);
-  saveState(); renderTachesPerso(); renderBandeau();
+  saveState(); syncTachesToFirestore(); renderTachesPerso(); renderBandeau();
 }
 
 function renderTachesPerso() {
@@ -4231,8 +4232,47 @@ function renderTachesPerso() {
 
 function clearDoneTaches() {
   state.tachesPerso = (state.tachesPerso||[]).filter(t=>!t.done);
-  saveState(); renderTachesPerso(); renderBandeau();
+  saveState(); syncTachesToFirestore(); renderTachesPerso(); renderBandeau();
   showToast("Tâches terminées supprimées ✓");
+}
+
+// Sauvegarde les tâches perso sur le serveur (users/{uid}/data/tachesPerso),
+// en plus du localStorage — pour qu'elles survivent à une perte du
+// stockage local de l'appareil (navigation privée, nettoyage auto...).
+// Fire-and-forget : ne bloque jamais l'UI, erreurs juste journalisées.
+function syncTachesToFirestore() {
+  if (!firebaseReady) return;
+  const uid = firebase.auth()?.currentUser?.uid;
+  if (!uid) return;
+  db.collection("users").doc(uid).collection("data").doc("tachesPerso")
+    .set({ items: state.tachesPerso || [] })
+    .catch(e => console.log("syncTachesToFirestore error:", e.message));
+}
+
+// Recharge les tâches perso depuis le serveur au démarrage. En cas de
+// conflit (tâches locales ET distantes différentes après une perte de
+// stockage local suivie d'ajouts sur un autre appareil), le serveur fait
+// foi — c'est la copie durable.
+async function loadTachesFromFirestore() {
+  if (!firebaseReady) return;
+  const uid = firebase.auth()?.currentUser?.uid;
+  if (!uid) return;
+  try {
+    const doc = await db.collection("users").doc(uid).collection("data").doc("tachesPerso").get();
+    if (doc.exists) {
+      state.tachesPerso = doc.data().items || [];
+      saveState();
+      try { renderTachesPerso(); } catch(e) {}
+      try { renderBandeau(); } catch(e) {}
+    } else if (state.tachesPerso && state.tachesPerso.length) {
+      // Premier passage après ce correctif : rien sur le serveur mais
+      // des tâches locales existent encore -> on les envoie une fois
+      // pour amorcer la sauvegarde serveur.
+      syncTachesToFirestore();
+    }
+  } catch (e) {
+    console.log("loadTachesFromFirestore error:", e.message);
+  }
 }
 
 // ════════════════════════════════════════════
@@ -5164,7 +5204,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.55";
+const APP_VERSION = "3.3.56";
 console.log("📦 Le Général v" + APP_VERSION);
 const footerVersionEl = document.getElementById("footer-version");
 if (footerVersionEl) footerVersionEl.textContent = "Le Général v" + APP_VERSION;
@@ -5194,6 +5234,7 @@ function proceedAfterAuth() {
   updateHeader();
   setInterval(updateHeader, 60000);
   syncMyMemberProfile();
+  loadTachesFromFirestore();
 
   document.getElementById("ob-step2")?.classList.add("hidden");
   document.getElementById("ob-step3")?.classList.add("hidden");
