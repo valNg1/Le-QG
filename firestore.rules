@@ -170,6 +170,16 @@ service cloud.firestore {
       match /diner/{dateKey} {
         allow read, write: if isActiveHouseholdMember(code);
       }
+
+      // Profil live de chaque membre (prénom/avatar). Chaque personne
+      // écrit UNIQUEMENT son propre document — jamais celui d'un autre —
+      // ce qui tient à jour la liste "Membres" sans jamais toucher au
+      // document principal du foyer (réservé aux admins ci-dessus).
+      match /members/{uid} {
+        allow read: if isActiveHouseholdMember(code);
+        allow create, update: if request.auth != null && request.auth.uid == uid && isActiveHouseholdMember(code);
+        allow delete: if false;
+      }
     }
   }
 }
