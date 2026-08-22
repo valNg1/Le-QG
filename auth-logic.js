@@ -91,8 +91,8 @@
 
   // Construit le payload d'une nouvelle demande d'adhésion (self-service).
   // Toujours "pending" — jamais un statut qui donnerait un accès direct.
-  function buildJoinRequestPayload(uid, code) {
-    return { uid, code, status: "pending" };
+  function buildJoinRequestPayload(uid, code, name) {
+    return { uid, code, name: name || "", status: "pending" };
   }
 
   // Construit le payload d'une adhésion APPROUVÉE. Toujours role:

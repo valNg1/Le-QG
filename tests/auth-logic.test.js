@@ -137,10 +137,11 @@ test("un admin dont l'adhésion est désactivée ne peut plus approuver", () => 
 
 // ─── Payloads : un utilisateur ne peut jamais s'attribuer admin/super-admin ───
 test("une demande d'adhésion est toujours construite en statut pending", () => {
-  const payload = buildJoinRequestPayload("u1", "ABC123");
+  const payload = buildJoinRequestPayload("u1", "ABC123", "Val");
   assert.equal(payload.status, "pending");
   assert.equal(payload.uid, "u1");
   assert.equal(payload.code, "ABC123");
+  assert.equal(payload.name, "Val");
 });
 
 test("une adhésion approuvée est TOUJOURS construite avec role member, jamais admin ni super-admin", () => {
@@ -223,7 +224,7 @@ test("messages d'erreur d'inscription distincts et informatifs", () => {
 // ─── Revue sécurité du 27/07/2026 (suite) : chemin strict, immutabilité, atomicité ───
 
 test("une demande d'adhésion ne référence jamais un uid ou un code différents de ceux fournis (cohérence chemin/contenu)", () => {
-  const payload = buildJoinRequestPayload("u1", "ABC123");
+  const payload = buildJoinRequestPayload("u1", "ABC123", "Val");
   // Le document est écrit à users/{uid}/membershipRequests/{code} — ces
   // deux champs DOIVENT correspondre exactement aux segments du chemin
   // (imposé aussi côté firestore.rules : request.resource.data.uid == uid

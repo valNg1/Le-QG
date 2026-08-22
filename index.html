@@ -406,6 +406,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
   <div style="font-size:20px;font-weight:800;color:var(--text);margin-bottom:8px;">Rejoins un foyer</div>
   <div style="font-size:14px;color:var(--muted);line-height:1.5;max-width:300px;margin-bottom:24px;">Demande le code à 6 caractères à un membre déjà présent dans le foyer. Un admin devra approuver ta demande.</div>
   <form id="join-household-form" style="width:100%;max-width:280px;">
+    <input id="join-household-name" type="text" maxlength="30" placeholder="Ton prénom" style="width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;font-family:var(--font);font-size:16px;text-align:center;color:var(--text);margin-bottom:10px;">
     <input id="join-household-code" type="text" maxlength="6" placeholder="Ex: 8W5D2B" style="width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;font-family:var(--font);font-size:16px;letter-spacing:.1em;text-align:center;text-transform:uppercase;color:var(--text);margin-bottom:10px;">
     <div id="join-household-error" style="display:none;color:var(--red);font-size:13px;margin-bottom:12px;"></div>
     <button id="join-household-submit-btn" type="submit" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:14px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;">Envoyer la demande</button>
@@ -2216,8 +2217,15 @@ function renderGroupe() {
       <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Foyer affiché</div>
       <div style="font-size:18px;font-weight:800;color:var(--yellow);letter-spacing:.12em;margin-bottom:6px;">${state.groupCode}</div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Lien d'invitation :<br><span style="color:var(--yellow);font-size:11px;word-break:break-all;">${inviteUrl}</span></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
         <button id="copy-invite-btn" style="background:var(--yellow-light);border:1px solid rgba(247,193,4,.3);color:var(--yellow);border-radius:20px;padding:7px 16px;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;">📋 Copier le lien</button>
+      </div>
+      <div style="background:var(--surface2);border-radius:var(--r-sm);padding:10px 12px;font-size:11px;color:var(--muted);line-height:1.6;">
+        <strong style="color:var(--text);">Comment ça marche :</strong><br>
+        1. Partage ce lien (ou juste le code ${state.groupCode})<br>
+        2. La personne crée son compte et envoie une demande<br>
+        3. ${myAdminCodes.includes(state.groupCode) ? `Sa demande apparaît ci-dessous dans "📥 Demandes en attente" — approuve-la (✓)` : `Un admin de ce foyer doit approuver sa demande (toi non, tu n'es pas admin ici)`}<br>
+        4. Une fois approuvée, elle apparaît dans "Membres" ci-dessous
       </div>
     </div>
     <div id="membres-liste" style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-top:12px;"><div class="info-label">Membres</div><div class="loading">Chargement...</div></div>` : ""}`;
@@ -2245,7 +2253,7 @@ function renderGroupe() {
     if (joinBtn) joinBtn.onclick = async () => {
       const codeEl = document.getElementById("join-other-code");
       const msgEl = document.getElementById("join-other-msg");
-      const ok = await submitJoinRequest(codeEl?.value, msgEl, joinBtn);
+      const ok = await submitJoinRequest(codeEl?.value, state.name, msgEl, joinBtn);
       if (ok) {
         if (codeEl) codeEl.value = "";
         if (msgEl) { msgEl.style.color = "var(--green)"; msgEl.textContent = "Demande envoyée — en attente de validation par un admin du foyer."; msgEl.style.display = "block"; }
@@ -2280,7 +2288,7 @@ async function loadPendingRequests(adminCodes) {
     el.innerHTML = allRequests.map(r => `
       <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
         <div style="flex:1;">
-          <div style="font-size:13px;font-weight:700;color:var(--text);">${r.uid.slice(0,8)}…</div>
+          <div style="font-size:13px;font-weight:700;color:var(--text);">${r.name || "(prénom non renseigné)"}</div>
           <div style="font-size:11px;color:var(--muted);">Foyer ${r.code}</div>
         </div>
         <button class="approve-request-btn" data-uid="${r.uid}" data-code="${r.code}" style="background:var(--green);color:#fff;border:none;border-radius:16px;padding:6px 12px;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;">✓</button>
@@ -3533,19 +3541,87 @@ const QUIZ_QUESTIONS = [
   {q:"Quel pourcentage approximatif de l'atmosphère terrestre est composé d'azote ?",opts:["78%","50%","21%","90%"],a:0,t:"science"},
   {q:"Quelle est la plus petite unité de vie autonome ?",opts:["La cellule","L'atome","La molécule","Le tissu"],a:0,t:"science"},
   // ─── Culture (suite) ───
-  {q:"Qui a peint la Joconde ?",opts:["Léonard de Vinci","Michel-Ange","Raphaël","Botticelli"],a:0,t:"culture"},
-  {q:"Quel écrivain français a écrit \"Les Misérables\" ?",opts:["Victor Hugo","Émile Zola","Gustave Flaubert","Alexandre Dumas"],a:0,t:"culture"},
   {q:"Quel compositeur allemand est devenu sourd et a continué à composer ?",opts:["Beethoven","Mozart","Bach","Brahms"],a:0,t:"culture"},
-  {q:"Dans quel musée parisien se trouve la Joconde ?",opts:["Le Louvre","Le musée d'Orsay","Le Centre Pompidou","Le Petit Palais"],a:0,t:"culture"},
   {q:"Quel mouvement artistique est associé à Claude Monet et Renoir ?",opts:["L'impressionnisme","Le cubisme","Le surréalisme","Le fauvisme"],a:0,t:"culture"},
-  {q:"Qui a sculpté \"Le Penseur\" ?",opts:["Auguste Rodin","Camille Claudel","Antoine Bourdelle","Aristide Maillol"],a:0,t:"culture"},
-  {q:"Quel écrivain a créé le personnage de Sherlock Holmes ?",opts:["Arthur Conan Doyle","Agatha Christie","Charles Dickens","Oscar Wilde"],a:0,t:"culture"},
   {q:"Quel peintre espagnol est célèbre pour le cubisme ?",opts:["Pablo Picasso","Salvador Dalí","Joan Miró","Diego Velázquez"],a:0,t:"culture"},
   {q:"Quel opéra célèbre a été composé par Bizet ?",opts:["Carmen","La Traviata","Aïda","La Bohème"],a:0,t:"culture"},
   {q:"Quel écrivain russe a écrit \"Guerre et Paix\" ?",opts:["Léon Tolstoï","Fiodor Dostoïevski","Anton Tchekhov","Nicolas Gogol"],a:0,t:"culture"},
   {q:"Quel style musical est né à La Nouvelle-Orléans au début du 20e siècle ?",opts:["Le jazz","Le blues","Le rock","Le reggae"],a:0,t:"culture"},
-  {q:"Quel peintre néerlandais a peint \"La Nuit étoilée\" ?",opts:["Vincent van Gogh","Rembrandt","Vermeer","Bosch"],a:0,t:"culture"},
   {q:"Quel est le nom du célèbre ballet de Tchaïkovski avec des cygnes ?",opts:["Le Lac des cygnes","Casse-Noisette","La Belle au bois dormant","Giselle"],a:0,t:"culture"},
+  {q:"Qui a écrit \"Cent ans de solitude\" ?",opts:["Gabriel García Márquez","Mario Vargas Llosa","Julio Cortázar","Jorge Luis Borges"],a:0,t:"culture"},
+  {q:"Quel peintre italien a peint le plafond de la chapelle Sixtine ?",opts:["Michel-Ange","Raphaël","Léonard de Vinci","Le Titien"],a:0,t:"culture"},
+  {q:"Qui a composé l'opéra \"La Flûte enchantée\" ?",opts:["Mozart","Beethoven","Verdi","Wagner"],a:0,t:"culture"},
+  {q:"Quel écrivain britannique a créé le personnage de Winnie l'Ourson ?",opts:["A. A. Milne","Lewis Carroll","J. M. Barrie","Roald Dahl"],a:0,t:"culture"},
+  {q:"Dans quelle ville se trouve le musée du Prado ?",opts:["Madrid","Barcelone","Lisbonne","Séville"],a:0,t:"culture"},
+  {q:"Qui a peint \"Les Demoiselles d'Avignon\" ?",opts:["Picasso","Matisse","Braque","Modigliani"],a:0,t:"culture"},
+  {q:"Quel écrivain a écrit \"À la recherche du temps perdu\" ?",opts:["Marcel Proust","André Gide","Paul Valéry","Louis Aragon"],a:0,t:"culture"},
+  {q:"Quel compositeur autrichien est mort à 35 ans en laissant son Requiem inachevé ?",opts:["Mozart","Schubert","Haydn","Beethoven"],a:0,t:"culture"},
+  {q:"Qui a écrit la pièce \"En attendant Godot\" ?",opts:["Samuel Beckett","Eugène Ionesco","Jean Anouilh","Jean Genet"],a:0,t:"culture"},
+  {q:"Quel peintre est célèbre pour ses tableaux de nénuphars à Giverny ?",opts:["Claude Monet","Edgar Degas","Paul Cézanne","Camille Pissarro"],a:0,t:"culture"},
+  {q:"Quel est le nom de famille du personnage principal des romans de Jane Austen \"Orgueil et Préjugés\" ?",opts:["Bennet","Darcy","Bingley","Woodhouse"],a:0,t:"culture"},
+  {q:"Quel sculpteur français a créé \"La Petite Danseuse de quatorze ans\" ?",opts:["Edgar Degas","Auguste Rodin","Camille Claudel","Aristide Maillol"],a:0,t:"culture"},
+  {q:"Quel instrument à vent est associé au jazzman Miles Davis ?",opts:["La trompette","Le saxophone","La clarinette","Le trombone"],a:0,t:"culture"},
+  {q:"Qui a écrit \"Madame Bovary\" ?",opts:["Gustave Flaubert","Victor Hugo","Émile Zola","Guy de Maupassant"],a:0,t:"culture"},
+  {q:"Quel peintre mexicain est connu pour ses autoportraits et son couple avec Diego Rivera ?",opts:["Frida Kahlo","Remedios Varo","Leonora Carrington","Tina Modotti"],a:0,t:"culture"},
+  {q:"Quel compositeur a écrit l'opéra \"La Traviata\" ?",opts:["Verdi","Puccini","Rossini","Donizetti"],a:0,t:"culture"},
+  {q:"Quel écrivain irlandais a écrit \"Ulysse\" ?",opts:["James Joyce","Oscar Wilde","Samuel Beckett","Bram Stoker"],a:0,t:"culture"},
+  {q:"Dans quel pays est né le tango ?",opts:["Argentine","Espagne","Cuba","Brésil"],a:0,t:"culture"},
+  {q:"Quel peintre norvégien a peint \"Le Cri\" ?",opts:["Edvard Munch","Anders Zorn","Carl Larsson","Akseli Gallen-Kallela"],a:0,t:"culture"},
+  {q:"Quel écrivain français est l'auteur de \"Notre-Dame de Paris\" ?",opts:["Victor Hugo","Alexandre Dumas","Stendhal","Balzac"],a:0,t:"culture"},
+  {q:"Quel compositeur allemand est l'auteur de la \"Marche nuptiale\" ?",opts:["Mendelssohn","Wagner","Brahms","Schumann"],a:0,t:"culture"},
+  {q:"Qui a réalisé la fresque \"La Cène\" ?",opts:["Léonard de Vinci","Michel-Ange","Raphaël","Le Caravage"],a:0,t:"culture"},
+  {q:"Quel écrivain colombien a reçu le prix Nobel de littérature en 1982 ?",opts:["Gabriel García Márquez","Pablo Neruda","Mario Vargas Llosa","Octavio Paz"],a:0,t:"culture"},
+  {q:"Quel danseur et chorégraphe russe a fondé les Ballets russes ?",opts:["Serge Diaghilev","Vaslav Nijinski","Rudolf Noureev","Mikhaïl Baryshnikov"],a:0,t:"culture"},
+  {q:"Quel écrivain a écrit la saga \"Le Seigneur des anneaux\" ?",opts:["J. R. R. Tolkien","C. S. Lewis","George R. R. Martin","Terry Pratchett"],a:0,t:"culture"},
+  {q:"Quel peintre autrichien a peint \"Le Baiser\" ?",opts:["Gustav Klimt","Egon Schiele","Oskar Kokoschka","Koloman Moser"],a:0,t:"culture"},
+  {q:"Quel compositeur italien a écrit l'opéra \"Madame Butterfly\" ?",opts:["Giacomo Puccini","Giuseppe Verdi","Gioachino Rossini","Vincenzo Bellini"],a:0,t:"culture"},
+  {q:"Quel écrivain français a écrit \"Le Rouge et le Noir\" ?",opts:["Stendhal","Balzac","Flaubert","Zola"],a:0,t:"culture"},
+  {q:"Quel style de danse classique se pratique sur pointes ?",opts:["Le ballet","Le flamenco","Le tango","La valse"],a:0,t:"culture"},
+  {q:"Quel écrivain britannique a créé Peter Pan ?",opts:["J. M. Barrie","A. A. Milne","Lewis Carroll","Kenneth Grahame"],a:0,t:"culture"},
+  {q:"Quel peintre a fondé le mouvement du pointillisme ?",opts:["Georges Seurat","Paul Signac","Camille Pissarro","Vincent van Gogh"],a:0,t:"culture"},
+  {q:"Quel philosophe grec était le maître de Platon ?",opts:["Socrate","Aristote","Pythagore","Héraclite"],a:0,t:"culture"},
+  {q:"Quel compositeur français a écrit \"Boléro\" ?",opts:["Maurice Ravel","Claude Debussy","Erik Satie","Gabriel Fauré"],a:0,t:"culture"},
+  {q:"Quel écrivain a écrit \"Les Fleurs du mal\" ?",opts:["Charles Baudelaire","Arthur Rimbaud","Paul Verlaine","Stéphane Mallarmé"],a:0,t:"culture"},
+  {q:"Quelle est la langue originale de l'opéra \"La Flûte enchantée\" ?",opts:["L'allemand","L'italien","Le français","Le latin"],a:0,t:"culture"},
+  {q:"Quel peintre flamand a peint \"La Jeune Fille à la perle\" ?",opts:["Johannes Vermeer","Rembrandt","Pieter Bruegel","Frans Hals"],a:0,t:"culture"},
+  {q:"Quel écrivain a créé le détective Hercule Poirot ?",opts:["Agatha Christie","Arthur Conan Doyle","Georges Simenon","P. D. James"],a:0,t:"culture"},
+  {q:"Quel compositeur hongrois a écrit les \"Rhapsodies hongroises\" ?",opts:["Franz Liszt","Béla Bartók","Zoltán Kodály","Johannes Brahms"],a:0,t:"culture"},
+  {q:"Dans quel pays est née la capoeira ?",opts:["Brésil","Angola","Cuba","Portugal"],a:0,t:"culture"},
+  {q:"Quel écrivain français a écrit \"Voyage au bout de la nuit\" ?",opts:["Louis-Ferdinand Céline","Jean Giono","André Malraux","Marcel Aymé"],a:0,t:"culture"},
+  {q:"Quel peintre a créé le mouvement surréaliste avec son \"Manifeste\" de 1924 ?",opts:["André Breton","Salvador Dalí","René Magritte","Max Ernst"],a:0,t:"culture"},
+  {q:"Quel compositeur russe a écrit \"Casse-Noisette\" ?",opts:["Tchaïkovski","Stravinsky","Rachmaninov","Prokofiev"],a:0,t:"culture"},
+  {q:"Quel écrivain a écrit \"Crime et Châtiment\" ?",opts:["Fiodor Dostoïevski","Léon Tolstoï","Anton Tchekhov","Nicolas Gogol"],a:0,t:"culture"},
+  {q:"Quel peintre belge est célèbre pour son tableau \"Ceci n'est pas une pipe\" ?",opts:["René Magritte","James Ensor","Paul Delvaux","Rik Wouters"],a:0,t:"culture"},
+  {q:"Quel philosophe allemand a écrit \"Ainsi parlait Zarathoustra\" ?",opts:["Friedrich Nietzsche","Emmanuel Kant","Arthur Schopenhauer","Georg Hegel"],a:0,t:"culture"},
+  {q:"Quel compositeur allemand a écrit l'opéra \"Tristan et Isolde\" ?",opts:["Richard Wagner","Johannes Brahms","Robert Schumann","Felix Mendelssohn"],a:0,t:"culture"},
+  {q:"Quel écrivain a écrit \"Les Trois Mousquetaires\" ?",opts:["Alexandre Dumas","Victor Hugo","Prosper Mérimée","Théophile Gautier"],a:0,t:"culture"},
+  {q:"Quel peintre a peint \"Le Déjeuner sur l'herbe\" ?",opts:["Édouard Manet","Claude Monet","Auguste Renoir","Edgar Degas"],a:0,t:"culture"},
+  {q:"Quel écrivain norvégien a écrit la pièce \"Une maison de poupée\" ?",opts:["Henrik Ibsen","August Strindberg","Knut Hamsun","Bjørnstjerne Bjørnson"],a:0,t:"culture"},
+  {q:"Quel danseur soviétique a fait défection en Occident en 1961 ?",opts:["Rudolf Noureev","Mikhaïl Baryshnikov","Vaslav Nijinski","Serge Lifar"],a:0,t:"culture"},
+  {q:"Quel compositeur tchèque a écrit \"Ma Patrie\" (Má vlast) ?",opts:["Bedřich Smetana","Antonín Dvořák","Leoš Janáček","Gustav Mahler"],a:0,t:"culture"},
+  {q:"Quel écrivain a écrit \"La Métamorphose\" ?",opts:["Franz Kafka","Thomas Mann","Hermann Hesse","Stefan Zweig"],a:0,t:"culture"},
+  {q:"Quel peintre italien de la Renaissance a peint \"La Naissance de Vénus\" ?",opts:["Sandro Botticelli","Léonard de Vinci","Raphaël","Le Titien"],a:0,t:"culture"},
+  {q:"Quel écrivain a écrit \"Anna Karénine\" ?",opts:["Léon Tolstoï","Fiodor Dostoïevski","Ivan Tourgueniev","Nicolas Gogol"],a:0,t:"culture"},
+  {q:"Quel compositeur français a écrit l'opéra \"Faust\" ?",opts:["Charles Gounod","Georges Bizet","Camille Saint-Saëns","Jules Massenet"],a:0,t:"culture"},
+  {q:"Quel peintre a fondé le mouvement fauviste avec Matisse ?",opts:["André Derain","Georges Braque","Maurice de Vlaminck","Raoul Dufy"],a:0,t:"culture"},
+  {q:"Quel écrivain français a écrit \"Bel-Ami\" ?",opts:["Guy de Maupassant","Émile Zola","Gustave Flaubert","Alphonse Daudet"],a:0,t:"culture"},
+  {q:"Quel compositeur autrichien est le père de l'école dodécaphonique ?",opts:["Arnold Schönberg","Anton Webern","Alban Berg","Gustav Mahler"],a:0,t:"culture"},
+  {q:"Quel écrivain a écrit \"Le Nom de la rose\" ?",opts:["Umberto Eco","Italo Calvino","Alessandro Baricco","Elena Ferrante"],a:0,t:"culture"},
+  {q:"Quel peintre hollandais a peint de nombreux autoportraits tout au long de sa vie ?",opts:["Rembrandt","Vermeer","Frans Hals","Jan Steen"],a:0,t:"culture"},
+  {q:"Quel écrivain a écrit \"Le Comte de Monte-Cristo\" ?",opts:["Alexandre Dumas","Victor Hugo","Eugène Sue","Jules Verne"],a:0,t:"culture"},
+  {q:"Quel compositeur finlandais a écrit \"Finlandia\" ?",opts:["Jean Sibelius","Edvard Grieg","Carl Nielsen","Wilhelm Stenhammar"],a:0,t:"culture"},
+  {q:"Quel philosophe français a écrit \"Le Discours de la méthode\" ?",opts:["René Descartes","Blaise Pascal","Michel de Montaigne","Voltaire"],a:0,t:"culture"},
+  {q:"Quel écrivain a écrit \"Le Vieil Homme et la Mer\" ?",opts:["Ernest Hemingway","John Steinbeck","William Faulkner","F. Scott Fitzgerald"],a:0,t:"culture"},
+  {q:"Quel peintre a peint \"Impression, soleil levant\", tableau qui a donné son nom à un mouvement ?",opts:["Claude Monet","Édouard Manet","Alfred Sisley","Berthe Morisot"],a:0,t:"culture"},
+  {q:"Quel écrivain américain a écrit \"Sa Majesté des Mouches\" ?",opts:["William Golding","John Steinbeck","J. D. Salinger","Kurt Vonnegut"],a:0,t:"culture"},
+  {q:"Quel compositeur allemand a écrit les \"Variations Goldberg\" ?",opts:["Jean-Sébastien Bach","Georg Friedrich Haendel","Georg Philipp Telemann","Dietrich Buxtehude"],a:0,t:"culture"},
+  {q:"Quel peintre espagnol a peint \"Les Ménines\" ?",opts:["Diego Velázquez","Francisco Goya","El Greco","Bartolomé Murillo"],a:0,t:"culture"},
+  {q:"Quel écrivain a écrit \"1984\" ?",opts:["George Orwell","Aldous Huxley","Ray Bradbury","H. G. Wells"],a:0,t:"culture"},
+  {q:"Quel compositeur français a écrit \"Clair de lune\" ?",opts:["Claude Debussy","Maurice Ravel","Erik Satie","Gabriel Fauré"],a:0,t:"culture"},
+  {q:"Quel écrivain a écrit \"Le Meilleur des mondes\" ?",opts:["Aldous Huxley","George Orwell","Ray Bradbury","Yevgeni Zamiatine"],a:0,t:"culture"},
+  {q:"Quel peintre espagnol a peint \"Les Fusillades du 3 mai 1808\" ?",opts:["Francisco Goya","Diego Velázquez","El Greco","Pablo Picasso"],a:0,t:"culture"},
+  {q:"Quel écrivain français a écrit \"La Peste\" ?",opts:["Albert Camus","Jean-Paul Sartre","André Malraux","Georges Bernanos"],a:0,t:"culture"},
+  {q:"Quel compositeur norvégien a écrit \"Peer Gynt\" ?",opts:["Edvard Grieg","Jean Sibelius","Carl Nielsen","Niels Gade"],a:0,t:"culture"},
   // ─── Nature (suite) ───
   {q:"Quel est le plus rapide des animaux terrestres ?",opts:["Le guépard","Le lion","L'antilope","Le lévrier"],a:0,t:"nature"},
   {q:"Combien de cœurs possède une pieuvre ?",opts:["3","1","2","4"],a:0,t:"nature"},
@@ -5204,7 +5280,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.56";
+const APP_VERSION = "3.3.57";
 console.log("📦 Le Général v" + APP_VERSION);
 const footerVersionEl = document.getElementById("footer-version");
 if (footerVersionEl) footerVersionEl.textContent = "Le Général v" + APP_VERSION;
@@ -5404,9 +5480,14 @@ function wireLoginForm() {
 // sécurité du 27/07/2026). Réutilisé par l'écran "rejoindre un foyer"
 // (aucune adhésion active) ET par le formulaire équivalent dans Mon QG
 // (rejoindre un foyer SUPPLÉMENTAIRE).
-async function submitJoinRequest(rawCode, msgEl, btn) {
+async function submitJoinRequest(rawCode, requesterName, msgEl, btn) {
   const code = String(rawCode || "").trim().toUpperCase();
+  const name = String(requesterName || "").trim();
   if (msgEl) msgEl.style.display = "none";
+  if (!name) {
+    if (msgEl) { msgEl.style.color = "var(--red)"; msgEl.textContent = "Indique ton prénom."; msgEl.style.display = "block"; }
+    return false;
+  }
   if (!AuthLogic.isValidHouseholdCode(code)) {
     if (msgEl) { msgEl.style.color = "var(--red)"; msgEl.textContent = "Code invalide (6 caractères attendus)."; msgEl.style.display = "block"; }
     return false;
@@ -5419,11 +5500,14 @@ async function submitJoinRequest(rawCode, msgEl, btn) {
       return false;
     }
     const uid = firebase.auth().currentUser.uid;
-    const payload = AuthLogic.buildJoinRequestPayload(uid, code);
+    const payload = AuthLogic.buildJoinRequestPayload(uid, code, name);
     await db.collection("users").doc(uid).collection("membershipRequests").doc(code).set({
       ...payload,
       requestedAt: firebase.firestore.FieldValue.serverTimestamp(),
     });
+    // Pré-remplit l'écran prénom/avatar qui suivra l'approbation, pour ne
+    // pas demander le prénom deux fois.
+    state.name = name; saveState();
     return true;
   } catch (err) {
     if (msgEl) { msgEl.style.color = "var(--red)"; msgEl.textContent = "Erreur — réessaie dans un instant."; msgEl.style.display = "block"; }
@@ -5440,9 +5524,10 @@ function wireJoinHouseholdForm() {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const codeEl = document.getElementById("join-household-code");
+    const nameEl = document.getElementById("join-household-name");
     const msgEl = document.getElementById("join-household-error");
     const btn = document.getElementById("join-household-submit-btn");
-    const ok = await submitJoinRequest(codeEl?.value, msgEl, btn);
+    const ok = await submitJoinRequest(codeEl?.value, nameEl?.value, msgEl, btn);
     if (ok) {
       handleAuthStateChange(firebase.auth().currentUser);
     }
