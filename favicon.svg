@@ -1,5 +1,5 @@
 <svg width="64" height="64" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg">
   <rect x="-5" y="-5" width="202" height="202" fill="#F7C104"/>
-  <text x="96" y="102" font-family="Arial, sans-serif" font-weight="900" font-size="88" fill="#0F0F12" text-anchor="middle" dominant-baseline="middle">QG</text>
-  <text x="96" y="164" font-family="Arial, sans-serif" font-weight="800" font-size="26" fill="#0F0F12" text-anchor="middle">LE GÉNÉRAL</text>
+  <text x="96" y="80" font-family="Arial, sans-serif" font-weight="900" font-size="56" fill="#0F0F12" text-anchor="middle" dominant-baseline="middle">Le</text>
+  <text x="96" y="136" font-family="Arial, sans-serif" font-weight="900" font-size="40" fill="#0F0F12" text-anchor="middle" dominant-baseline="middle">Général</text>
 </svg>
