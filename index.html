@@ -4402,6 +4402,18 @@ function renderBandeau() {
       </div>`;
     });
     html += `</div>`;
+  } else {
+    // Toujours un accès direct à "Mes tâches" depuis l'Accueil, même
+    // sans aucune tâche (nouvelle liste, ou aucune ⭐) — avant, ce lien
+    // n'existait que via la section ci-dessus, invisible si vide.
+    html += `<div class="bandeau-item" style="cursor:pointer;" onclick="showView('postit');backToPostit();openPostitModule('taches_perso')">
+      <div class="bandeau-icon">✅</div>
+      <div style="flex:1;">
+        <div class="bandeau-text">Mes tâches</div>
+        <div class="bandeau-sub">Voir ou créer une tâche</div>
+      </div>
+      <span style="color:var(--yellow);font-size:13px;font-weight:700;">→</span>
+    </div>`;
   }
 
   el.innerHTML = html;
@@ -5280,7 +5292,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.58";
+const APP_VERSION = "3.3.60";
 console.log("📦 Le Général v" + APP_VERSION);
 const footerVersionEl = document.getElementById("footer-version");
 if (footerVersionEl) footerVersionEl.textContent = "Le Général v" + APP_VERSION;
