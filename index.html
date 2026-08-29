@@ -391,8 +391,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
   <div style="font-size:20px;font-weight:800;color:var(--text);margin-bottom:4px;">Le Général</div>
   <div id="login-subtitle" style="font-size:13px;color:var(--muted);margin-bottom:28px;">Connecte-toi pour accéder à tes foyers</div>
   <form id="login-form" style="width:100%;max-width:320px;" autocomplete="on">
-    <input id="login-email" type="email" inputmode="email" autocomplete="username" placeholder="Email" style="width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;font-family:var(--font);font-size:15px;color:var(--text);margin-bottom:10px;">
-    <input id="login-password" type="text" class="pw-mask-css" autocomplete="off" placeholder="Mot de passe" style="width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;font-family:var(--font);font-size:15px;color:var(--text);margin-bottom:14px;">
+    <div id="login-fields-slot"></div>
     <div id="login-error" style="display:none;color:var(--red);font-size:13px;margin-bottom:12px;text-align:center;"></div>
     <div id="login-reset-msg" style="display:none;color:var(--green);font-size:13px;margin-bottom:12px;text-align:center;"></div>
     <button id="login-submit-btn" type="submit" style="width:100%;background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:14px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;">Se connecter</button>
@@ -5310,7 +5309,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.65";
+const APP_VERSION = "3.3.66";
 console.log("📦 Le Général v" + APP_VERSION);
 const footerVersionEl = document.getElementById("footer-version");
 if (footerVersionEl) footerVersionEl.textContent = "Le Général v" + APP_VERSION;
@@ -5390,23 +5389,23 @@ function showAuthScreen(name) {
     if (el) el.style.display = (id === name ? "flex" : "none");
   });
   if (name) hideSplash();
-  // Le champ mot de passe de connexion ne reste réellement type="password"
-  // que pendant que l'écran de connexion est affiché. Le reste du temps
-  // (99% de l'usage), on le repasse en texte masqué par CSS — sans ce
-  // champ password vivant en permanence dans la page, Android ne
-  // considère plus le reste de l'app comme "une page de connexion" et
-  // arrête de proposer son autofill mot de passe sur les autres champs
-  // (ex. création de tâche).
-  const pwField = document.getElementById("login-password");
-  if (pwField) {
+  // Le champ mot de passe n'existe DANS LE DOM que pendant que l'écran
+  // de connexion est réellement affiché — retiré entièrement (pas juste
+  // masqué/changé de type) le reste du temps. Un simple changement de
+  // type="password" -> "text" à la volée s'est révélé insuffisant :
+  // Android/Google Password Manager continuait d'associer le champ à
+  // legeneral.org et proposait son autofill sur d'autres champs (ex.
+  // création de tâche), avec des titres de tâches parfois même
+  // sauvegardés comme identifiants. Sans le nœud DOM du tout, plus rien
+  // à détecter.
+  const slot = document.getElementById("login-fields-slot");
+  if (slot) {
     if (name === "login-screen") {
-      pwField.type = "password";
-      pwField.setAttribute("autocomplete", "current-password");
-      pwField.classList.remove("pw-mask-css");
+      if (!document.getElementById("login-password")) {
+        slot.innerHTML = '<input id="login-email" type="email" inputmode="email" autocomplete="username" placeholder="Email" style="width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;font-family:var(--font);font-size:15px;color:var(--text);margin-bottom:10px;"><input id="login-password" type="password" autocomplete="current-password" placeholder="Mot de passe" style="width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;font-family:var(--font);font-size:15px;color:var(--text);margin-bottom:14px;">';
+      }
     } else {
-      pwField.type = "text";
-      pwField.setAttribute("autocomplete", "off");
-      pwField.classList.add("pw-mask-css");
+      slot.innerHTML = "";
     }
   }
 }
