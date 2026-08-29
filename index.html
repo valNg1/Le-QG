@@ -4392,7 +4392,7 @@ function renderBandeau() {
   const starTaches = (state.tachesPerso||[])
     .filter(t => t.star && !t.done)
     .sort((a,b) => (a.date||"9")<(b.date||"9")?-1:1)
-    .slice(0,5);
+    .slice(0,15);
 
   if (starTaches.length > 0) {
     html += `<div style="margin-bottom:8px;">`;
@@ -5309,7 +5309,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.67";
+const APP_VERSION = "3.3.68";
 console.log("📦 Le Général v" + APP_VERSION);
 const footerVersionEl = document.getElementById("footer-version");
 if (footerVersionEl) footerVersionEl.textContent = "Le Général v" + APP_VERSION;
