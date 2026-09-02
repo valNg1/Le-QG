@@ -77,6 +77,9 @@
   <p class="sec">📖 À propos</p>
   <div class="card" id="topo-card"><div class="loading">…</div></div>
 
+  <p class="sec">📰 Dernières news</p>
+  <div class="card" id="news-card"><div class="loading">…</div></div>
+
   <p class="sec">🌤 Météo — aujourd'hui, demain, après-demain</p>
   <div class="card" id="meteo-card"><div class="loading">…</div></div>
 
@@ -105,10 +108,10 @@ function setVille(v) {
   document.getElementById("ville-nom").textContent = v.nom;
   document.getElementById("ville-coords").textContent =
     `${v.lat.toFixed(3)}°N, ${Math.abs(v.lon).toFixed(3)}°${v.lon<0?"O":"E"}${v.pays ? " · " + v.pays : ""}`;
-  ["topo-card","meteo-card","aqi-card","poi-card","events-card"].forEach(id => {
+  ["topo-card","news-card","meteo-card","aqi-card","poi-card","events-card"].forEach(id => {
     document.getElementById(id).innerHTML = '<div class="loading">Chargement…</div>';
   });
-  loadTopo(); loadMeteo(); loadAQI(); loadPOI(); loadEvents();
+  loadTopo(); loadNews(); loadMeteo(); loadAQI(); loadPOI(); loadEvents();
 }
 
 let searchTimer;
@@ -181,6 +184,45 @@ async function loadTopo() {
     }
   } catch (e) {
     el.innerHTML = '<div style="font-size:13px;color:var(--red);">Erreur de chargement Wikipédia.</div>';
+  }
+}
+
+// ─── Dernières news (GDELT DOC 2.0 — gratuit, sans clé, CORS ouvert) ─
+function newsDateLabel(seendate) {
+  // Format GDELT : "20260827T143000Z"
+  try {
+    const iso = seendate.replace(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/, "$1-$2-$3T$4:$5:$6Z");
+    const d = new Date(iso);
+    const now = new Date();
+    const hoursAgo = Math.round((now - d) / 3600000);
+    if (hoursAgo < 1) return "à l'instant";
+    if (hoursAgo < 24) return `il y a ${hoursAgo} h`;
+    const daysAgo = Math.round(hoursAgo / 24);
+    if (daysAgo < 7) return `il y a ${daysAgo} j`;
+    return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+  } catch (e) { return ""; }
+}
+async function loadNews() {
+  const el = document.getElementById("news-card");
+  try {
+    const url = `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent('"'+VILLE.nom+'"')}&mode=artlist&maxrecords=8&sort=DateDesc&format=json&timespan=1m`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const articles = (data.articles || []).slice(0, 6);
+    if (!articles.length) {
+      el.innerHTML = `<div style="font-size:13px;color:var(--muted);">Aucune actualité récente trouvée pour "${VILLE.nom}" dans les 30 derniers jours.</div>`;
+      return;
+    }
+    el.innerHTML = articles.map(a => `
+      <div class="evt-row">
+        <div style="flex:1;min-width:0;">
+          <div class="evt-name" style="white-space:normal;">${a.title || "Article"}</div>
+          <div class="evt-date">${a.domain || ""}${a.seendate ? " · " + newsDateLabel(a.seendate) : ""}</div>
+        </div>
+        <a class="evt-link" href="${a.url}" target="_blank">Lire →</a>
+      </div>`).join("");
+  } catch (e) {
+    el.innerHTML = `<div style="font-size:13px;color:var(--muted);">Actualités indisponibles pour le moment.</div>`;
   }
 }
 
