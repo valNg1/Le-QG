@@ -5309,7 +5309,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.69";
+const APP_VERSION = "3.3.70";
 console.log("📦 Le Général v" + APP_VERSION);
 const footerVersionEl = document.getElementById("footer-version");
 if (footerVersionEl) footerVersionEl.textContent = "Le Général v" + APP_VERSION;
@@ -5340,6 +5340,14 @@ function proceedAfterAuth() {
   setInterval(updateHeader, 60000);
   syncMyMemberProfile();
   loadTachesFromFirestore();
+  // Demande au navigateur de classer le stockage du site comme
+  // "persistant" plutôt que "temporaire" — réduit (sans l'éliminer
+  // totalement) le risque qu'iOS/Safari efface la session de connexion
+  // et les données locales après une période d'inactivité. Best-effort :
+  // le navigateur peut refuser silencieusement, pas d'erreur à gérer.
+  if (navigator.storage && navigator.storage.persist) {
+    navigator.storage.persist().catch(() => {});
+  }
 
   document.getElementById("ob-step2")?.classList.add("hidden");
   document.getElementById("ob-step3")?.classList.add("hidden");
