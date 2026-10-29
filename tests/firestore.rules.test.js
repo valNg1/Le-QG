@@ -291,3 +291,127 @@ test("un admin actif peut modifier le document principal du foyer", async () => 
     admin.collection("groupes").doc(code).update({ name: "Nom modifié" })
   );
 });
+
+// ─── Santé & Équilibre : données strictement personnelles ───────────
+// users/{uid}/healthSteps/{YYYY-MM-DD} et users/{uid}/healthMeta/{settings|sync}.
+// Aucun accès pour les autres membres du foyer, admins et super-admins inclus.
+const goodStepsDoc = (day, steps = 8421) => ({
+  date: day, steps, source: "Health Connect", syncedAt: new Date(),
+});
+
+async function seedAdminAndMember(code) {
+  await testEnv.withSecurityRulesDisabled(async (ctx) => {
+    const db = ctx.firestore();
+    await db.collection("groupes").doc(code).set({ name: "Foyer test" });
+    await db.collection("users").doc("admin1").set({ email: "a@x.fr", isSuperAdmin: false });
+    await db.collection("users").doc("admin1").collection("memberships").doc(code)
+      .set({ role: "admin", status: "active" });
+    await db.collection("users").doc("root").set({ email: "r@x.fr", isSuperAdmin: true });
+    await db.collection("users").doc("alice").collection("memberships").doc(code)
+      .set({ role: "member", status: "active" });
+    await db.collection("users").doc("alice").collection("healthSteps").doc("2026-10-28")
+      .set(goodStepsDoc("2026-10-28", 5000));
+    await db.collection("users").doc("alice").collection("healthMeta").doc("sync")
+      .set({ lastSyncAt: new Date(), source: "Health Connect", device: "Pixel" });
+  });
+}
+
+test("santé : le propriétaire peut écrire et relire ses pas du jour", async () => {
+  const alice = testEnv.authenticatedContext("alice").firestore();
+  const ref = alice.collection("users").doc("alice").collection("healthSteps").doc("2026-10-29");
+  await assertSucceeds(ref.set(goodStepsDoc("2026-10-29")));
+  await assertSucceeds(ref.get());
+});
+
+test("santé : un utilisateur non connecté ne peut ni lire ni écrire", async () => {
+  await seedAdminAndMember("HHH111");
+  const anon = testEnv.unauthenticatedContext().firestore();
+  await assertFails(anon.collection("users").doc("alice").collection("healthSteps").doc("2026-10-28").get());
+  await assertFails(anon.collection("users").doc("alice").collection("healthSteps").doc("2026-10-29").set(goodStepsDoc("2026-10-29")));
+});
+
+test("santé : un autre membre du foyer ne peut pas lire les pas d'Alice", async () => {
+  await seedAdminAndMember("HHH111");
+  await testEnv.withSecurityRulesDisabled(async (ctx) => {
+    await ctx.firestore().collection("users").doc("bob").collection("memberships").doc("HHH111")
+      .set({ role: "member", status: "active" });
+  });
+  const bob = testEnv.authenticatedContext("bob").firestore();
+  await assertFails(bob.collection("users").doc("alice").collection("healthSteps").doc("2026-10-28").get());
+  await assertFails(bob.collection("users").doc("alice").collection("healthSteps").get());
+  await assertFails(bob.collection("users").doc("alice").collection("healthMeta").doc("sync").get());
+});
+
+test("santé : un ADMIN du foyer ne peut ni lire ni écrire les données d'Alice", async () => {
+  await seedAdminAndMember("HHH111");
+  const admin = testEnv.authenticatedContext("admin1").firestore();
+  await assertFails(admin.collection("users").doc("alice").collection("healthSteps").doc("2026-10-28").get());
+  await assertFails(admin.collection("users").doc("alice").collection("healthSteps").doc("2026-10-29").set(goodStepsDoc("2026-10-29")));
+  await assertFails(admin.collection("users").doc("alice").collection("healthMeta").doc("sync").get());
+});
+
+test("santé : un SUPER-ADMIN ne peut pas lire les données d'Alice non plus", async () => {
+  await seedAdminAndMember("HHH111");
+  const root = testEnv.authenticatedContext("root").firestore();
+  await assertFails(root.collection("users").doc("alice").collection("healthSteps").doc("2026-10-28").get());
+  await assertFails(root.collection("users").doc("alice").collection("healthMeta").doc("sync").get());
+});
+
+test("santé : requête collectionGroup sur healthSteps refusée (pas de moisson inter-comptes)", async () => {
+  await seedAdminAndMember("HHH111");
+  const admin = testEnv.authenticatedContext("admin1").firestore();
+  await assertFails(admin.collectionGroup("healthSteps").get());
+});
+
+test("santé : refus d'un nombre de pas négatif, décimal, absurde ou non numérique", async () => {
+  const ref = testEnv.authenticatedContext("alice").firestore()
+    .collection("users").doc("alice").collection("healthSteps").doc("2026-10-29");
+  await assertFails(ref.set(goodStepsDoc("2026-10-29", -1)));
+  await assertFails(ref.set(goodStepsDoc("2026-10-29", 12.5)));
+  await assertFails(ref.set(goodStepsDoc("2026-10-29", 200001)));
+  await assertFails(ref.set({ ...goodStepsDoc("2026-10-29"), steps: "8000" }));
+});
+
+test("santé : refus si le champ date ne correspond pas à l'identifiant du document", async () => {
+  const ref = testEnv.authenticatedContext("alice").firestore()
+    .collection("users").doc("alice").collection("healthSteps").doc("2026-10-29");
+  await assertFails(ref.set(goodStepsDoc("2026-10-28")));
+});
+
+test("santé : refus d'un identifiant de document qui n'est pas une date, et de champs en trop", async () => {
+  const col = testEnv.authenticatedContext("alice").firestore()
+    .collection("users").doc("alice").collection("healthSteps");
+  await assertFails(col.doc("n-importe-quoi").set(goodStepsDoc("n-importe-quoi")));
+  await assertFails(col.doc("2026-10-29").set({ ...goodStepsDoc("2026-10-29"), heartRate: 60 }));
+});
+
+test("santé : l'objectif quotidien se règle dans healthMeta/settings, borné 1000..100000", async () => {
+  const col = testEnv.authenticatedContext("alice").firestore()
+    .collection("users").doc("alice").collection("healthMeta");
+  await assertSucceeds(col.doc("settings").set({ dailyGoal: 10000 }));
+  await assertFails(col.doc("settings").set({ dailyGoal: 10 }));
+  await assertFails(col.doc("settings").set({ dailyGoal: 500000 }));
+  await assertFails(col.doc("settings").set({ dailyGoal: 8000, extra: true }));
+  await assertFails(col.doc("autre").set({ dailyGoal: 8000 }));
+});
+
+test("santé : la méta de synchronisation exige une date serveur plausible et des champs connus", async () => {
+  const col = testEnv.authenticatedContext("alice").firestore()
+    .collection("users").doc("alice").collection("healthMeta");
+  await assertSucceeds(col.doc("sync").set({ lastSyncAt: new Date(), source: "Health Connect", device: "Pixel" }));
+  await assertFails(col.doc("sync").set({ lastSyncAt: "hier", source: "x", device: "y" }));
+  await assertFails(col.doc("sync").set({ lastSyncAt: new Date(), source: "x", device: "y", token: "secret" }));
+});
+
+test("santé : le propriétaire peut supprimer ses données (droit à l'effacement)", async () => {
+  await seedAdminAndMember("HHH111");
+  const alice = testEnv.authenticatedContext("alice").firestore();
+  await assertSucceeds(alice.collection("users").doc("alice").collection("healthSteps").doc("2026-10-28").delete());
+  await assertSucceeds(alice.collection("users").doc("alice").collection("healthMeta").doc("sync").delete());
+});
+
+test("santé : un tiers ne peut pas supprimer les données d'Alice", async () => {
+  await seedAdminAndMember("HHH111");
+  const admin = testEnv.authenticatedContext("admin1").firestore();
+  await assertFails(admin.collection("users").doc("alice").collection("healthSteps").doc("2026-10-28").delete());
+});
