@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Envoi vers Firebase (Auth + Firestore). -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- SEULE permission santé demandée : lecture des pas. Aucune lecture en
+         arrière-plan (READ_HEALTH_DATA_IN_BACKGROUND volontairement absente) :
+         la synchronisation se fait uniquement application ouverte. -->
+    <uses-permission android:name="android.permission.health.READ_STEPS" />
+
+    <!-- Nécessaire pour détecter Health Connect sur Android 13 et moins. -->
+    <queries>
+        <package android:name="com.google.android.apps.healthdata" />
+    </queries>
+
+    <application
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:label="Le Général Pas"
+        android:theme="@android:style/Theme.DeviceDefault.Light.NoActionBar">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Écran « pourquoi cette permission » exigé par Health Connect. -->
+        <activity
+            android:name=".PermissionsRationaleActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+            </intent-filter>
+        </activity>
+
+        <!-- Même écran pour Android 14 et plus. -->
+        <activity-alias
+            android:name="ViewPermissionUsageActivity"
+            android:exported="true"
+            android:permission="android.permission.START_VIEW_PERMISSION_USAGE"
+            android:targetActivity=".PermissionsRationaleActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+                <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
+            </intent-filter>
+        </activity-alias>
+    </application>
+</manifest>

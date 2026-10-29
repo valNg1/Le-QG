@@ -1,0 +1,33 @@
+name: Android APK (Le Général Pas)
+
+# Compile et teste l'application compagnon Android, puis publie l'APK de
+# debug (installable sur un Pixel) comme artefact téléchargeable.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "android-companion/**"
+      - ".github/workflows/android-apk.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Accepter les licences du SDK Android
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.14.3"
+      - name: Tests unitaires puis APK de debug
+        working-directory: android-companion
+        run: gradle --no-daemon testDebugUnitTest assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: le-general-pas-debug-apk
+          path: android-companion/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30

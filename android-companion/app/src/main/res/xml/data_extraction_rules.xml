@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Aucune sauvegarde cloud ni transfert d'appareil : le jeton de session
+     reste uniquement sur ce téléphone. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="." />
+        <exclude domain="root" path="." />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="." />
+        <exclude domain="root" path="." />
+    </device-transfer>
+</data-extraction-rules>

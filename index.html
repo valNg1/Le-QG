@@ -19,6 +19,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="auth-logic.js"></script>
+<script src="health-logic.js"></script>
 <style>
 .pw-mask-css { -webkit-text-security: disc; text-security: disc; }
 :root {
@@ -284,6 +285,36 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
 .mod-tab.active { color: var(--yellow); border-bottom-color: var(--yellow); }
 
 /* ── MODULES ── */
+/* ── Santé & Équilibre ── */
+.eq-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.eq-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.eq-big{font-size:44px;font-weight:800;color:var(--text);line-height:1.05;font-variant-numeric:tabular-nums}
+.eq-sub{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}
+.eq-bar{height:8px;border-radius:99px;background:var(--surface2);margin-top:12px;overflow:hidden}
+.eq-bar-fill{height:100%;background:var(--green);border-radius:99px;transition:width .3s}
+.eq-pill{font-size:12px;font-weight:700;padding:4px 10px;border-radius:99px;border:1px solid var(--border2)}
+.eq-pill-never{color:var(--muted)}
+.eq-pill-ok{color:var(--green);border-color:var(--green)}
+.eq-pill-stale{color:var(--orange);border-color:var(--orange)}
+.eq-pill-error{color:var(--red);border-color:var(--red)}
+.eq-input{width:110px;padding:9px 10px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-family:var(--font);font-size:16px}
+.eq-btn{background:var(--yellow);color:#1A1916;border:none;border-radius:var(--r-sm);padding:9px 12px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer}
+.eq-btn-danger{background:transparent;color:var(--red);border:1px solid var(--red)}
+.eq-week{display:flex;gap:6px;align-items:flex-end;height:120px}
+.eq-day{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0}
+.eq-day-bar{width:100%;border-radius:6px 6px 2px 2px;background:var(--yellow);min-height:3px}
+.eq-day-bar.empty{background:transparent;border:1px dashed var(--border2);height:3px}
+.eq-day-bar.goal{background:var(--green)}
+.eq-day-val{font-size:10px;color:var(--muted);margin-bottom:3px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.eq-day-name{font-size:10px;color:var(--muted);margin-top:4px}
+.eq-row{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:5px 0;color:var(--muted)}
+.eq-row b{color:var(--text);font-weight:600;text-align:right;min-width:0;overflow-wrap:anywhere}
+.eq-steps{font-size:13px;color:var(--text);line-height:1.5;padding-left:18px;margin-top:8px}
+.eq-steps li{margin-bottom:6px}
+.eq-soon{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.eq-soon-item{background:var(--surface);border:1px dashed var(--border2);border-radius:var(--r);padding:12px;font-size:13px;font-weight:600;color:var(--muted);display:flex;flex-direction:column;gap:2px;opacity:.75}
+.eq-soon-item span{font-size:20px}
+.eq-soon-item small{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
 .module-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 10px; margin-bottom: 16px; }
 .module-card { background: var(--surface); border-radius: var(--r); border: 1px solid var(--border); padding: 16px; cursor: pointer; transition: all .15s; text-align: center; position: relative; display: block !important; min-height: 110px; }
 .module-card.active { border-color: var(--yellow); background: var(--yellow-light); }
@@ -701,6 +732,72 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
   <div id="sante-home">
     <p class="sec" style="margin-top:8px;">🏃 Santé</p>
     <div class="module-grid" id="sante-grid"></div>
+  </div>
+
+  <!-- SANTÉ & ÉQUILIBRE (pas via Health Connect — données strictement personnelles) -->
+  <div id="module-equilibre" style="display:none;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;margin-top:8px;">
+      <button onclick="backToSante()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
+      <div style="font-size:16px;font-weight:700;color:var(--text);">🌿 Santé &amp; Équilibre</div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;">
+      <span id="eq-state" class="eq-pill eq-pill-never">Chargement…</span>
+      <span style="font-size:11px;color:var(--muted);">Visible par vous seul</span>
+    </div>
+
+    <div class="eq-card">
+      <div class="eq-label">Pas aujourd'hui</div>
+      <div class="eq-big" id="eq-today">—</div>
+      <div class="eq-bar"><div class="eq-bar-fill" id="eq-bar-fill" style="width:0%"></div></div>
+      <div class="eq-sub" id="eq-today-sub">En attente de la première synchronisation.</div>
+    </div>
+
+    <div class="eq-card">
+      <div class="eq-label">Objectif quotidien</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="number" id="eq-goal-input" inputmode="numeric" min="1000" max="100000" step="500" class="eq-input" aria-label="Objectif de pas par jour">
+        <span style="font-size:13px;color:var(--muted);">pas / jour</span>
+        <button id="eq-goal-save" class="eq-btn">Enregistrer</button>
+      </div>
+    </div>
+
+    <div class="eq-card">
+      <div class="eq-label">7 derniers jours</div>
+      <div class="eq-week" id="eq-week"></div>
+      <div class="eq-sub" id="eq-week-note"></div>
+    </div>
+
+    <div class="eq-card">
+      <div class="eq-label">Synchronisation</div>
+      <div class="eq-row"><span>Source</span><b id="eq-source">—</b></div>
+      <div class="eq-row"><span>Appareil</span><b id="eq-device">—</b></div>
+      <div class="eq-row"><span>Dernière synchro</span><b id="eq-last">Jamais</b></div>
+      <details style="margin-top:10px;">
+        <summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--yellow);">Connecter mon Pixel</summary>
+        <ol class="eq-steps">
+          <li>Installez l'application « Le Général Pas » sur le Pixel (fichier APK, voir <code>android-companion/README.md</code> dans le dépôt).</li>
+          <li>Ouvrez-la, connectez-vous avec le même email et mot de passe que sur le Général.</li>
+          <li>Autorisez la lecture des pas dans Health Connect (seule permission demandée).</li>
+          <li>Appuyez sur « Synchroniser maintenant ». Les pas apparaissent ici en quelques secondes.</li>
+        </ol>
+        <div class="eq-sub">Si l'application indique « aucun pas », une application doit d'abord écrire vos pas dans Health Connect (par exemple Google Fit ou Fitbit).</div>
+      </details>
+    </div>
+
+    <div class="eq-soon">
+      <div class="eq-soon-item"><span>😴</span>Sommeil<small>Bientôt</small></div>
+      <div class="eq-soon-item"><span>📵</span>Temps d'écran<small>Bientôt</small></div>
+      <div class="eq-soon-item"><span>🧘</span>Santé digitale<small>Bientôt</small></div>
+      <div class="eq-soon-item"><span>🔋</span>Récupération<small>Bientôt</small></div>
+    </div>
+
+    <div class="eq-card">
+      <div class="eq-label">Confidentialité</div>
+      <div class="eq-sub" style="margin-top:0;">Ces données ne sont lisibles que par votre compte. Les autres membres du foyer et les administrateurs n'y ont pas accès. Vous pouvez les effacer à tout moment.</div>
+      <button id="eq-delete" class="eq-btn eq-btn-danger" style="margin-top:10px;">Supprimer mes données de santé</button>
+      <div id="eq-delete-msg" class="eq-sub"></div>
+    </div>
   </div>
 
   <!-- JEÛNE INTERMITTENT -->
@@ -1404,6 +1501,7 @@ function showView(id) {
   if (id==="mur") renderMurList();
   if (id==="modules") renderModulesHome();
   if (id==="postit") { backToPostit(); renderPostitHome(); }
+  if (id!=="sante") stopEquilibre();
   if (id==="sante") { backToSante(); renderSanteHome(); }
   if (id==="media") { backToMedia(); renderMediaHome(); renderFilsPicker("media-fils-picker", "Coche les sources à afficher :"); }
 }
@@ -2885,6 +2983,7 @@ function renderPostitList() {
 // ════════════════════════════════════════════
 const SANTE_MODULES = [
   { id:"jeune", name:"Jeûne intermittent", desc:"Timer + prochain repas", emoji:"⏱", color:"#F7C104" },
+  { id:"equilibre", name:"Santé & Équilibre", desc:"Pas, objectif, 7 jours", emoji:"🌿", color:"#34C77B" },
 ];
 
 function renderSanteHome() {
@@ -2909,6 +3008,7 @@ function openSanteModule(id) {
   const el = document.getElementById("module-"+id);
   if (el) el.style.display = "block";
   if (id==="jeune") initJeune();
+  if (id==="equilibre") initEquilibre();
 }
 
 function backToSante() {
@@ -2916,7 +3016,180 @@ function backToSante() {
   const home = document.getElementById("sante-home");
   if (home) home.style.display = "block";
   if (jeuneInterval) { clearInterval(jeuneInterval); jeuneInterval = null; }
+  stopEquilibre();
 }
+
+// ════════════════
+// SANTÉ & ÉQUILIBRE (pas du Pixel via Health Connect)
+// Données strictement personnelles : users/{uid}/healthSteps/{jour} et
+// users/{uid}/healthMeta/{settings|sync}. Lecture seule ici côté pas :
+// seule l'application Android écrit les pas. Aucune valeur simulée.
+// ════════════════
+let eqUnsubs = [];
+let eqTimer = null;
+let eqData = { docs: {}, meta: null, goal: HealthLogic.DEFAULT_GOAL, error: false, loaded: false };
+let eqDeleteArmed = null;
+
+function eqUid() {
+  const u = (typeof firebase !== "undefined" && firebase.auth) ? firebase.auth().currentUser : null;
+  return u ? u.uid : null;
+}
+function eqCol(name) { return db.collection("users").doc(eqUid()).collection(name); }
+
+function stopEquilibre() {
+  eqUnsubs.forEach(fn => { try { fn(); } catch (e) {} });
+  eqUnsubs = [];
+  if (eqTimer) { clearInterval(eqTimer); eqTimer = null; }
+}
+
+function initEquilibre() {
+  stopEquilibre();
+  eqData = { docs: {}, meta: null, goal: HealthLogic.DEFAULT_GOAL, error: false, loaded: false };
+  const uid = eqUid();
+  if (!db || !uid) { eqData.error = true; renderEquilibre(); return; }
+  const startKey = HealthLogic.lastDays(new Date(), 7)[0];
+  eqUnsubs.push(eqCol("healthSteps").where("date", ">=", startKey).onSnapshot(snap => {
+    const docs = {};
+    snap.forEach(d => { docs[d.id] = d.data(); });
+    eqData.docs = docs; eqData.error = false; eqData.loaded = true;
+    renderEquilibre();
+  }, err => {
+    console.log("healthSteps listener error:", err.code, err.message);
+    eqData.error = true; renderEquilibre();
+  }));
+  eqUnsubs.push(eqCol("healthMeta").onSnapshot(snap => {
+    let meta = null, goal = HealthLogic.DEFAULT_GOAL;
+    snap.forEach(d => {
+      if (d.id === "sync") meta = d.data();
+      if (d.id === "settings") goal = HealthLogic.normalizeGoal(d.data().dailyGoal);
+    });
+    eqData.meta = meta; eqData.goal = goal; eqData.error = false;
+    renderEquilibre();
+  }, err => {
+    console.log("healthMeta listener error:", err.code, err.message);
+    eqData.error = true; renderEquilibre();
+  }));
+  eqTimer = setInterval(renderEquilibre, 60000);
+  renderEquilibre();
+}
+
+function renderEquilibre() {
+  const el = id => document.getElementById(id);
+  if (!el("eq-today")) return;
+  const now = new Date();
+  const days = HealthLogic.lastDays(now, 7);
+  const series = HealthLogic.buildSeries(days, eqData.docs);
+  const today = series[series.length - 1];
+  const goal = eqData.goal;
+
+  // État de connexion
+  const st = HealthLogic.connectionState(eqData.meta, now, { error: eqData.error });
+  const pill = el("eq-state");
+  pill.className = "eq-pill eq-pill-" + st.code;
+  pill.textContent = st.code === "ok" ? "Connecté · synchro il y a " + (st.ageHours < 1 ? "moins d'1 h" : st.ageHours + " h") : st.label;
+
+  // Aujourd'hui
+  el("eq-today").textContent = HealthLogic.formatSteps(today.steps);
+  const pct = HealthLogic.goalProgress(today.steps, goal);
+  el("eq-bar-fill").style.width = (pct === null ? 0 : pct) + "%";
+  const sub = el("eq-today-sub");
+  if (eqData.error) {
+    sub.textContent = "Lecture impossible pour le moment. Vérifiez votre connexion et rouvrez le module.";
+  } else if (today.hasData) {
+    sub.textContent = pct + " % de l'objectif de " + HealthLogic.formatSteps(goal) + " pas.";
+  } else if (!HealthLogic.hasAnyData(series) && !eqData.meta) {
+    sub.textContent = "Aucune donnée reçue. Rien n'est affiché tant que le Pixel n'a rien envoyé.";
+  } else {
+    sub.textContent = "Pas de donnée reçue pour aujourd'hui.";
+  }
+
+  // Objectif (ne pas écraser la saisie en cours)
+  const gi = el("eq-goal-input");
+  if (document.activeElement !== gi) gi.value = goal;
+
+  // 7 jours
+  const week = el("eq-week");
+  week.textContent = "";
+  const maxV = Math.max(goal, ...series.map(s => s.steps || 0));
+  series.forEach(s => {
+    const col = document.createElement("div"); col.className = "eq-day";
+    const val = document.createElement("div"); val.className = "eq-day-val";
+    val.textContent = s.hasData ? HealthLogic.formatSteps(s.steps) : "—";
+    const bar = document.createElement("div");
+    bar.className = "eq-day-bar" + (!s.hasData ? " empty" : (s.steps >= goal ? " goal" : ""));
+    if (s.hasData) bar.style.height = Math.max(3, Math.round((s.steps / maxV) * 80)) + "px";
+    const p = s.day.split("-").map(Number);
+    const name = document.createElement("div"); name.className = "eq-day-name";
+    name.textContent = new Date(p[0], p[1] - 1, p[2], 12).toLocaleDateString("fr-FR", { weekday: "short" }).replace(".", "");
+    col.append(val, bar, name);
+    week.appendChild(col);
+  });
+  el("eq-week-note").textContent = HealthLogic.hasAnyData(series)
+    ? "Les jours sans donnée reçue restent vides : ils ne valent pas 0 pas."
+    : "Aucun jour reçu pour l'instant.";
+
+  // Synchronisation
+  const lastWithData = series.slice().reverse().find(s => s.hasData);
+  el("eq-source").textContent = lastWithData ? lastWithData.source : (eqData.meta && eqData.meta.source) || "—";
+  el("eq-device").textContent = (eqData.meta && eqData.meta.device) || "—";
+  const last = eqData.meta && eqData.meta.lastSyncAt && eqData.meta.lastSyncAt.toDate ? eqData.meta.lastSyncAt.toDate() : null;
+  el("eq-last").textContent = last
+    ? last.toLocaleString("fr-FR", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })
+    : "Jamais";
+}
+
+async function eqSaveGoal() {
+  const input = document.getElementById("eq-goal-input");
+  const goal = HealthLogic.normalizeGoal(input.value);
+  try {
+    await eqCol("healthMeta").doc("settings").set({ dailyGoal: goal });
+    input.value = goal;
+    showToast("Objectif enregistré : " + HealthLogic.formatSteps(goal) + " pas");
+  } catch (e) {
+    console.log("eqSaveGoal error:", e.code, e.message);
+    showToast("Impossible d'enregistrer l'objectif");
+  }
+}
+
+async function eqDeleteAll() {
+  const btn = document.getElementById("eq-delete");
+  const msg = document.getElementById("eq-delete-msg");
+  if (!eqDeleteArmed) {
+    btn.textContent = "Confirmer la suppression définitive";
+    btn.style.background = "var(--red)"; btn.style.color = "#fff";
+    eqDeleteArmed = setTimeout(eqDisarmDelete, 6000);
+    return;
+  }
+  eqDisarmDelete();
+  btn.disabled = true;
+  try {
+    const snap = await eqCol("healthSteps").get();
+    let batch = db.batch(), n = 0, total = 0;
+    for (const d of snap.docs) {
+      batch.delete(d.ref); n++; total++;
+      if (n === 400) { await batch.commit(); batch = db.batch(); n = 0; }
+    }
+    batch.delete(eqCol("healthMeta").doc("sync"));
+    batch.delete(eqCol("healthMeta").doc("settings"));
+    await batch.commit();
+    msg.textContent = total + " jour(s) supprimé(s). Pour arrêter la synchronisation, déconnectez-vous dans l'application Android ou retirez l'autorisation dans Health Connect.";
+  } catch (e) {
+    console.log("eqDeleteAll error:", e.code, e.message);
+    msg.textContent = "Suppression impossible pour le moment. Réessayez.";
+  } finally {
+    btn.disabled = false;
+  }
+}
+function eqDisarmDelete() {
+  if (eqDeleteArmed) { clearTimeout(eqDeleteArmed); eqDeleteArmed = null; }
+  const btn = document.getElementById("eq-delete");
+  if (btn) { btn.textContent = "Supprimer mes données de santé"; btn.style.background = ""; btn.style.color = ""; }
+}
+
+document.addEventListener("click", function(e) {
+  if (e.target.closest && e.target.closest("#eq-goal-save")) eqSaveGoal();
+  if (e.target.closest && e.target.closest("#eq-delete")) eqDeleteAll();
+});
 
 function openModule(id) {
   document.getElementById("modules-home").style.display = "none";
@@ -5309,7 +5582,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.75";
+const APP_VERSION = "3.3.76";
 console.log("📦 Le Général v" + APP_VERSION);
 const footerVersionEl = document.getElementById("footer-version");
 if (footerVersionEl) footerVersionEl.textContent = "Le Général v" + APP_VERSION;

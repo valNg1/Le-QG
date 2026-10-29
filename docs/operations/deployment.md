@@ -48,3 +48,9 @@ Console pour un nouveau compte ou pour rejoindre un foyer existant.
 Voir `runbook.md` uniquement pour : créer un nouveau foyer, promouvoir
 quelqu'un admin d'un foyer, ou donner le statut super-admin — ces
 actions-là restent manuelles (Console).
+
+## Santé & Équilibre (sprint Santé 01)
+
+- Le site (`health-logic.js`, `index.html`) se déploie comme le reste, via GitHub Pages.
+- Les règles `healthSteps` / `healthMeta` de `firestore.rules` doivent être **publiées dans la Console Firebase** (Option A ci-dessus) avant la première synchro, sinon l'application Android reçoit « Refusé par les règles Firestore ».
+- L'APK Android se compile via le workflow `Android APK` (Actions) ; voir `android-companion/README.md`.
