@@ -1,0 +1,7 @@
+{
+  "cleanUrls": false,
+  "trailingSlash": false,
+  "headers": [
+    { "source": "/(sw.js|version.json|index.html)", "headers": [{ "key": "Cache-Control", "value": "no-cache, must-revalidate" }] }
+  ]
+}

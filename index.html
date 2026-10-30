@@ -1109,7 +1109,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
       <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
       <div style="font-size:16px;font-weight:700;color:var(--text);">🚴 Tour de France 2026</div>
     </div>
-    <a href="https://legeneral.org/tdf2026.html" target="_blank" class="tdf-open" style="display:flex;margin-bottom:12px;">🚴 Ouvrir l'app complète</a>
+    <a href="tdf2026.html" target="_blank" class="tdf-open" style="display:flex;margin-bottom:12px;">🚴 Ouvrir l'app complète</a>
     <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:16px;font-size:13px;color:var(--muted);line-height:1.8;">
       📅 4–26 juillet 2026<br>🏁 Départ : Barcelone<br>🏔 21 étapes · 3 333 km<br>⛰ Double Alpe d'Huez · Galibier
     </div>
@@ -1121,7 +1121,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
       <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
       <div style="font-size:16px;font-weight:700;color:var(--text);">⚽ Coupe du Monde 2026</div>
     </div>
-    <a href="https://legeneral.org/cdm2026.html" target="_blank" class="tdf-open" style="display:flex;margin-bottom:12px;color:var(--green);border-color:rgba(52,199,123,.3);background:rgba(52,199,123,.1);">⚽ Ouvrir l'app complète</a>
+    <a href="cdm2026.html" target="_blank" class="tdf-open" style="display:flex;margin-bottom:12px;color:var(--green);border-color:rgba(52,199,123,.3);background:rgba(52,199,123,.1);">⚽ Ouvrir l'app complète</a>
     <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:16px;font-size:13px;color:var(--muted);line-height:1.8;">
       🔴 8es de finale — 4 → 7 juillet<br>🇫🇷 France 1-0 Paraguay : en quarts !<br>🏟 16 stades · USA, Canada, Mexique<br>⚽ Prochain : France vs Maroc, 9 juillet
     </div>
@@ -1133,7 +1133,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
       <button onclick="backToModules()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
       <div style="font-size:16px;font-weight:700;color:var(--text);">🏉 Top 14 2026-2027</div>
     </div>
-    <a href="https://legeneral.org/rugby2026.html" target="_blank" class="tdf-open" style="display:flex;margin-bottom:12px;color:var(--gold);border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.1);">🏉 Ouvrir l'app complète</a>
+    <a href="rugby2026.html" target="_blank" class="tdf-open" style="display:flex;margin-bottom:12px;color:var(--gold);border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.1);">🏉 Ouvrir l'app complète</a>
     <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:16px;font-size:13px;color:var(--muted);line-height:1.8;">
       🏆 Champion en titre : Stade Toulousain (4ᵉ sacre)<br>⬆️ RC Vannes promu de Pro D2<br>🗓 Coup d'envoi : 5 septembre 2026<br>🏟 Finale : Stade de France, 26 juin 2027
     </div>
@@ -2244,7 +2244,7 @@ function renderWidgetsZone() {
   ];
   sportApps.forEach(a => {
     if (!state.widgets[a.id]) return;
-    html += `<p class="sec" style="margin-top:16px;">${a.nom}</p><a href="https://legeneral.org/${a.url}" target="_blank" style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--surface);border-radius:var(--r);border:1px solid var(--border);text-decoration:none;">
+    html += `<p class="sec" style="margin-top:16px;">${a.nom}</p><a href="${a.url}" target="_blank" style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--surface);border-radius:var(--r);border:1px solid var(--border);text-decoration:none;">
       <span style="font-size:24px;flex-shrink:0;">${a.emoji}</span>
       <div style="flex:1;min-width:0;">
         <div style="font-size:14px;font-weight:700;color:var(--text);">${a.sub}</div>
@@ -2371,7 +2371,7 @@ function renderGroupe() {
   if(!el) return;
   const memberships = AuthLogic.activeMemberships(state.memberships);
   const myAdminCodes = memberships.filter(m => m.role === "admin").map(m => m.code);
-  const inviteUrl = "https://legeneral.org?g="+(state.groupCode||"")+"&from="+encodeURIComponent(state.name||"quelqu'un");
+  const inviteUrl = location.origin+"/?g="+(state.groupCode||"")+"&from="+encodeURIComponent(state.name||"quelqu'un");
 
   const householdsListHtml = memberships.length ? memberships.map(m => `
     <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
@@ -4284,7 +4284,7 @@ async function generateQuizAI(orKey, themeLabel, avoidList, level, extraInstruct
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer " + orKey,
-          "HTTP-Referer": "https://legeneral.org",
+          "HTTP-Referer": location.origin,
           "X-Title": "Le General"
         },
         body: JSON.stringify({
@@ -4930,7 +4930,7 @@ function fetchRecos(type, prompt) {
     headers: {
       "Content-Type": "application/json",
       "Authorization": "Bearer " + (localStorage.getItem("qg_or_key")||""),
-      "HTTP-Referer": "https://legeneral.org",
+      "HTTP-Referer": location.origin,
       "X-Title": "Le General"
     },
     body: JSON.stringify({
@@ -5661,7 +5661,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.77";
+const APP_VERSION = "3.3.78";
 console.log("📦 Le Général v" + APP_VERSION);
 const footerVersionEl = document.getElementById("footer-version");
 if (footerVersionEl) footerVersionEl.textContent = "Le Général v" + APP_VERSION;
