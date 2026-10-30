@@ -10,6 +10,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Le G.">
 <meta name="theme-color" content="#0F0F12">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="manifest" href="manifest.json">
 <title>Le Général</title>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
@@ -315,6 +317,46 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
 .eq-soon-item{background:var(--surface);border:1px dashed var(--border2);border-radius:var(--r);padding:12px;font-size:13px;font-weight:600;color:var(--muted);display:flex;flex-direction:column;gap:2px;opacity:.75}
 .eq-soon-item span{font-size:20px}
 .eq-soon-item small{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+
+/* ── Santé & Équilibre : look « coaching » (blocs immersifs) ── */
+#module-equilibre{--eq-accent:#D7FF3A;--eq-ink:#0B0B0C;font-family:"Inter","Helvetica Neue",Arial,sans-serif}
+.eq-top{display:flex;align-items:center;gap:10px;margin:8px 0 12px}
+.eq-top h2{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:800;font-size:30px;text-transform:uppercase;letter-spacing:.02em;line-height:1;margin:0;color:var(--text)}
+.eq-block{position:relative;border-radius:22px;overflow:hidden;margin-bottom:16px;color:#fff;background-color:#16181d;background-size:cover;background-position:center}
+.eq-block-head{position:relative;padding:20px 18px 14px;min-height:150px;display:flex;flex-direction:column;justify-content:flex-end;
+  background-size:cover;background-position:center}
+.eq-block-head::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.78) 100%)}
+.eq-block-head>*{position:relative}
+.eq-kicker{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--eq-accent)}
+.eq-block-title{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:800;font-size:38px;line-height:.95;text-transform:uppercase;margin:4px 0 0}
+.eq-block-body{padding:6px 18px 18px;background:#0F1115}
+.eq-b-physique .eq-block-head{background-image:linear-gradient(135deg,#1c3a1f,#0b1d12 60%,#d7ff3a33),url("img/sante/physique.jpg")}
+.eq-b-mentale .eq-block-head{background-image:linear-gradient(135deg,#2a1f4d,#12102a 60%,#7c5cff44),url("img/sante/mentale.jpg")}
+.eq-b-recup .eq-block-head{background-image:linear-gradient(135deg,#10294a,#0a1428 60%,#3aa0ff44),url("img/sante/recuperation.jpg")}
+.eq-b-diet .eq-block-head{background-image:linear-gradient(135deg,#4a2a10,#24130a 60%,#ff8a3a44),url("img/sante/dietetique.jpg")}
+.eq-metric{padding:14px 0;border-top:1px solid rgba(255,255,255,.09)}
+.eq-metric:first-child{border-top:none}
+.eq-metric-name{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#aab0ba}
+.eq-tag{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:99px;background:rgba(255,255,255,.08);color:#c4c9d2;white-space:nowrap}
+.eq-tag.live{background:var(--eq-accent);color:var(--eq-ink)}
+.eq-block .eq-big{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:800;font-size:76px;letter-spacing:-.01em;color:#fff;margin-top:6px}
+.eq-block .eq-sub{color:#9aa1ad}
+.eq-block .eq-bar{height:12px;background:rgba(255,255,255,.12)}
+.eq-block .eq-bar-fill{background:var(--eq-accent)}
+.eq-block .eq-label{color:#aab0ba}
+.eq-block .eq-input{background:#1b1f27;border-color:#2c323d;color:#fff}
+.eq-block .eq-btn{background:var(--eq-accent);color:var(--eq-ink);border-radius:99px;padding:10px 16px;font-family:"Inter",sans-serif}
+.eq-block .eq-btn-danger{background:transparent;color:#ff6b6b;border:1px solid #ff6b6b}
+.eq-block .eq-day-bar{background:#4b5260}
+.eq-block .eq-day-bar.goal{background:var(--eq-accent)}
+.eq-block .eq-day-bar.empty{border-color:#3a414d}
+.eq-block .eq-day-val,.eq-block .eq-day-name{color:#9aa1ad}
+.eq-block .eq-row{color:#9aa1ad}.eq-block .eq-row b{color:#fff}
+.eq-block .eq-steps{color:#dfe3ea}
+.eq-block details summary{color:var(--eq-accent)}
+.eq-na{font-size:13px;line-height:1.5;color:#9aa1ad;margin-top:6px}
+.eq-link{display:inline-block;margin-top:10px;background:#fff;color:#0B0B0C;border:none;border-radius:99px;padding:10px 16px;font-family:"Inter",sans-serif;font-size:13px;font-weight:700;cursor:pointer}
+.eq-privacy{border-radius:22px;background:var(--surface);border:1px solid var(--border);padding:16px;margin-bottom:10px}
 .module-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 10px; margin-bottom: 16px; }
 .module-card { background: var(--surface); border-radius: var(--r); border: 1px solid var(--border); padding: 16px; cursor: pointer; transition: all .15s; text-align: center; position: relative; display: block !important; min-height: 110px; }
 .module-card.active { border-color: var(--yellow); background: var(--yellow-light); }
@@ -736,66 +778,103 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);max-width:43
 
   <!-- SANTÉ & ÉQUILIBRE (pas via Health Connect — données strictement personnelles) -->
   <div id="module-equilibre" style="display:none;">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;margin-top:8px;">
-      <button onclick="backToSante()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">←</button>
-      <div style="font-size:16px;font-weight:700;color:var(--text);">🌿 Santé &amp; Équilibre</div>
+    <div class="eq-top">
+      <button onclick="backToSante()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;" aria-label="Retour">←</button>
+      <h2>Santé &amp; Équilibre</h2>
     </div>
-
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;">
       <span id="eq-state" class="eq-pill eq-pill-never">Chargement…</span>
       <span style="font-size:11px;color:var(--muted);">Visible par vous seul</span>
     </div>
 
-    <div class="eq-card">
-      <div class="eq-label">Pas aujourd'hui</div>
-      <div class="eq-big" id="eq-today">—</div>
-      <div class="eq-bar"><div class="eq-bar-fill" id="eq-bar-fill" style="width:0%"></div></div>
-      <div class="eq-sub" id="eq-today-sub">En attente de la première synchronisation.</div>
-    </div>
-
-    <div class="eq-card">
-      <div class="eq-label">Objectif quotidien</div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <input type="number" id="eq-goal-input" inputmode="numeric" min="1000" max="100000" step="500" class="eq-input" aria-label="Objectif de pas par jour">
-        <span style="font-size:13px;color:var(--muted);">pas / jour</span>
-        <button id="eq-goal-save" class="eq-btn">Enregistrer</button>
+    <!-- SANTÉ PHYSIQUE -->
+    <section class="eq-block eq-b-physique">
+      <div class="eq-block-head"><div class="eq-kicker">Bloc 1</div><h3 class="eq-block-title">Santé physique</h3></div>
+      <div class="eq-block-body">
+        <div class="eq-metric">
+          <div class="eq-metric-name"><span>Pas aujourd'hui</span><span class="eq-tag live">Pixel · Health Connect</span></div>
+          <div class="eq-big" id="eq-today">—</div>
+          <div class="eq-bar"><div class="eq-bar-fill" id="eq-bar-fill" style="width:0%"></div></div>
+          <div class="eq-sub" id="eq-today-sub">En attente de la première synchronisation.</div>
+        </div>
+        <div class="eq-metric">
+          <div class="eq-metric-name"><span>Objectif quotidien</span></div>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap;">
+            <input type="number" id="eq-goal-input" inputmode="numeric" min="1000" max="100000" step="500" class="eq-input" aria-label="Objectif de pas par jour">
+            <span style="font-size:13px;color:#9aa1ad;">pas / jour</span>
+            <button id="eq-goal-save" class="eq-btn">Enregistrer</button>
+          </div>
+        </div>
+        <div class="eq-metric">
+          <div class="eq-metric-name"><span>7 derniers jours</span></div>
+          <div class="eq-week" id="eq-week" style="margin-top:10px;"></div>
+          <div class="eq-sub" id="eq-week-note"></div>
+        </div>
+        <div class="eq-metric">
+          <div class="eq-metric-name"><span>Synchronisation</span></div>
+          <div class="eq-row"><span>Source</span><b id="eq-source">—</b></div>
+          <div class="eq-row"><span>Appareil</span><b id="eq-device">—</b></div>
+          <div class="eq-row"><span>Dernière synchro</span><b id="eq-last">Jamais</b></div>
+          <details style="margin-top:8px;">
+            <summary style="cursor:pointer;font-size:13px;font-weight:600;">Connecter mon Pixel</summary>
+            <ol class="eq-steps">
+              <li>Installez l'application « Le Général Pas » sur le Pixel (APK, voir <code>android-companion/README.md</code>).</li>
+              <li>Connectez-vous avec le même e-mail et mot de passe que sur le Général.</li>
+              <li>Autorisez la lecture des pas dans Health Connect (seule permission demandée).</li>
+              <li>Appuyez sur « Synchroniser maintenant ».</li>
+            </ol>
+            <div class="eq-sub">Si l'application indique « aucun pas », une application (Google Fit, Fitbit…) doit d'abord écrire vos pas dans Health Connect.</div>
+          </details>
+        </div>
       </div>
-    </div>
+    </section>
 
-    <div class="eq-card">
-      <div class="eq-label">7 derniers jours</div>
-      <div class="eq-week" id="eq-week"></div>
-      <div class="eq-sub" id="eq-week-note"></div>
-    </div>
+    <!-- SANTÉ MENTALE -->
+    <section class="eq-block eq-b-mentale">
+      <div class="eq-block-head"><div class="eq-kicker">Bloc 2</div><h3 class="eq-block-title">Santé mentale</h3></div>
+      <div class="eq-block-body">
+        <div class="eq-metric">
+          <div class="eq-metric-name"><span>Temps de connexion (écran)</span><span class="eq-tag">Pas encore connecté</span></div>
+          <div class="eq-na">Temps d'écran quotidien, nombre de déverrouillages et applications les plus utilisées. Nécessite une nouvelle version de l'application Android et une autorisation spéciale « accès à l'usage » à activer à la main. Aucun chiffre n'est affiché tant que le Pixel n'a rien envoyé.</div>
+        </div>
+      </div>
+    </section>
 
-    <div class="eq-card">
-      <div class="eq-label">Synchronisation</div>
-      <div class="eq-row"><span>Source</span><b id="eq-source">—</b></div>
-      <div class="eq-row"><span>Appareil</span><b id="eq-device">—</b></div>
-      <div class="eq-row"><span>Dernière synchro</span><b id="eq-last">Jamais</b></div>
-      <details style="margin-top:10px;">
-        <summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--yellow);">Connecter mon Pixel</summary>
-        <ol class="eq-steps">
-          <li>Installez l'application « Le Général Pas » sur le Pixel (fichier APK, voir <code>android-companion/README.md</code> dans le dépôt).</li>
-          <li>Ouvrez-la, connectez-vous avec le même email et mot de passe que sur le Général.</li>
-          <li>Autorisez la lecture des pas dans Health Connect (seule permission demandée).</li>
-          <li>Appuyez sur « Synchroniser maintenant ». Les pas apparaissent ici en quelques secondes.</li>
-        </ol>
-        <div class="eq-sub">Si l'application indique « aucun pas », une application doit d'abord écrire vos pas dans Health Connect (par exemple Google Fit ou Fitbit).</div>
-      </details>
-    </div>
+    <!-- RÉCUPÉRATION -->
+    <section class="eq-block eq-b-recup">
+      <div class="eq-block-head"><div class="eq-kicker">Bloc 3</div><h3 class="eq-block-title">Récupération</h3></div>
+      <div class="eq-block-body">
+        <div class="eq-metric">
+          <div class="eq-metric-name"><span>Sommeil</span><span class="eq-tag">Pas encore connecté</span></div>
+          <div class="eq-na">Durée et phases de sommeil, lues dans Health Connect. Elles n'apparaîtront que si une application y écrit vos nuits.</div>
+        </div>
+        <div class="eq-metric">
+          <div class="eq-metric-name"><span>Ronflement</span><span class="eq-tag">Non disponible</span></div>
+          <div class="eq-na">Android ne partage pas la détection de ronflements et de toux avec les autres applications : Le Général ne peut pas l'afficher.</div>
+        </div>
+      </div>
+    </section>
 
-    <div class="eq-soon">
-      <div class="eq-soon-item"><span>😴</span>Sommeil<small>Bientôt</small></div>
-      <div class="eq-soon-item"><span>📵</span>Temps d'écran<small>Bientôt</small></div>
-      <div class="eq-soon-item"><span>🧘</span>Santé digitale<small>Bientôt</small></div>
-      <div class="eq-soon-item"><span>🔋</span>Récupération<small>Bientôt</small></div>
-    </div>
+    <!-- DIÉTÉTIQUE -->
+    <section class="eq-block eq-b-diet">
+      <div class="eq-block-head"><div class="eq-kicker">Bloc 4</div><h3 class="eq-block-title">Diététique</h3></div>
+      <div class="eq-block-body">
+        <div class="eq-metric">
+          <div class="eq-metric-name"><span>Jeûne intermittent</span><span class="eq-tag live">Disponible</span></div>
+          <div class="eq-na">Minuteur de jeûne et prochain repas, protocoles 14/10 à 5:2.</div>
+          <button type="button" class="eq-link" onclick="openSanteModule('jeune')">Ouvrir le jeûne</button>
+        </div>
+        <div class="eq-metric">
+          <div class="eq-metric-name"><span>Hydratation · Repas</span><span class="eq-tag">À venir</span></div>
+          <div class="eq-na">Saisie manuelle de l'eau et des repas, à définir ensemble.</div>
+        </div>
+      </div>
+    </section>
 
-    <div class="eq-card">
+    <div class="eq-privacy">
       <div class="eq-label">Confidentialité</div>
       <div class="eq-sub" style="margin-top:0;">Ces données ne sont lisibles que par votre compte. Les autres membres du foyer et les administrateurs n'y ont pas accès. Vous pouvez les effacer à tout moment.</div>
-      <button id="eq-delete" class="eq-btn eq-btn-danger" style="margin-top:10px;">Supprimer mes données de santé</button>
+      <button id="eq-delete" class="eq-btn eq-btn-danger" style="margin-top:10px;background:transparent;color:var(--red);border:1px solid var(--red);border-radius:99px;padding:10px 16px;">Supprimer mes données de santé</button>
       <div id="eq-delete-msg" class="eq-sub"></div>
     </div>
   </div>
@@ -2983,7 +3062,7 @@ function renderPostitList() {
 // ════════════════════════════════════════════
 const SANTE_MODULES = [
   { id:"jeune", name:"Jeûne intermittent", desc:"Timer + prochain repas", emoji:"⏱", color:"#F7C104" },
-  { id:"equilibre", name:"Santé & Équilibre", desc:"Pas, objectif, 7 jours", emoji:"🌿", color:"#34C77B" },
+  { id:"equilibre", name:"Santé & Équilibre", desc:"Physique, mental, récupération, diététique", emoji:"🌿", color:"#34C77B" },
 ];
 
 function renderSanteHome() {
@@ -5582,7 +5661,7 @@ document.addEventListener("keydown", function(e) {
 
 
 // ── AUTO-UPDATE DETECTION (sans service worker) ──
-const APP_VERSION = "3.3.76";
+const APP_VERSION = "3.3.77";
 console.log("📦 Le Général v" + APP_VERSION);
 const footerVersionEl = document.getElementById("footer-version");
 if (footerVersionEl) footerVersionEl.textContent = "Le Général v" + APP_VERSION;
